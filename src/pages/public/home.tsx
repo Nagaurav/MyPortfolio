@@ -1,7 +1,7 @@
-import { useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
-import { ArrowRight, Github, ExternalLink, Download, Linkedin, Mail, Award, FileText, Send } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { useState, useEffect } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { ArrowRight, Github, ExternalLink, Mail, Linkedin, Send } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
@@ -9,8 +9,6 @@ import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import type { Database } from '../../types/database.types';
 
-type Certificate = Database['public']['Tables']['certificates']['Row'];
-type Resume = Database['public']['Tables']['resumes']['Row'];
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface ContactFormData {
@@ -22,10 +20,19 @@ interface ContactFormData {
 
 export function HomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [certificates, setCertificates] = useState<Certificate[]>([]);
-  const [activeResume, setActiveResume] = useState<Resume | null>(null);
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [bioIndex, setBioIndex] = useState(0);
+  const { scrollYProgress } = useScroll();
+  const navigate = useNavigate();
+  
+  const bios = [
+    "A passionate full-stack developer crafting beautiful and functional web experiences",
+    "Turning innovative ideas into elegant digital solutions",
+    "Building the future of web applications, one line of code at a time",
+    "Creating seamless user experiences through modern web technologies",
+    "Transforming complex problems into simple, beautiful solutions"
+  ];
   
   const {
     register,
@@ -33,26 +40,22 @@ export function HomePage() {
     reset,
     formState: { errors },
   } = useForm<ContactFormData>();
+
+  const parallaxY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
+  const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
   
   useEffect(() => {
     async function fetchData() {
       try {
-        const [profileResult, certificatesResult, resumeResult] = await Promise.all([
-          supabase.from('profiles').select('*').limit(1),
-          supabase.from('certificates').select('*').order('issue_date', { ascending: false }).limit(3),
-          supabase.from('resumes').select('*').eq('is_active', true).maybeSingle(),
-        ]);
-  
-        if (profileResult.data && profileResult.data.length > 0) {
-          setProfile(profileResult.data[0]);
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .limit(1);
+
+        if (error) throw error;
+        if (data && data.length > 0) {
+          setProfile(data[0]);
         }
-  
-        if (certificatesResult.data) {
-          setCertificates(certificatesResult.data);
-        }
-  
-        if (resumeResult.error) throw resumeResult.error;
-        setActiveResume(resumeResult.data);
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -61,6 +64,14 @@ export function HomePage() {
     }
     
     fetchData();
+  }, []);
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setBioIndex((current) => (current + 1) % bios.length);
+    }, 5000); // Change bio every 5 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
   const onSubmit = async (data: ContactFormData) => {
@@ -86,108 +97,253 @@ export function HomePage() {
     }
   };
 
+  const handleContactClick = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
+  const handleProjectsClick = () => {
+    navigate('/projects');
+  };
+
+  const containerVariants = {
+    hidden: { opacity: 0 },
+    visible: {
+      opacity: 1,
+      transition: {
+        staggerChildren: 0.2,
+        delayChildren: 0.3,
+      },
+    },
+  };
+
+  const itemVariants = {
+    hidden: { opacity: 0, y: 20 },
+    visible: {
+      opacity: 1,
+      y: 0,
+      transition: {
+        duration: 0.6,
+        ease: "easeOut",
+      },
+    },
+  };
+
+  const socialIconVariants = {
+    hidden: { scale: 0, opacity: 0 },
+    visible: {
+      scale: 1,
+      opacity: 1,
+      transition: {
+        type: "spring",
+        stiffness: 260,
+        damping: 20,
+      },
+    },
+    hover: {
+      scale: 1.2,
+      transition: {
+        type: "spring",
+        stiffness: 400,
+        damping: 10,
+      },
+    },
+  };
+
+  const backgroundBlobVariants = {
+    animate: {
+      scale: [1, 1.1, 1],
+      rotate: [0, 90, 180, 270, 360],
+      transition: {
+        duration: 20,
+        repeat: Infinity,
+        ease: "linear",
+      },
+    },
+  };
+
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-secondary-50 to-primary-50">
-          <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
-        </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+        {/* Animated background blobs */}
+        <motion.div
+          className="absolute inset-0 bg-gradient-to-br from-secondary-50 to-primary-50 opacity-50"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 0.5 }}
+          transition={{ duration: 1 }}
+        >
+          <motion.div
+            className="absolute top-0 left-0 w-[800px] h-[800px] bg-primary-200/30 rounded-full mix-blend-multiply filter blur-3xl"
+            variants={backgroundBlobVariants}
+            animate="animate"
+            style={{ x: parallaxY }}
+          />
+          <motion.div
+            className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-accent-200/30 rounded-full mix-blend-multiply filter blur-3xl"
+            variants={backgroundBlobVariants}
+            animate="animate"
+            style={{ 
+              x: useTransform(scrollYProgress, [0, 1], ['0%', '-50%']),
+              y: useTransform(scrollYProgress, [0, 1], ['0%', '30%']),
+            }}
+          />
+        </motion.div>
         
         <div className="container relative z-10">
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
-            <motion.div 
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.6 }}
-              className="space-y-8"
-            >
-              <div className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-secondary-200 shadow-sm">
+          <motion.div 
+            className="grid lg:grid-cols-2 gap-12 items-center"
+            variants={containerVariants}
+            initial="hidden"
+            animate="visible"
+          >
+            <div className="space-y-8">
+              <motion.div
+                className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-secondary-200 shadow-sm"
+                variants={itemVariants}
+                whileHover={{ scale: 1.05 }}
+                whileTap={{ scale: 0.95 }}
+              >
                 <span className="text-sm font-medium text-secondary-600">Available for freelance work</span>
                 <span className="ml-2 w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
+              </motion.div>
+              
+              <motion.h1 
+                className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight"
+                variants={itemVariants}
+              >
+                <span className="text-secondary-900">Hi, I'm </span>
+                <motion.span 
+                  className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]"
+                  whileHover={{ scale: 1.05 }}
+                  transition={{ type: "spring", stiffness: 300 }}
+                >
+                  {profile?.full_name || 'Your Name'}
+                </motion.span>
+              </motion.h1>
+              
+              <div className="h-[60px]">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={bioIndex}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -20 }}
+                    transition={{ duration: 0.5 }}
+                    className="text-xl md:text-2xl text-secondary-600 max-w-xl"
+                  >
+                    {bios[bioIndex]}
+                  </motion.p>
+                </AnimatePresence>
               </div>
               
-              <h1 className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight">
-                <span className="text-secondary-900">Hi, I'm </span>
-                <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]">
-                  {profile?.full_name || 'Your Name'}
-                </span>
-              </h1>
-              
-              <p className="text-xl md:text-2xl text-secondary-600 max-w-xl">
-                {profile?.bio || 'A passionate full-stack developer crafting beautiful and functional web experiences.'}
-              </p>
-              
-              <div className="flex flex-wrap gap-4">
-                <Button 
-                  as="a"
-                  href="#contact"
-                  size="lg"
-                  className="bg-gradient-to-r from-primary-600 to-accent-500 hover:from-primary-700 hover:to-accent-600"
+              <motion.div 
+                className="flex flex-wrap gap-4"
+                variants={itemVariants}
+              >
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Let's Talk
-                </Button>
-                {activeResume && (
+                  <Button 
+                    onClick={handleContactClick}
+                    size="lg"
+                    className="bg-gradient-to-r from-primary-600 to-accent-500 hover:from-primary-700 hover:to-accent-600"
+                  >
+                    Let's Talk
+                  </Button>
+                </motion.div>
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
                   <Button
-                    as="a"
-                    href={activeResume.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                    onClick={handleProjectsClick}
                     variant="outline"
                     size="lg"
                     className="group"
-                    rightIcon={<Download className="group-hover:translate-y-1 transition-transform" size={16} />}
+                    rightIcon={
+                      <motion.span
+                        animate={{ x: [0, 5, 0] }}
+                        transition={{ repeat: Infinity, duration: 1.5 }}
+                      >
+                        <ArrowRight size={16} />
+                      </motion.span>
+                    }
                   >
-                    Download Resume
+                    View Projects
                   </Button>
-                )}
-              </div>
+                </motion.div>
+              </motion.div>
               
-              <div className="flex items-center space-x-6">
+              <motion.div 
+                className="flex items-center space-x-6"
+                variants={itemVariants}
+              >
                 {profile?.github_url && (
-                  <a 
+                  <motion.a 
                     href={profile.github_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-secondary-600 hover:text-secondary-900 transition-colors"
                     aria-label="GitHub"
+                    variants={socialIconVariants}
+                    whileHover="hover"
                   >
                     <Github size={24} />
-                  </a>
+                  </motion.a>
                 )}
                 {profile?.linkedin_url && (
-                  <a 
+                  <motion.a 
                     href={profile.linkedin_url}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-secondary-600 hover:text-secondary-900 transition-colors"
                     aria-label="LinkedIn"
+                    variants={socialIconVariants}
+                    whileHover="hover"
                   >
                     <Linkedin size={24} />
-                  </a>
+                  </motion.a>
                 )}
                 {profile?.email && (
-                  <a 
+                  <motion.a 
                     href={`mailto:${profile.email}`}
                     className="text-secondary-600 hover:text-secondary-900 transition-colors"
                     aria-label="Email"
+                    variants={socialIconVariants}
+                    whileHover="hover"
                   >
                     <Mail size={24} />
-                  </a>
+                  </motion.a>
                 )}
-              </div>
-            </motion.div>
+              </motion.div>
+            </div>
             
             <motion.div 
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              transition={{ duration: 0.6, delay: 0.2 }}
               className="relative hidden lg:block"
+              variants={itemVariants}
+              style={{ opacity }}
             >
-              <div className="absolute inset-0 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl transform rotate-6 blur opacity-20"></div>
-              <div className="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-md mx-auto">
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl transform rotate-6 blur opacity-20"
+                animate={{
+                  rotate: [6, -6, 6],
+                  scale: [1, 1.02, 1],
+                }}
+                transition={{
+                  duration: 8,
+                  repeat: Infinity,
+                  ease: "easeInOut",
+                }}
+              />
+              <motion.div 
+                className="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-md mx-auto"
+                whileHover={{ scale: 1.02 }}
+                transition={{ type: "spring", stiffness: 300 }}
+              >
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
@@ -199,163 +355,21 @@ export function HomePage() {
                     <p className="text-secondary-400 text-lg">Add your photo in profile settings</p>
                   </div>
                 )}
-              </div>
-            </motion.div>
-          </div>
-        </div>
-      </section>
-
-      {/* Certificates Section */}
-      <section className="py-20 bg-white">
-        <div className="container">
-          <SectionHeader
-            title="Certifications"
-            subtitle="Professional certifications and achievements that demonstrate my expertise"
-            centered
-          />
-          
-          <div className="mt-12 grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-            {loading ? (
-              Array(3).fill(0).map((_, index) => (
-                <div
-                  key={index}
-                  className="bg-white rounded-xl shadow-lg animate-pulse h-96"
-                ></div>
-              ))
-            ) : certificates.length > 0 ? (
-              certificates.map((certificate) => (
-                <motion.div
-                  key={certificate.id}
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ duration: 0.6 }}
-                  className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
-                >
-                  {certificate.certificate_url && (
-                    <div className="relative h-48 overflow-hidden">
-                      <img
-                        src={certificate.certificate_url}
-                        alt={certificate.title}
-                        className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
-                      />
-                      <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    </div>
-                  )}
-                  <div className="p-6">
-                    <div className="flex items-start justify-between">
-                      <div>
-                        <h3 className="text-xl font-semibold text-secondary-900">
-                          {certificate.title}
-                        </h3>
-                        <p className="mt-2 text-secondary-600">
-                          Issued by {certificate.issuer}
-                        </p>
-                      </div>
-                      <Award className="text-primary-500" size={24} />
-                    </div>
-                    <div className="mt-4 text-sm text-secondary-500">
-                      <p>Issued: {new Date(certificate.issue_date).toLocaleDateString()}</p>
-                      {certificate.expiry_date && (
-                        <p>Expires: {new Date(certificate.expiry_date).toLocaleDateString()}</p>
-                      )}
-                    </div>
-                    {certificate.credential_url && (
-                      <a
-                        href={certificate.credential_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="mt-4 inline-flex items-center text-primary-600 hover:text-primary-700"
-                      >
-                        View Credential
-                        <ExternalLink size={16} className="ml-1" />
-                      </a>
-                    )}
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              <div className="col-span-full text-center">
-                <p className="text-secondary-500">No certificates found.</p>
-              </div>
-            )}
-          </div>
-          
-          <div className="mt-12 text-center">
-            <Button
-              as={Link}
-              to="/certificates"
-              variant="outline"
-              size="lg"
-              className="group"
-              rightIcon={<ArrowRight className="group-hover:translate-x-1 transition-transform" size={16} />}
-            >
-              View All Certificates
-            </Button>
-          </div>
-        </div>
-      </section>
-
-      {/* Resume Section */}
-      <section className="py-20 bg-gradient-to-b from-white to-secondary-50">
-        <div className="container">
-          <SectionHeader
-            title="Resume"
-            subtitle="Download my resume to learn more about my experience and qualifications"
-            centered
-          />
-
-          <div className="mt-12 max-w-3xl mx-auto">
-            {loading ? (
-              <div className="bg-white rounded-xl shadow-lg p-8 animate-pulse">
-                <div className="h-8 bg-secondary-200 rounded w-1/3 mb-4"></div>
-                <div className="h-4 bg-secondary-200 rounded w-2/3 mb-6"></div>
-                <div className="h-12 bg-secondary-200 rounded w-48"></div>
-              </div>
-            ) : activeResume ? (
-              <motion.div
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="bg-white rounded-xl shadow-lg p-8 border border-secondary-100"
-              >
-                <div className="flex items-center justify-between">
-                  <div>
-                    <h3 className="text-2xl font-semibold text-secondary-900">
-                      {activeResume.title}
-                    </h3>
-                    <p className="mt-1 text-sm text-secondary-500">
-                      Last updated: {new Date(activeResume.created_at).toLocaleDateString()}
-                    </p>
-                  </div>
-                  <FileText className="text-primary-500" size={32} />
-                </div>
-                <div className="mt-8">
-                  <Button
-                    as="a"
-                    href={activeResume.file_url}
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    size="lg"
-                    className="w-full sm:w-auto"
-                    leftIcon={<Download size={16} />}
-                  >
-                    Download Resume
-                  </Button>
-                </div>
               </motion.div>
-            ) : (
-              <div className="text-center py-12">
-                <p className="text-secondary-500">No resume available at the moment.</p>
-              </div>
-            )}
-          </div>
+            </motion.div>
+          </motion.div>
         </div>
       </section>
 
       {/* Contact Section */}
-      <section id="contact" className="py-20 bg-white">
+      <motion.section 
+        id="contact" 
+        className="py-20 bg-white"
+        initial={{ opacity: 0 }}
+        whileInView={{ opacity: 1 }}
+        viewport={{ once: true }}
+        transition={{ duration: 0.6 }}
+      >
         <div className="container">
           <SectionHeader
             title="Get in Touch"
@@ -373,15 +387,21 @@ export function HomePage() {
               <div className="bg-secondary-50 rounded-xl p-8">
                 <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
                 <div className="space-y-6">
-                  <div className="flex items-start">
+                  <motion.div 
+                    className="flex items-start"
+                    whileHover={{ scale: 1.02 }}
+                  >
                     <Mail className="w-6 h-6 text-primary-600 mt-1" />
                     <div className="ml-4">
                       <h4 className="text-lg font-medium">Email</h4>
                       <p className="text-secondary-600">{profile?.email || 'contact@example.com'}</p>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex items-start">
+                  <motion.div 
+                    className="flex items-start"
+                    whileHover={{ scale: 1.02 }}
+                  >
                     <Github className="w-6 h-6 text-primary-600 mt-1" />
                     <div className="ml-4">
                       <h4 className="text-lg font-medium">GitHub</h4>
@@ -394,9 +414,12 @@ export function HomePage() {
                         View Profile
                       </a>
                     </div>
-                  </div>
+                  </motion.div>
 
-                  <div className="flex items-start">
+                  <motion.div 
+                    className="flex items-start"
+                    whileHover={{ scale: 1.02 }}
+                  >
                     <Linkedin className="w-6 h-6 text-primary-600 mt-1" />
                     <div className="ml-4">
                       <h4 className="text-lg font-medium">LinkedIn</h4>
@@ -409,7 +432,7 @@ export function HomePage() {
                         Connect with me
                       </a>
                     </div>
-                  </div>
+                  </motion.div>
                 </div>
               </div>
             </motion.div>
@@ -421,7 +444,10 @@ export function HomePage() {
               transition={{ duration: 0.6 }}
             >
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-                <div>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
                   <label htmlFor="name" className="block text-sm font-medium text-secondary-700">
                     Name
                   </label>
@@ -434,9 +460,12 @@ export function HomePage() {
                   {errors.name && (
                     <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
                   )}
-                </div>
+                </motion.div>
 
-                <div>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
                   <label htmlFor="email" className="block text-sm font-medium text-secondary-700">
                     Email
                   </label>
@@ -455,9 +484,12 @@ export function HomePage() {
                   {errors.email && (
                     <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
                   )}
-                </div>
+                </motion.div>
 
-                <div>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
                   <label htmlFor="subject" className="block text-sm font-medium text-secondary-700">
                     Subject
                   </label>
@@ -470,9 +502,12 @@ export function HomePage() {
                   {errors.subject && (
                     <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
                   )}
-                </div>
+                </motion.div>
 
-                <div>
+                <motion.div
+                  whileHover={{ scale: 1.02 }}
+                  transition={{ type: "spring", stiffness: 400 }}
+                >
                   <label htmlFor="message" className="block text-sm font-medium text-secondary-700">
                     Message
                   </label>
@@ -485,21 +520,26 @@ export function HomePage() {
                   {errors.message && (
                     <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
                   )}
-                </div>
+                </motion.div>
 
-                <Button
-                  type="submit"
-                  isLoading={isSubmitting}
-                  leftIcon={<Send size={16} />}
-                  fullWidth
+                <motion.div
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
                 >
-                  Send Message
-                </Button>
+                  <Button
+                    type="submit"
+                    isLoading={isSubmitting}
+                    leftIcon={<Send size={16} />}
+                    fullWidth
+                  >
+                    Send Message
+                  </Button>
+                </motion.div>
               </form>
             </motion.div>
           </div>
         </div>
-      </section>
+      </motion.section>
     </>
   );
 }

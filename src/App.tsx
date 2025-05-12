@@ -18,7 +18,6 @@ import { ProjectDetailPage } from './pages/public/project-detail';
 import { SkillsPage } from './pages/public/skills';
 import { CertificatesPage } from './pages/public/certificates';
 import { ResumePage } from './pages/public/resume';
-import { ContactPage } from './pages/public/contact';
 import { ProtectedRoute } from './components/auth/protected-route';
 
 function App() {
@@ -47,7 +46,6 @@ function App() {
         <Route path="skills" element={<SkillsPage />} />
         <Route path="certificates" element={<CertificatesPage />} />
         <Route path="resume" element={<ResumePage />} />
-        <Route path="contact" element={<ContactPage />} />
       </Route>
       
       {/* Admin Login */}

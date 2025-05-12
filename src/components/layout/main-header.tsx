@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, Github, Linkedin } from 'lucide-react';
+import { Menu, X, Github, Linkedin, Mail } from 'lucide-react';
+import { supabase } from '../../lib/supabase';
 
 export function MainHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [profileEmail, setProfileEmail] = useState<string | null>(null);
   
   useEffect(() => {
     const handleScroll = () => {
@@ -18,6 +20,26 @@ export function MainHeader() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+
+  useEffect(() => {
+    async function fetchProfileEmail() {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('email')
+          .single();
+
+        if (error) throw error;
+        if (data?.email) {
+          setProfileEmail(data.email);
+        }
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    }
+
+    fetchProfileEmail();
+  }, []);
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
@@ -27,6 +49,15 @@ export function MainHeader() {
         ? 'text-primary-600' 
         : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100'
     }`;
+
+  const handleContactClick = () => {
+    const contactSection = document.getElementById('contact');
+    if (contactSection) {
+      contactSection.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      window.location.href = '/#contact';
+    }
+  };
   
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${
@@ -54,9 +85,12 @@ export function MainHeader() {
           <NavLink to="/resume" className={navLinkClasses}>
             Resume
           </NavLink>
-          <NavLink to="/contact" className={navLinkClasses}>
+          <button 
+            onClick={handleContactClick}
+            className={`px-3 py-2 text-sm font-medium transition-colors rounded-md text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100`}
+          >
             Contact
-          </NavLink>
+          </button>
         </nav>
         
         <div className="hidden md:flex items-center space-x-4">
@@ -77,6 +111,13 @@ export function MainHeader() {
             aria-label="LinkedIn"
           >
             <Linkedin size={20} />
+          </a>
+          <a 
+            href={`mailto:${profileEmail || 'contact@example.com'}`}
+            className="text-secondary-600 hover:text-secondary-900"
+            aria-label="Email"
+          >
+            <Mail size={20} />
           </a>
         </div>
         
@@ -143,13 +184,15 @@ export function MainHeader() {
             >
               Resume
             </NavLink>
-            <NavLink 
-              to="/contact" 
-              className={navLinkClasses} 
-              onClick={toggleMenu}
+            <button 
+              onClick={() => {
+                handleContactClick();
+                toggleMenu();
+              }}
+              className={`px-3 py-2 text-sm font-medium transition-colors rounded-md text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 text-left`}
             >
               Contact
-            </NavLink>
+            </button>
             
             <div className="flex items-center space-x-4 pt-4">
               <a 
@@ -169,6 +212,13 @@ export function MainHeader() {
                 aria-label="LinkedIn"
               >
                 <Linkedin size={20} />
+              </a>
+              <a 
+                href={`mailto:${profileEmail || 'contact@example.com'}`}
+                className="text-secondary-600 hover:text-secondary-900"
+                aria-label="Email"
+              >
+                <Mail size={20} />
               </a>
             </div>
           </nav>
