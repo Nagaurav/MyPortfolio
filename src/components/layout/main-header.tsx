@@ -1,12 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
+<<<<<<< HEAD
 import { Menu, X, Github, Linkedin, Mail } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+=======
+import { Menu, X, Github, Linkedin } from 'lucide-react';
+>>>>>>> 183ebc5 (Initial commit)
 
 export function MainHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+<<<<<<< HEAD
   const [profileEmail, setProfileEmail] = useState<string | null>(null);
+=======
+>>>>>>> 183ebc5 (Initial commit)
   
   useEffect(() => {
     const handleScroll = () => {
@@ -20,6 +27,7 @@ export function MainHeader() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
+<<<<<<< HEAD
 
   useEffect(() => {
     async function fetchProfileEmail() {
@@ -40,6 +48,8 @@ export function MainHeader() {
 
     fetchProfileEmail();
   }, []);
+=======
+>>>>>>> 183ebc5 (Initial commit)
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
@@ -49,6 +59,7 @@ export function MainHeader() {
         ? 'text-primary-600' 
         : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100'
     }`;
+<<<<<<< HEAD
 
   const handleContactClick = () => {
     const contactSection = document.getElementById('contact');
@@ -58,6 +69,8 @@ export function MainHeader() {
       window.location.href = '/#contact';
     }
   };
+=======
+>>>>>>> 183ebc5 (Initial commit)
   
   return (
     <header className={`sticky top-0 z-50 transition-all duration-300 ${
@@ -79,18 +92,30 @@ export function MainHeader() {
           <NavLink to="/skills" className={navLinkClasses}>
             Skills
           </NavLink>
+<<<<<<< HEAD
+=======
+          <NavLink to="/experience" className={navLinkClasses}>
+            Experience
+          </NavLink>
+>>>>>>> 183ebc5 (Initial commit)
           <NavLink to="/certificates" className={navLinkClasses}>
             Certificates
           </NavLink>
           <NavLink to="/resume" className={navLinkClasses}>
             Resume
           </NavLink>
+<<<<<<< HEAD
           <button 
             onClick={handleContactClick}
             className={`px-3 py-2 text-sm font-medium transition-colors rounded-md text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100`}
           >
             Contact
           </button>
+=======
+          <NavLink to="/contact" className={navLinkClasses}>
+            Contact
+          </NavLink>
+>>>>>>> 183ebc5 (Initial commit)
         </nav>
         
         <div className="hidden md:flex items-center space-x-4">
@@ -112,6 +137,7 @@ export function MainHeader() {
           >
             <Linkedin size={20} />
           </a>
+<<<<<<< HEAD
           <a 
             href={`mailto:${profileEmail || 'contact@example.com'}`}
             className="text-secondary-600 hover:text-secondary-900"
@@ -119,6 +145,8 @@ export function MainHeader() {
           >
             <Mail size={20} />
           </a>
+=======
+>>>>>>> 183ebc5 (Initial commit)
         </div>
         
         {/* Mobile Menu Button */}
@@ -171,6 +199,16 @@ export function MainHeader() {
               Skills
             </NavLink>
             <NavLink 
+<<<<<<< HEAD
+=======
+              to="/experience" 
+              className={navLinkClasses} 
+              onClick={toggleMenu}
+            >
+              Experience
+            </NavLink>
+            <NavLink 
+>>>>>>> 183ebc5 (Initial commit)
               to="/certificates" 
               className={navLinkClasses} 
               onClick={toggleMenu}
@@ -184,6 +222,7 @@ export function MainHeader() {
             >
               Resume
             </NavLink>
+<<<<<<< HEAD
             <button 
               onClick={() => {
                 handleContactClick();
@@ -193,6 +232,15 @@ export function MainHeader() {
             >
               Contact
             </button>
+=======
+            <NavLink 
+              to="/contact" 
+              className={navLinkClasses} 
+              onClick={toggleMenu}
+            >
+              Contact
+            </NavLink>
+>>>>>>> 183ebc5 (Initial commit)
             
             <div className="flex items-center space-x-4 pt-4">
               <a 
@@ -213,6 +261,7 @@ export function MainHeader() {
               >
                 <Linkedin size={20} />
               </a>
+<<<<<<< HEAD
               <a 
                 href={`mailto:${profileEmail || 'contact@example.com'}`}
                 className="text-secondary-600 hover:text-secondary-900"
@@ -220,6 +269,8 @@ export function MainHeader() {
               >
                 <Mail size={20} />
               </a>
+=======
+>>>>>>> 183ebc5 (Initial commit)
             </div>
           </nav>
         </div>

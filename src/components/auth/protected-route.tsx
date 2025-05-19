@@ -1,4 +1,8 @@
+<<<<<<< HEAD
 import { Navigate } from 'react-router-dom';
+=======
+import { Navigate, useLocation } from 'react-router-dom';
+>>>>>>> 183ebc5 (Initial commit)
 import { useAuth } from '../../context/auth-context';
 
 interface ProtectedRouteProps {
@@ -7,6 +11,10 @@ interface ProtectedRouteProps {
 
 export function ProtectedRoute({ children }: ProtectedRouteProps) {
   const { isAuthenticated, isInitialized } = useAuth();
+<<<<<<< HEAD
+=======
+  const location = useLocation();
+>>>>>>> 183ebc5 (Initial commit)
   
   if (!isInitialized) {
     return (
@@ -17,7 +25,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   }
   
   if (!isAuthenticated) {
+<<<<<<< HEAD
     return <Navigate to="/admin/login" replace />;
+=======
+    return <Navigate to="/admin/login" state={{ from: location }} replace />;
+>>>>>>> 183ebc5 (Initial commit)
   }
   
   return <>{children}</>;

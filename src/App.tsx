@@ -11,6 +11,10 @@ import { AdminResumePage } from './pages/admin/resumes';
 import { AdminContactPage } from './pages/admin/contact';
 import { AdminSettingsPage } from './pages/admin/settings';
 import { AdminAnalyticsPage } from './pages/admin/analytics';
+<<<<<<< HEAD
+=======
+import { AdminExperiencePage } from './pages/admin/experience';
+>>>>>>> 183ebc5 (Initial commit)
 import { AdminLoginPage } from './pages/admin/login';
 import { HomePage } from './pages/public/home';
 import { ProjectsPage } from './pages/public/projects';
@@ -18,9 +22,17 @@ import { ProjectDetailPage } from './pages/public/project-detail';
 import { SkillsPage } from './pages/public/skills';
 import { CertificatesPage } from './pages/public/certificates';
 import { ResumePage } from './pages/public/resume';
+<<<<<<< HEAD
 import { ProtectedRoute } from './components/auth/protected-route';
 
 function App() {
+=======
+import { ExperiencePage } from './pages/public/experience';
+import { ContactPage } from './pages/public/contact';
+import { ProtectedRoute } from './components/auth/protected-route';
+
+export default function App() {
+>>>>>>> 183ebc5 (Initial commit)
   const location = useLocation();
   const { isInitialized } = useAuth();
 
@@ -45,7 +57,13 @@ function App() {
         <Route path="projects/:id" element={<ProjectDetailPage />} />
         <Route path="skills" element={<SkillsPage />} />
         <Route path="certificates" element={<CertificatesPage />} />
+<<<<<<< HEAD
         <Route path="resume" element={<ResumePage />} />
+=======
+        <Route path="experience" element={<ExperiencePage />} />
+        <Route path="resume" element={<ResumePage />} />
+        <Route path="contact" element={<ContactPage />} />
+>>>>>>> 183ebc5 (Initial commit)
       </Route>
       
       {/* Admin Login */}
@@ -64,6 +82,10 @@ function App() {
         <Route path="projects" element={<AdminProjectsPage />} />
         <Route path="skills" element={<AdminSkillsPage />} />
         <Route path="certificates" element={<AdminCertificatesPage />} />
+<<<<<<< HEAD
+=======
+        <Route path="experience" element={<AdminExperiencePage />} />
+>>>>>>> 183ebc5 (Initial commit)
         <Route path="resume" element={<AdminResumePage />} />
         <Route path="contact" element={<AdminContactPage />} />
         <Route path="settings" element={<AdminSettingsPage />} />
@@ -71,6 +93,10 @@ function App() {
       </Route>
     </Routes>
   );
+<<<<<<< HEAD
 }
 
 export default App;
+=======
+}
+>>>>>>> 183ebc5 (Initial commit)

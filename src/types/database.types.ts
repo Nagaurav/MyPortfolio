@@ -50,6 +50,56 @@ export interface Database {
           user_id?: string
         }
       }
+<<<<<<< HEAD
+=======
+      experiences: {
+        Row: {
+          id: string
+          user_id: string
+          title: string
+          company: string
+          location: string
+          type: string
+          start_date: string
+          end_date: string | null
+          current: boolean
+          description: string
+          technologies: string[]
+          created_at: string
+          updated_at: string
+        }
+        Insert: {
+          id?: string
+          user_id: string
+          title: string
+          company: string
+          location: string
+          type: string
+          start_date: string
+          end_date?: string | null
+          current?: boolean
+          description: string
+          technologies?: string[]
+          created_at?: string
+          updated_at?: string
+        }
+        Update: {
+          id?: string
+          user_id?: string
+          title?: string
+          company?: string
+          location?: string
+          type?: string
+          start_date?: string
+          end_date?: string | null
+          current?: boolean
+          description?: string
+          technologies?: string[]
+          created_at?: string
+          updated_at?: string
+        }
+      }
+>>>>>>> 183ebc5 (Initial commit)
       skills: {
         Row: {
           id: string

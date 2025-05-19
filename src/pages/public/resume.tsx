@@ -35,7 +35,11 @@ export function ResumePage() {
   return (
     <>
       {/* Hero Section */}
+<<<<<<< HEAD
       <section className="relative py-20 overflow-hidden">
+=======
+      <section className="relative py-12 md:py-20 overflow-hidden">
+>>>>>>> 183ebc5 (Initial commit)
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
           <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
         </div>
@@ -47,25 +51,42 @@ export function ResumePage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
+<<<<<<< HEAD
             className="max-w-3xl mx-auto text-center"
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
+=======
+            className="max-w-3xl mx-auto text-center px-4"
+          >
+            <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6">
+>>>>>>> 183ebc5 (Initial commit)
               <span className="text-secondary-900">My Professional </span>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]">
                 Resume
               </span>
             </h1>
+<<<<<<< HEAD
             <p className="text-xl text-secondary-600">
+=======
+            <p className="text-lg md:text-xl text-secondary-600">
+>>>>>>> 183ebc5 (Initial commit)
               Download my resume to learn more about my experience, skills, and qualifications
             </p>
           </motion.div>
         </div>
       </section>
 
+<<<<<<< HEAD
       <div className="container pb-20">
         <div className="max-w-3xl mx-auto">
           {loading ? (
             <div className="bg-white rounded-xl shadow-lg p-8 animate-pulse">
+=======
+      <div className="container pb-12 md:pb-20 px-4">
+        <div className="max-w-3xl mx-auto">
+          {loading ? (
+            <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 animate-pulse">
+>>>>>>> 183ebc5 (Initial commit)
               <div className="h-8 bg-secondary-200 rounded w-1/2 mb-4"></div>
               <div className="h-4 bg-secondary-200 rounded w-1/3 mb-6"></div>
               <div className="h-12 bg-secondary-200 rounded w-48"></div>
@@ -74,11 +95,19 @@ export function ResumePage() {
             <motion.div
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
+<<<<<<< HEAD
               className="bg-white rounded-xl shadow-lg p-8 border border-secondary-100"
             >
               <div className="flex items-center justify-between mb-6">
                 <div>
                   <h2 className="text-2xl font-semibold text-secondary-900">
+=======
+              className="bg-white rounded-xl shadow-lg p-6 md:p-8 border border-secondary-100"
+            >
+              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
+                <div>
+                  <h2 className="text-xl md:text-2xl font-semibold text-secondary-900">
+>>>>>>> 183ebc5 (Initial commit)
                     {activeResume.title}
                   </h2>
                   <p className="text-secondary-600 mt-1">

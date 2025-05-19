@@ -5,7 +5,12 @@ import {
   Award, 
   FileText, 
   Mail, 
+<<<<<<< HEAD
   Lightbulb, 
+=======
+  Lightbulb,
+  Briefcase,
+>>>>>>> 183ebc5 (Initial commit)
   Settings, 
   BarChart
 } from 'lucide-react';
@@ -23,7 +28,13 @@ export function AdminSidebar() {
       <div className="h-full flex flex-col">
         <div className="px-4 py-6 border-b border-secondary-200">
           <Link to="/admin" className="flex items-center">
+<<<<<<< HEAD
             <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent">GN</span>
+=======
+            <span className="text-3xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent font-['Helvetica_Neue'] transform hover:scale-105 transition-transform">
+              GN
+            </span>
+>>>>>>> 183ebc5 (Initial commit)
             <span className="ml-2 text-xl font-bold text-secondary-900">Admin</span>
           </Link>
         </div>
@@ -41,6 +52,13 @@ export function AdminSidebar() {
             <Lightbulb size={18} className="mr-3" />
             Skills
           </NavLink>
+<<<<<<< HEAD
+=======
+          <NavLink to="/admin/experience" className={navLinkClasses}>
+            <Briefcase size={18} className="mr-3" />
+            Experience
+          </NavLink>
+>>>>>>> 183ebc5 (Initial commit)
           <NavLink to="/admin/certificates" className={navLinkClasses}>
             <Award size={18} className="mr-3" />
             Certificates

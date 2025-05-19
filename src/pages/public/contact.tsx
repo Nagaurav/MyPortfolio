@@ -6,6 +6,12 @@ import { Mail, Phone, MapPin, Send, Copy, Github, Linkedin } from 'lucide-react'
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { generateCSRFToken, storeCSRFToken, getStoredCSRFToken } from '../../lib/csrf';
+<<<<<<< HEAD
+=======
+import type { Database } from '../../types/database.types';
+
+type Profile = Database['public']['Tables']['profiles']['Row'];
+>>>>>>> 183ebc5 (Initial commit)
 
 interface ContactFormData {
   name: string;
@@ -17,12 +23,37 @@ interface ContactFormData {
 export function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [copiedEmail, setCopiedEmail] = useState(false);
+<<<<<<< HEAD
+=======
+  const [profile, setProfile] = useState<Profile | null>(null);
+>>>>>>> 183ebc5 (Initial commit)
   
   useEffect(() => {
     if (!getStoredCSRFToken()) {
       const token = generateCSRFToken();
       storeCSRFToken(token);
     }
+<<<<<<< HEAD
+=======
+
+    // Fetch profile data
+    async function fetchProfile() {
+      try {
+        const { data, error } = await supabase
+          .from('profiles')
+          .select('*')
+          .limit(1)
+          .single();
+
+        if (error) throw error;
+        setProfile(data);
+      } catch (error) {
+        console.error('Error fetching profile:', error);
+      }
+    }
+
+    fetchProfile();
+>>>>>>> 183ebc5 (Initial commit)
   }, []);
 
   const {
@@ -66,8 +97,15 @@ export function ContactPage() {
   };
 
   const copyEmail = async () => {
+<<<<<<< HEAD
     try {
       await navigator.clipboard.writeText('your.email@example.com');
+=======
+    if (!profile?.email) return;
+    
+    try {
+      await navigator.clipboard.writeText(profile.email);
+>>>>>>> 183ebc5 (Initial commit)
       setCopiedEmail(true);
       toast.success('Email copied to clipboard!');
       setTimeout(() => setCopiedEmail(false), 2000);
@@ -116,6 +154,7 @@ export function ContactPage() {
           >
             <h2 className="text-2xl font-semibold mb-6">Contact Information</h2>
             <div className="space-y-6">
+<<<<<<< HEAD
               <div className="flex items-start">
                 <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
                   <Mail className="w-5 h-5 text-primary-600" />
@@ -159,10 +198,62 @@ export function ContactPage() {
                   <p className="text-secondary-600">San Francisco, CA</p>
                 </div>
               </div>
+=======
+              {profile?.email && (
+                <div className="flex items-start">
+                  <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
+                    <Mail className="w-5 h-5 text-primary-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-medium">Email</h3>
+                    <div className="flex items-center mt-1">
+                      <p className="text-secondary-600">{profile.email}</p>
+                      <button
+                        onClick={copyEmail}
+                        className="ml-2 text-secondary-400 hover:text-secondary-600 transition-colors"
+                        aria-label="Copy email"
+                      >
+                        <Copy size={16} />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+
+              {profile?.phone && (
+                <div className="flex items-start">
+                  <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
+                    <Phone className="w-5 h-5 text-primary-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-medium">Phone</h3>
+                    <a
+                      href={`tel:${profile.phone}`}
+                      className="text-secondary-600 hover:text-primary-600 transition-colors"
+                    >
+                      {profile.phone}
+                    </a>
+                  </div>
+                </div>
+              )}
+
+              {profile?.location && (
+                <div className="flex items-start">
+                  <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
+                    <MapPin className="w-5 h-5 text-primary-600" />
+                  </div>
+                  <div className="ml-4">
+                    <h3 className="text-lg font-medium">Location</h3>
+                    <p className="text-secondary-600">{profile.location}</p>
+                  </div>
+                </div>
+              )}
+>>>>>>> 183ebc5 (Initial commit)
 
               <div className="pt-6 border-t border-secondary-200">
                 <h3 className="text-lg font-medium mb-4">Connect with me</h3>
                 <div className="flex space-x-4">
+<<<<<<< HEAD
                   <a
                     href="https://github.com/yourusername"
                     target="_blank"
@@ -179,6 +270,30 @@ export function ContactPage() {
                   >
                     <Linkedin size={20} />
                   </a>
+=======
+                  {profile?.github_url && (
+                    <a
+                      href={profile.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center text-secondary-600 hover:bg-secondary-200 transition-colors"
+                      aria-label="GitHub"
+                    >
+                      <Github size={20} />
+                    </a>
+                  )}
+                  {profile?.linkedin_url && (
+                    <a
+                      href={profile.linkedin_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center text-secondary-600 hover:bg-secondary-200 transition-colors"
+                      aria-label="LinkedIn"
+                    >
+                      <Linkedin size={20} />
+                    </a>
+                  )}
+>>>>>>> 183ebc5 (Initial commit)
                 </div>
               </div>
             </div>

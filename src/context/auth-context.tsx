@@ -33,13 +33,25 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
+<<<<<<< HEAD
       (_event, session) => {
         setSession(session);
         setUser(session?.user ?? null);
+=======
+      async (_event, session) => {
+        setSession(session);
+        setUser(session?.user ?? null);
+
+        // If user is logged out, redirect to login page
+        if (!session?.user) {
+          navigate('/admin/login');
+        }
+>>>>>>> 183ebc5 (Initial commit)
       }
     );
 
     return () => subscription.unsubscribe();
+<<<<<<< HEAD
   }, []);
 
   const signIn = async (email: string, password: string) => {
@@ -72,13 +84,79 @@ export function AuthProvider({ children }: { children: ReactNode }) {
           {
             id: user.id,
             email: user.email,
+=======
+  }, [navigate]);
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
+
+      if (error) throw error;
+
+      // Create profile if it doesn't exist
+      if (data.user) {
+        const { data: profile } = await supabase
+          .from('profiles')
+          .select('*')
+          .eq('id', data.user.id)
+          .single();
+
+        if (!profile) {
+          await supabase.from('profiles').insert([
+            {
+              id: data.user.id,
+              email: data.user.email,
+              full_name: '',
+            },
+          ]);
+        }
+
+        navigate('/admin');
+      }
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+  };
+
+  const signUp = async (email: string, password: string) => {
+    try {
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: `${window.location.origin}/admin`,
+        },
+      });
+
+      if (error) throw error;
+
+      // Create a profile record for the new user
+      if (data.user) {
+        await supabase.from('profiles').insert([
+          {
+            id: data.user.id,
+            email: data.user.email,
+>>>>>>> 183ebc5 (Initial commit)
             full_name: '',
           },
         ]);
       }
+<<<<<<< HEAD
     }
 
     return { error };
+=======
+
+      return { error: null };
+    } catch (error) {
+      return { error: error as Error };
+    }
+>>>>>>> 183ebc5 (Initial commit)
   };
 
   const signOut = async () => {
