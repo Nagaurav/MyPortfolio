@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
+import { FileUpload } from '../../components/ui/file-upload';
 import type { Database } from '../../types/database.types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -30,8 +31,11 @@ export function AdminProjectsPage() {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormData>();
+
+  const imageUrl = watch('image_url');
   
   useEffect(() => {
     fetchProjects();
@@ -121,6 +125,10 @@ export function AdminProjectsPage() {
       toast.error('Failed to delete project');
     }
   };
+
+  const handleImageUpload = (url: string) => {
+    setValue('image_url', url);
+  };
   
   return (
     <div>
@@ -129,10 +137,10 @@ export function AdminProjectsPage() {
         subtitle="Manage your portfolio projects"
       />
       
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6 mb-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="title" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Title
             </label>
             <input
@@ -142,12 +150,12 @@ export function AdminProjectsPage() {
               {...register('title', { required: 'Title is required' })}
             />
             {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="description" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="description" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Description
             </label>
             <textarea
@@ -157,12 +165,12 @@ export function AdminProjectsPage() {
               {...register('description', { required: 'Description is required' })}
             />
             {errors.description && (
-              <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="short_description" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="short_description" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Short Description
             </label>
             <input
@@ -174,7 +182,7 @@ export function AdminProjectsPage() {
           </div>
           
           <div>
-            <label htmlFor="tags" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="tags" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Tags (comma-separated)
             </label>
             <input
@@ -185,20 +193,17 @@ export function AdminProjectsPage() {
             />
           </div>
           
-          <div>
-            <label htmlFor="image_url" className="block text-sm font-medium text-secondary-700">
-              Image URL
-            </label>
-            <input
-              type="url"
-              id="image_url"
-              className="mt-1 input"
-              {...register('image_url')}
-            />
-          </div>
+          <FileUpload
+            onUpload={handleImageUpload}
+            accept="image/*"
+            bucket="projects"
+            folder="images"
+            currentFile={imageUrl}
+            label="Project Image"
+          />
           
           <div>
-            <label htmlFor="github_url" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="github_url" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               GitHub URL
             </label>
             <input
@@ -210,7 +215,7 @@ export function AdminProjectsPage() {
           </div>
           
           <div>
-            <label htmlFor="live_url" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="live_url" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Live URL
             </label>
             <input
@@ -228,7 +233,7 @@ export function AdminProjectsPage() {
               className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
               {...register('featured')}
             />
-            <label htmlFor="featured" className="ml-2 block text-sm text-secondary-700">
+            <label htmlFor="featured" className="ml-2 block text-sm text-secondary-700 dark:text-secondary-200">
               Featured Project
             </label>
           </div>
@@ -236,7 +241,7 @@ export function AdminProjectsPage() {
           <div className="flex gap-4">
             <Button
               type="submit"
-              isLoading={isSubmitting}
+              loading={isSubmitting}
               leftIcon={editingProject ? <Pencil size={16} /> : <Plus size={16} />}
             >
               {editingProject ? 'Update Project' : 'Add Project'}

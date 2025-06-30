@@ -1,10 +1,11 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { User, Mail, Github, Linkedin, Twitter, Image } from 'lucide-react';
+import { User, Mail, Github, Linkedin, Twitter } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
+import { FileUpload } from '../../components/ui/file-upload';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -112,6 +113,10 @@ export function AdminSettingsPage() {
       setSaving(false);
     }
   };
+
+  const handleAvatarUpload = (url: string) => {
+    setValue('avatar_url', url);
+  };
   
   if (loading) {
     return (
@@ -128,10 +133,10 @@ export function AdminSettingsPage() {
         subtitle="Update your personal information and social media links"
       />
       
-      <div className="bg-white rounded-lg shadow-md p-6">
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label htmlFor="full_name" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="full_name" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Full Name
             </label>
             <div className="mt-1 relative">
@@ -141,15 +146,15 @@ export function AdminSettingsPage() {
                 className="input pl-10"
                 {...register('full_name', { required: 'Full name is required' })}
               />
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={18} />
+              <User className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
             </div>
             {errors.full_name && (
-              <p className="mt-1 text-sm text-red-600">{errors.full_name.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.full_name.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="email" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Email
             </label>
             <div className="mt-1 relative">
@@ -165,15 +170,15 @@ export function AdminSettingsPage() {
                   },
                 })}
               />
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={18} />
+              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
             </div>
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="bio" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="bio" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Bio
             </label>
             <textarea
@@ -185,41 +190,17 @@ export function AdminSettingsPage() {
             />
           </div>
           
-          <div>
-            <label htmlFor="avatar_url" className="block text-sm font-medium text-secondary-700">
-              Profile Image URL
-            </label>
-            <div className="mt-1 space-y-4">
-              <div className="relative">
-                <input
-                  type="url"
-                  id="avatar_url"
-                  className="input pl-10"
-                  {...register('avatar_url')}
-                  placeholder="https://example.com/avatar.jpg"
-                />
-                <Image className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={18} />
-              </div>
-              {avatarUrl && (
-                <div className="mt-2">
-                  <p className="text-sm text-secondary-600 mb-2">Preview:</p>
-                  <div className="relative w-32 h-32 rounded-lg overflow-hidden">
-                    <img
-                      src={avatarUrl}
-                      alt="Profile preview"
-                      className="w-full h-full object-cover"
-                      onError={(e) => {
-                        e.currentTarget.src = 'https://images.pexels.com/photos/4974915/pexels-photo-4974915.jpeg';
-                      }}
-                    />
-                  </div>
-                </div>
-              )}
-            </div>
-          </div>
+          <FileUpload
+            onUpload={handleAvatarUpload}
+            accept="image/*"
+            bucket="avatars"
+            folder="profile"
+            currentFile={avatarUrl}
+            label="Profile Image"
+          />
           
           <div>
-            <label htmlFor="github_url" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="github_url" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               GitHub URL
             </label>
             <div className="mt-1 relative">
@@ -230,12 +211,12 @@ export function AdminSettingsPage() {
                 {...register('github_url')}
                 placeholder="https://github.com/yourusername"
               />
-              <Github className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={18} />
+              <Github className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
             </div>
           </div>
           
           <div>
-            <label htmlFor="linkedin_url" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="linkedin_url" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               LinkedIn URL
             </label>
             <div className="mt-1 relative">
@@ -246,12 +227,12 @@ export function AdminSettingsPage() {
                 {...register('linkedin_url')}
                 placeholder="https://linkedin.com/in/yourusername"
               />
-              <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={18} />
+              <Linkedin className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
             </div>
           </div>
           
           <div>
-            <label htmlFor="twitter_url" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="twitter_url" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Twitter URL
             </label>
             <div className="mt-1 relative">
@@ -262,16 +243,17 @@ export function AdminSettingsPage() {
                 {...register('twitter_url')}
                 placeholder="https://twitter.com/yourusername"
               />
-              <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={18} />
+              <Twitter className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
             </div>
           </div>
           
           <div className="flex justify-end">
             <Button
               type="submit"
-              isLoading={saving}
+              loading={saving}
+              className="px-8"
             >
-              Save Changes
+              {saving ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </form>

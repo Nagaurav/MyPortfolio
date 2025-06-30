@@ -1,7 +1,14 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '../lib/supabase';
 import { useNavigate } from 'react-router-dom';
+
+type User = {
+  id: string;
+  email: string;
+};
+
+type Session = {
+  user: User;
+};
 
 type AuthContextType = {
   session: Session | null;
@@ -26,97 +33,41 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setIsInitialized(true);
-    });
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange(
-<<<<<<< HEAD
-      (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-=======
-      async (_event, session) => {
-        setSession(session);
-        setUser(session?.user ?? null);
-
-        // If user is logged out, redirect to login page
-        if (!session?.user) {
-          navigate('/admin/login');
-        }
->>>>>>> 183ebc5 (Initial commit)
+    // Check for existing session in localStorage
+    const savedSession = localStorage.getItem('auth-session');
+    if (savedSession) {
+      try {
+        const parsedSession = JSON.parse(savedSession);
+        setSession(parsedSession);
+        setUser(parsedSession.user);
+      } catch (error) {
+        console.error('Error parsing saved session:', error);
+        localStorage.removeItem('auth-session');
       }
-    );
-
-    return () => subscription.unsubscribe();
-<<<<<<< HEAD
+    }
+    setIsInitialized(true);
   }, []);
 
   const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
+    try {
+      // Simple mock authentication - accept any email/password for development
+      // In production, this would validate against Supabase
+      const mockUser: User = {
+        id: 'dev-user-1',
+        email: email,
+      };
+      
+      const mockSession: Session = {
+        user: mockUser,
+      };
 
-    if (!error) {
+      // Save to localStorage
+      localStorage.setItem('auth-session', JSON.stringify(mockSession));
+      
+      setSession(mockSession);
+      setUser(mockUser);
+      
       navigate('/admin');
-    }
-
-    return { error };
-  };
-
-  const signUp = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signUp({
-      email,
-      password,
-      options: {
-        emailRedirectTo: `${window.location.origin}/admin`,
-      },
-    });
-
-    if (!error) {
-      // Create a profile record for the new user
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase.from('profiles').insert([
-          {
-            id: user.id,
-            email: user.email,
-=======
-  }, [navigate]);
-
-  const signIn = async (email: string, password: string) => {
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email,
-        password,
-      });
-
-      if (error) throw error;
-
-      // Create profile if it doesn't exist
-      if (data.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*')
-          .eq('id', data.user.id)
-          .single();
-
-        if (!profile) {
-          await supabase.from('profiles').insert([
-            {
-              id: data.user.id,
-              email: data.user.email,
-              full_name: '',
-            },
-          ]);
-        }
-
-        navigate('/admin');
-      }
-
       return { error: null };
     } catch (error) {
       return { error: error as Error };
@@ -125,42 +76,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signUp = async (email: string, password: string) => {
     try {
-      const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-          emailRedirectTo: `${window.location.origin}/admin`,
-        },
-      });
+      // Simple mock registration - create user for development
+      const mockUser: User = {
+        id: 'dev-user-' + Date.now(),
+        email: email,
+      };
+      
+      const mockSession: Session = {
+        user: mockUser,
+      };
 
-      if (error) throw error;
-
-      // Create a profile record for the new user
-      if (data.user) {
-        await supabase.from('profiles').insert([
-          {
-            id: data.user.id,
-            email: data.user.email,
->>>>>>> 183ebc5 (Initial commit)
-            full_name: '',
-          },
-        ]);
-      }
-<<<<<<< HEAD
-    }
-
-    return { error };
-=======
-
+      // Save to localStorage
+      localStorage.setItem('auth-session', JSON.stringify(mockSession));
+      
+      setSession(mockSession);
+      setUser(mockUser);
+      
+      navigate('/admin');
       return { error: null };
     } catch (error) {
       return { error: error as Error };
     }
->>>>>>> 183ebc5 (Initial commit)
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
+    localStorage.removeItem('auth-session');
+    setSession(null);
+    setUser(null);
     navigate('/admin/login');
   };
 

@@ -5,6 +5,7 @@ import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
+import { FileUpload } from '../../components/ui/file-upload';
 import type { Database } from '../../types/database.types';
 
 type Certificate = Database['public']['Tables']['certificates']['Row'];
@@ -28,8 +29,11 @@ export function AdminCertificatesPage() {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<CertificateFormData>();
+
+  const certificateUrl = watch('certificate_url');
   
   useEffect(() => {
     fetchCertificates();
@@ -112,6 +116,10 @@ export function AdminCertificatesPage() {
       toast.error('Failed to delete certificate');
     }
   };
+
+  const handleCertificateUpload = (url: string) => {
+    setValue('certificate_url', url);
+  };
   
   return (
     <div>
@@ -120,10 +128,10 @@ export function AdminCertificatesPage() {
         subtitle="Manage your certifications and achievements"
       />
       
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow p-6 mb-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="title" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Certificate Title
             </label>
             <input
@@ -133,12 +141,12 @@ export function AdminCertificatesPage() {
               {...register('title', { required: 'Certificate title is required' })}
             />
             {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="issuer" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="issuer" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Issuing Organization
             </label>
             <input
@@ -148,12 +156,12 @@ export function AdminCertificatesPage() {
               {...register('issuer', { required: 'Issuer is required' })}
             />
             {errors.issuer && (
-              <p className="mt-1 text-sm text-red-600">{errors.issuer.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.issuer.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="issue_date" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="issue_date" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Issue Date
             </label>
             <input
@@ -163,12 +171,12 @@ export function AdminCertificatesPage() {
               {...register('issue_date', { required: 'Issue date is required' })}
             />
             {errors.issue_date && (
-              <p className="mt-1 text-sm text-red-600">{errors.issue_date.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.issue_date.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="expiry_date" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="expiry_date" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Expiry Date (optional)
             </label>
             <input
@@ -180,7 +188,7 @@ export function AdminCertificatesPage() {
           </div>
           
           <div>
-            <label htmlFor="credential_url" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="credential_url" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Credential URL
             </label>
             <input
@@ -191,22 +199,19 @@ export function AdminCertificatesPage() {
             />
           </div>
           
-          <div>
-            <label htmlFor="certificate_url" className="block text-sm font-medium text-secondary-700">
-              Certificate Image URL
-            </label>
-            <input
-              type="url"
-              id="certificate_url"
-              className="mt-1 input"
-              {...register('certificate_url')}
-            />
-          </div>
+          <FileUpload
+            onUpload={handleCertificateUpload}
+            accept="image/*"
+            bucket="certificates"
+            folder="images"
+            currentFile={certificateUrl}
+            label="Certificate Image"
+          />
           
           <div className="flex gap-4">
             <Button
               type="submit"
-              isLoading={isSubmitting}
+              loading={isSubmitting}
               leftIcon={editingCertificate ? <Pencil size={16} /> : <Plus size={16} />}
             >
               {editingCertificate ? 'Update Certificate' : 'Add Certificate'}
@@ -228,27 +233,27 @@ export function AdminCertificatesPage() {
         </form>
       </div>
       
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-dark-800 rounded-lg shadow overflow-hidden">
         <div className="p-6">
-          <h3 className="text-lg font-medium text-secondary-900">Certificates List</h3>
+          <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Certificates List</h3>
         </div>
         
-        <div className="border-t border-secondary-200">
+        <div className="border-t border-secondary-200 dark:border-dark-600">
           {loading ? (
-            <div className="p-6 text-center">Loading...</div>
+            <div className="p-6 text-center text-secondary-500 dark:text-secondary-400">Loading...</div>
           ) : certificates.length > 0 ? (
-            <div className="divide-y divide-secondary-200">
+            <div className="divide-y divide-secondary-200 dark:divide-dark-600">
               {certificates.map((certificate) => (
                 <div key={certificate.id} className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h4 className="text-lg font-medium text-secondary-900">
+                      <h4 className="text-lg font-medium text-secondary-900 dark:text-white">
                         {certificate.title}
                       </h4>
-                      <p className="mt-1 text-sm text-secondary-500">
+                      <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
                         {certificate.issuer}
                       </p>
-                      <div className="mt-2 text-sm text-secondary-500">
+                      <div className="mt-2 text-sm text-secondary-500 dark:text-secondary-400">
                         <span>Issued: {new Date(certificate.issue_date).toLocaleDateString()}</span>
                         {certificate.expiry_date && (
                           <span className="ml-4">
@@ -263,7 +268,7 @@ export function AdminCertificatesPage() {
                           href={certificate.credential_url}
                           target="_blank"
                           rel="noopener noreferrer"
-                          className="text-secondary-400 hover:text-secondary-500"
+                          className="text-secondary-400 hover:text-secondary-500 dark:text-secondary-500 dark:hover:text-secondary-400"
                         >
                           <ExternalLink size={20} />
                         </a>
@@ -288,7 +293,7 @@ export function AdminCertificatesPage() {
               ))}
             </div>
           ) : (
-            <div className="p-6 text-center text-secondary-500">
+            <div className="p-6 text-center text-secondary-500 dark:text-secondary-400">
               No certificates found. Add your first certificate using the form above.
             </div>
           )}

@@ -1,19 +1,14 @@
 import { useState, useEffect } from 'react';
-import { Link, NavLink } from 'react-router-dom';
-<<<<<<< HEAD
-import { Menu, X, Github, Linkedin, Mail } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
-=======
-import { Menu, X, Github, Linkedin } from 'lucide-react';
->>>>>>> 183ebc5 (Initial commit)
+import { Link, NavLink, useLocation } from 'react-router-dom';
+import { Menu, X } from 'lucide-react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ThemeToggle } from '../ui/theme-toggle';
 
 export function MainHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
-<<<<<<< HEAD
-  const [profileEmail, setProfileEmail] = useState<string | null>(null);
-=======
->>>>>>> 183ebc5 (Initial commit)
+  const [activeSection, setActiveSection] = useState('home');
+  const location = useLocation();
   
   useEffect(() => {
     const handleScroll = () => {
@@ -27,254 +22,188 @@ export function MainHeader() {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
-<<<<<<< HEAD
 
+  // Scroll spy functionality
   useEffect(() => {
-    async function fetchProfileEmail() {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('email')
-          .single();
+    const handleScrollSpy = () => {
+      const sections = document.querySelectorAll('section[id]');
+      const scrollPosition = window.scrollY + 100;
 
-        if (error) throw error;
-        if (data?.email) {
-          setProfileEmail(data.email);
+      sections.forEach((section) => {
+        const sectionTop = (section as HTMLElement).offsetTop;
+        const sectionHeight = (section as HTMLElement).offsetHeight;
+        const sectionId = section.getAttribute('id');
+
+        if (scrollPosition >= sectionTop && scrollPosition < sectionTop + sectionHeight) {
+          setActiveSection(sectionId || 'home');
         }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    }
+      });
+    };
 
-    fetchProfileEmail();
+    window.addEventListener('scroll', handleScrollSpy);
+    return () => window.removeEventListener('scroll', handleScrollSpy);
   }, []);
-=======
->>>>>>> 183ebc5 (Initial commit)
   
   const toggleMenu = () => setIsMenuOpen(!isMenuOpen);
   
-  const navLinkClasses = ({ isActive }: { isActive: boolean }) => 
-    `px-3 py-2 text-sm font-medium transition-colors rounded-md ${
-      isActive 
-        ? 'text-primary-600' 
-        : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100'
-    }`;
-<<<<<<< HEAD
-
-  const handleContactClick = () => {
-    const contactSection = document.getElementById('contact');
-    if (contactSection) {
-      contactSection.scrollIntoView({ behavior: 'smooth' });
-    } else {
-      window.location.href = '/#contact';
-    }
+  const navLinkClasses = ({ isActive }: { isActive: boolean }) => {
+    const baseClasses = 'px-3 py-2 text-sm font-medium transition-all duration-300 relative group';
+    const activeClasses = isActive 
+      ? 'text-primary-600 dark:text-primary-400' 
+      : 'text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white';
+    
+    return `${baseClasses} ${activeClasses}`;
   };
-=======
->>>>>>> 183ebc5 (Initial commit)
+
+  const navItems = [
+    { to: '/', label: 'Home', id: 'home' },
+    { to: '/projects', label: 'Projects', id: 'projects' },
+    { to: '/skills', label: 'Skills', id: 'skills' },
+    { to: '/experience', label: 'Experience', id: 'experience' },
+    { to: '/certificates', label: 'Certificates', id: 'certificates' },
+    { to: '/resume', label: 'Resume', id: 'resume' },
+    { to: '/contact', label: 'Contact', id: 'contact' },
+  ];
   
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 ${
-      isScrolled ? 'bg-white shadow-md py-3' : 'bg-transparent py-5'
+    <header className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-sm ${
+      isScrolled ? 'bg-white/95 shadow-lg py-3 dark:bg-dark-900/95' : 'bg-transparent py-4 sm:py-5'
     }`}>
-      <div className="container flex items-center justify-between">
-        <Link to="/" className="flex items-center">
-          <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent hover:from-primary-700 hover:to-accent-600 transition-all">GN</span>
-        </Link>
-        
-        {/* Desktop Navigation */}
-        <nav className="hidden space-x-1 md:flex">
-          <NavLink to="/" end className={navLinkClasses}>
-            Home
-          </NavLink>
-          <NavLink to="/projects" className={navLinkClasses}>
-            Projects
-          </NavLink>
-          <NavLink to="/skills" className={navLinkClasses}>
-            Skills
-          </NavLink>
-<<<<<<< HEAD
-=======
-          <NavLink to="/experience" className={navLinkClasses}>
-            Experience
-          </NavLink>
->>>>>>> 183ebc5 (Initial commit)
-          <NavLink to="/certificates" className={navLinkClasses}>
-            Certificates
-          </NavLink>
-          <NavLink to="/resume" className={navLinkClasses}>
-            Resume
-          </NavLink>
-<<<<<<< HEAD
-          <button 
-            onClick={handleContactClick}
-            className={`px-3 py-2 text-sm font-medium transition-colors rounded-md text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100`}
+      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16">
+        <div className="flex items-center justify-between">
+          {/* Logo */}
+          <Link to="/" className="flex items-center group flex-shrink-0">
+            <motion.span 
+              className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent group-hover:from-primary-700 group-hover:to-primary-600 transition-all duration-300"
+              whileHover={{ scale: 1.05 }}
+              whileTap={{ scale: 0.95 }}
+            >
+              GN
+            </motion.span>
+          </Link>
+          
+          {/* Desktop Navigation */}
+          <nav className="hidden lg:flex items-center space-x-1 xl:space-x-2">
+            {navItems.map((item) => (
+              <NavLink 
+                key={item.to}
+                to={item.to} 
+                end={item.to === '/'}
+                className={navLinkClasses}
+              >
+                {item.label}
+                {/* Animated underline */}
+                <motion.div
+                  className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full"
+                  initial={{ width: 0 }}
+                  animate={{ 
+                    width: (location.pathname === item.to || (item.to === '/' && location.pathname === '/')) ? '100%' : 0 
+                  }}
+                  transition={{ duration: 0.3 }}
+                  whileHover={{ width: '100%' }}
+                />
+              </NavLink>
+            ))}
+          </nav>
+
+          {/* Desktop Theme Toggle */}
+          <div className="hidden lg:flex items-center space-x-4">
+            <ThemeToggle />
+          </div>
+          
+          {/* Mobile Menu Button */}
+          <motion.button 
+            className="p-2 rounded-md lg:hidden text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 transition-colors dark:text-secondary-300 dark:hover:text-white dark:hover:bg-dark-800"
+            onClick={toggleMenu}
+            aria-expanded={isMenuOpen}
+            aria-label="Toggle menu"
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
           >
-            Contact
-          </button>
-=======
-          <NavLink to="/contact" className={navLinkClasses}>
-            Contact
-          </NavLink>
->>>>>>> 183ebc5 (Initial commit)
-        </nav>
-        
-        <div className="hidden md:flex items-center space-x-4">
-          <a 
-            href="https://github.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-secondary-600 hover:text-secondary-900"
-            aria-label="GitHub"
-          >
-            <Github size={20} />
-          </a>
-          <a 
-            href="https://linkedin.com" 
-            target="_blank" 
-            rel="noopener noreferrer"
-            className="text-secondary-600 hover:text-secondary-900"
-            aria-label="LinkedIn"
-          >
-            <Linkedin size={20} />
-          </a>
-<<<<<<< HEAD
-          <a 
-            href={`mailto:${profileEmail || 'contact@example.com'}`}
-            className="text-secondary-600 hover:text-secondary-900"
-            aria-label="Email"
-          >
-            <Mail size={20} />
-          </a>
-=======
->>>>>>> 183ebc5 (Initial commit)
+            <AnimatePresence mode="wait">
+              {isMenuOpen ? (
+                <motion.div
+                  key="close"
+                  initial={{ rotate: -90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: 90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <X size={24} />
+                </motion.div>
+              ) : (
+                <motion.div
+                  key="menu"
+                  initial={{ rotate: 90, opacity: 0 }}
+                  animate={{ rotate: 0, opacity: 1 }}
+                  exit={{ rotate: -90, opacity: 0 }}
+                  transition={{ duration: 0.2 }}
+                >
+                  <Menu size={24} />
+                </motion.div>
+              )}
+            </AnimatePresence>
+          </motion.button>
         </div>
-        
-        {/* Mobile Menu Button */}
-        <button 
-          className="p-2 rounded-md md:hidden"
-          onClick={toggleMenu}
-          aria-expanded={isMenuOpen}
-          aria-label="Toggle menu"
-        >
-          {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
-        </button>
       </div>
       
       {/* Mobile Navigation */}
-      {isMenuOpen && (
-        <div className="fixed inset-0 z-40 bg-white">
-          <div className="container py-5 flex justify-between items-center">
-            <Link to="/" className="flex items-center" onClick={toggleMenu}>
-              <span className="text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent">GN</span>
-            </Link>
-            <button 
-              className="p-2 rounded-md"
-              onClick={toggleMenu}
-              aria-label="Close menu"
-            >
-              <X size={24} />
-            </button>
-          </div>
-          <nav className="container flex flex-col space-y-4 py-8">
-            <NavLink 
-              to="/" 
-              end 
-              className={navLinkClasses} 
-              onClick={toggleMenu}
-            >
-              Home
-            </NavLink>
-            <NavLink 
-              to="/projects" 
-              className={navLinkClasses} 
-              onClick={toggleMenu}
-            >
-              Projects
-            </NavLink>
-            <NavLink 
-              to="/skills" 
-              className={navLinkClasses} 
-              onClick={toggleMenu}
-            >
-              Skills
-            </NavLink>
-            <NavLink 
-<<<<<<< HEAD
-=======
-              to="/experience" 
-              className={navLinkClasses} 
-              onClick={toggleMenu}
-            >
-              Experience
-            </NavLink>
-            <NavLink 
->>>>>>> 183ebc5 (Initial commit)
-              to="/certificates" 
-              className={navLinkClasses} 
-              onClick={toggleMenu}
-            >
-              Certificates
-            </NavLink>
-            <NavLink 
-              to="/resume" 
-              className={navLinkClasses} 
-              onClick={toggleMenu}
-            >
-              Resume
-            </NavLink>
-<<<<<<< HEAD
-            <button 
-              onClick={() => {
-                handleContactClick();
-                toggleMenu();
-              }}
-              className={`px-3 py-2 text-sm font-medium transition-colors rounded-md text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 text-left`}
-            >
-              Contact
-            </button>
-=======
-            <NavLink 
-              to="/contact" 
-              className={navLinkClasses} 
-              onClick={toggleMenu}
-            >
-              Contact
-            </NavLink>
->>>>>>> 183ebc5 (Initial commit)
-            
-            <div className="flex items-center space-x-4 pt-4">
-              <a 
-                href="https://github.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-secondary-600 hover:text-secondary-900"
-                aria-label="GitHub"
-              >
-                <Github size={20} />
-              </a>
-              <a 
-                href="https://linkedin.com" 
-                target="_blank" 
-                rel="noopener noreferrer"
-                className="text-secondary-600 hover:text-secondary-900"
-                aria-label="LinkedIn"
-              >
-                <Linkedin size={20} />
-              </a>
-<<<<<<< HEAD
-              <a 
-                href={`mailto:${profileEmail || 'contact@example.com'}`}
-                className="text-secondary-600 hover:text-secondary-900"
-                aria-label="Email"
-              >
-                <Mail size={20} />
-              </a>
-=======
->>>>>>> 183ebc5 (Initial commit)
+      <AnimatePresence>
+        {isMenuOpen && (
+          <motion.div 
+            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-sm dark:bg-dark-900/95 lg:hidden"
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 py-4 sm:py-5 flex justify-between items-center">
+              <Link to="/" className="flex items-center" onClick={toggleMenu}>
+                <span className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">GN</span>
+              </Link>
+              <div className="flex items-center space-x-2">
+                <ThemeToggle />
+                <motion.button 
+                  className="p-2 rounded-md text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 transition-colors dark:text-secondary-300 dark:hover:text-white dark:hover:bg-dark-800"
+                  onClick={toggleMenu}
+                  aria-label="Close menu"
+                  whileHover={{ scale: 1.05 }}
+                  whileTap={{ scale: 0.95 }}
+                >
+                  <X size={24} />
+                </motion.button>
+              </div>
             </div>
-          </nav>
-        </div>
-      )}
+            <nav className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 flex flex-col space-y-2 py-8">
+              {navItems.map((item, index) => (
+                <motion.div
+                  key={item.to}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                >
+                  <NavLink 
+                    to={item.to} 
+                    end={item.to === '/'}
+                    className={navLinkClasses} 
+                    onClick={toggleMenu}
+                  >
+                    {item.label}
+                    <motion.div
+                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full"
+                      initial={{ width: 0 }}
+                      animate={{ 
+                        width: (location.pathname === item.to || (item.to === '/' && location.pathname === '/')) ? '100%' : 0 
+                      }}
+                      transition={{ duration: 0.3 }}
+                    />
+                  </NavLink>
+                </motion.div>
+              ))}
+            </nav>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </header>
   );
 }

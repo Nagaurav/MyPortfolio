@@ -3,83 +3,86 @@ import { supabase } from '../lib/supabase';
 
 type Theme = 'light' | 'dark';
 
-type ThemeContextType = {
+interface ThemeContextType {
   theme: Theme;
   toggleTheme: () => void;
-};
+  setTheme: (theme: Theme) => void;
+}
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
-  const [theme, setTheme] = useState<Theme>(() => {
-    const savedTheme = localStorage.getItem('theme');
-    return (savedTheme as Theme) || 'light';
+  const [theme, setThemeState] = useState<Theme>(() => {
+    // Check for saved theme preference or default to light
+    const savedTheme = localStorage.getItem('theme') as Theme;
+    if (savedTheme) {
+      return savedTheme;
+    }
+    
+    // Always default to light mode, ignore system preferences
+    return 'light';
   });
 
+  const setTheme = (newTheme: Theme) => {
+    setThemeState(newTheme);
+    localStorage.setItem('theme', newTheme);
+  };
+
+  const toggleTheme = () => {
+    setTheme(theme === 'light' ? 'dark' : 'light');
+  };
+
   useEffect(() => {
-    // Update localStorage
-    localStorage.setItem('theme', theme);
-
-    // Update document class
-    if (theme === 'dark') {
-      document.documentElement.classList.add('dark');
-    } else {
-      document.documentElement.classList.remove('dark');
+    const root = document.documentElement;
+    
+    // Remove existing theme classes
+    root.classList.remove('light', 'dark');
+    
+    // Add current theme class
+    root.classList.add(theme);
+    
+    // Update meta theme-color
+    const metaThemeColor = document.querySelector('meta[name="theme-color"]');
+    if (metaThemeColor) {
+      metaThemeColor.setAttribute('content', theme === 'dark' ? '#041421' : '#f8fafc');
     }
-
-    // If user is authenticated, save preference to Supabase
-    const saveThemePreference = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        await supabase
-          .from('user_preferences')
-          .upsert({ 
-            user_id: user.id,
-            theme: theme
-          }, { 
-            onConflict: 'user_id' 
-          });
-      }
-    };
-
-    saveThemePreference();
   }, [theme]);
 
   // Load theme preference from Supabase when user logs in
   useEffect(() => {
     const loadThemePreference = async () => {
-      const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        const { data } = await supabase
-          .from('user_preferences')
-          .select('theme')
-          .eq('user_id', user.id)
-          .single();
+      try {
+        const { data: { user } } = await supabase.auth.getUser();
+        if (user) {
+          const { data } = await supabase
+            .from('user_preferences')
+            .select('theme')
+            .eq('user_id', user.id)
+            .single();
 
-        if (data?.theme) {
-          setTheme(data.theme as Theme);
+          if (data?.theme) {
+            setTheme(data.theme as Theme);
+          }
         }
+      } catch (error) {
+        console.log('No user preferences found, using default light theme');
       }
     };
 
     loadThemePreference();
   }, []);
 
-  const toggleTheme = () => {
-    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
-  };
-
   return (
-    <ThemeContext.Provider value={{ theme, toggleTheme }}>
+    <ThemeContext.Provider value={{ theme, toggleTheme, setTheme }}>
       {children}
     </ThemeContext.Provider>
   );
 }
 
-export const useTheme = () => {
+export function useTheme() {
   const context = useContext(ThemeContext);
   if (context === undefined) {
     throw new Error('useTheme must be used within a ThemeProvider');
   }
   return context;
-};
+}

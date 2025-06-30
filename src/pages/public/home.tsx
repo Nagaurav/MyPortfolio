@@ -33,6 +33,13 @@ export function HomePage() {
     "Creating seamless user experiences through modern web technologies",
     "Transforming complex problems into simple, beautiful solutions"
   ];
+
+  const roles = [
+    "Full Stack Developer",
+    "AI Enthusiast", 
+    "UI/UX Designer",
+    "Problem Solver"
+  ];
   
   const {
     register,
@@ -167,22 +174,25 @@ export function HomePage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative min-h-[90vh] flex items-center overflow-hidden">
+      <section id="hero" className="relative min-h-screen flex items-center overflow-hidden py-8 sm:py-12 lg:py-16">
         {/* Animated background blobs */}
         <motion.div
-          className="absolute inset-0 bg-gradient-to-br from-secondary-50 to-primary-50 opacity-50"
+          className="absolute inset-0 opacity-50"
+          style={{
+            background: 'linear-gradient(to bottom right, #f8fafc, #f0f7f8)'
+          }}
           initial={{ opacity: 0 }}
           animate={{ opacity: 0.5 }}
           transition={{ duration: 1 }}
         >
           <motion.div
-            className="absolute top-0 left-0 w-[800px] h-[800px] bg-primary-200/30 rounded-full mix-blend-multiply filter blur-3xl"
+            className="absolute top-0 left-0 w-[400px] h-[400px] sm:w-[600px] sm:h-[600px] lg:w-[800px] lg:h-[800px] bg-primary-200/30 dark:bg-primary-800/20 rounded-full mix-blend-multiply filter blur-3xl"
             variants={backgroundBlobVariants}
             animate="animate"
             style={{ x: parallaxY }}
           />
           <motion.div
-            className="absolute bottom-0 right-0 w-[600px] h-[600px] bg-accent-200/30 rounded-full mix-blend-multiply filter blur-3xl"
+            className="absolute bottom-0 right-0 w-[300px] h-[300px] sm:w-[400px] sm:h-[400px] lg:w-[600px] lg:h-[600px] bg-primary-300/30 dark:bg-primary-700/20 rounded-full mix-blend-multiply filter blur-3xl"
             variants={backgroundBlobVariants}
             animate="animate"
             style={{ 
@@ -192,39 +202,68 @@ export function HomePage() {
           />
         </motion.div>
         
-        <div className="container relative z-10">
+        {/* Dark mode background overlay */}
+        <div className="absolute inset-0 dark:block hidden" style={{
+          background: 'linear-gradient(to bottom right, #041421, #042630)',
+          opacity: 0.5
+        }} />
+        
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 relative z-10">
           <motion.div 
-            className="grid lg:grid-cols-2 gap-12 items-center"
+            className="flex flex-col lg:flex-row items-center gap-8 lg:gap-12 xl:gap-16"
             variants={containerVariants}
             initial="hidden"
             animate="visible"
           >
-            <div className="space-y-8">
+            {/* Left side: Text content */}
+            <div className="flex-1 text-center lg:text-left space-y-6 sm:space-y-8 max-w-full lg:max-w-none">
               <motion.div
-                className="inline-flex items-center px-4 py-2 bg-white/80 backdrop-blur-sm rounded-full border border-secondary-200 shadow-sm"
+                className="inline-flex items-center px-3 sm:px-4 py-2 bg-white/80 dark:bg-dark-800/80 backdrop-blur-sm rounded-full border border-secondary-200 dark:border-dark-700 shadow-sm"
                 variants={itemVariants}
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                <span className="text-sm font-medium text-secondary-600">Available for freelance work</span>
+                <span className="text-xs sm:text-sm font-medium text-secondary-600 dark:text-secondary-300">Available for freelance work</span>
                 <span className="ml-2 w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
               </motion.div>
               
               <motion.h1 
-                className="text-5xl md:text-6xl lg:text-7xl font-bold tracking-tight"
+                className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight"
                 variants={itemVariants}
               >
-                <span className="text-secondary-900">Hi, I'm </span>
+                <span className="text-secondary-900 dark:text-white">Hi, I'm </span>
                 <motion.span 
-                  className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]"
+                  className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-primary-500 animate-gradient bg-[length:200%_auto]"
                   whileHover={{ scale: 1.05 }}
                   transition={{ type: "spring", stiffness: 300 }}
                 >
                   {profile?.full_name || 'Your Name'}
                 </motion.span>
               </motion.h1>
+
+              {/* Role/Subtitle */}
+              <motion.div
+                className="flex flex-wrap gap-2 items-center justify-center lg:justify-start"
+                variants={itemVariants}
+              >
+                {roles.map((role, index) => (
+                  <motion.span
+                    key={role}
+                    className="inline-flex items-center px-2 sm:px-3 py-1 text-xs sm:text-sm md:text-base font-medium text-secondary-600 dark:text-secondary-300 bg-white/60 dark:bg-dark-800/60 backdrop-blur-sm rounded-full border border-secondary-200 dark:border-dark-700"
+                    initial={{ opacity: 0, scale: 0.8 }}
+                    animate={{ opacity: 1, scale: 1 }}
+                    transition={{ delay: 0.5 + index * 0.1 }}
+                    whileHover={{ scale: 1.05, backgroundColor: 'rgba(255, 255, 255, 0.8)' }}
+                  >
+                    {role}
+                    {index < roles.length - 1 && (
+                      <span className="ml-2 text-secondary-400 dark:text-secondary-500">•</span>
+                    )}
+                  </motion.span>
+                ))}
+              </motion.div>
               
-              <div className="h-[60px]">
+              <div className="h-[60px] sm:h-[80px]">
                 <AnimatePresence mode="wait">
                   <motion.p
                     key={bioIndex}
@@ -232,7 +271,7 @@ export function HomePage() {
                     animate={{ opacity: 1, y: 0 }}
                     exit={{ opacity: 0, y: -20 }}
                     transition={{ duration: 0.5 }}
-                    className="text-xl md:text-2xl text-secondary-600 max-w-xl"
+                    className="text-base sm:text-lg md:text-xl text-secondary-600 dark:text-secondary-300 max-w-xl mx-auto lg:mx-0 font-light"
                   >
                     {bios[bioIndex]}
                   </motion.p>
@@ -240,17 +279,18 @@ export function HomePage() {
               </div>
               
               <motion.div 
-                className="flex flex-wrap gap-4"
+                className="flex flex-col sm:flex-row gap-4 justify-center lg:justify-start"
                 variants={itemVariants}
               >
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto"
                 >
                   <Button 
                     onClick={handleContactClick}
                     size="lg"
-                    className="bg-gradient-to-r from-primary-600 to-accent-500 hover:from-primary-700 hover:to-accent-600"
+                    className="w-full sm:w-auto bg-gradient-to-r from-primary-600 to-primary-500 hover:from-primary-700 hover:to-primary-600 transition-all duration-300 focus:ring-4 focus:ring-primary-300"
                   >
                     Let's Talk
                   </Button>
@@ -258,12 +298,13 @@ export function HomePage() {
                 <motion.div
                   whileHover={{ scale: 1.05 }}
                   whileTap={{ scale: 0.95 }}
+                  className="w-full sm:w-auto"
                 >
                   <Button
                     onClick={handleProjectsClick}
                     variant="outline"
                     size="lg"
-                    className="group"
+                    className="w-full sm:w-auto group transition-all duration-300 focus:ring-4 focus:ring-secondary-300"
                     rightIcon={
                       <motion.span
                         animate={{ x: [0, 5, 0] }}
@@ -279,7 +320,7 @@ export function HomePage() {
               </motion.div>
               
               <motion.div 
-                className="flex items-center space-x-6"
+                className="flex items-center justify-center lg:justify-start space-x-4 sm:space-x-6"
                 variants={itemVariants}
               >
                 {profile?.github_url && (
@@ -287,12 +328,12 @@ export function HomePage() {
                     href={profile.github_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-secondary-600 hover:text-secondary-900 transition-colors"
-                    aria-label="GitHub"
+                    className="text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white transition-colors p-2 rounded-full hover:bg-secondary-100 dark:hover:bg-dark-800"
+                    aria-label="GitHub Profile"
                     variants={socialIconVariants}
                     whileHover="hover"
                   >
-                    <Github size={24} />
+                    <Github size={20} className="sm:w-6 sm:h-6" />
                   </motion.a>
                 )}
                 {profile?.linkedin_url && (
@@ -300,35 +341,36 @@ export function HomePage() {
                     href={profile.linkedin_url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="text-secondary-600 hover:text-secondary-900 transition-colors"
-                    aria-label="LinkedIn"
+                    className="text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white transition-colors p-2 rounded-full hover:bg-secondary-100 dark:hover:bg-dark-800"
+                    aria-label="LinkedIn Profile"
                     variants={socialIconVariants}
                     whileHover="hover"
                   >
-                    <Linkedin size={24} />
+                    <Linkedin size={20} className="sm:w-6 sm:h-6" />
                   </motion.a>
                 )}
                 {profile?.email && (
                   <motion.a 
                     href={`mailto:${profile.email}`}
-                    className="text-secondary-600 hover:text-secondary-900 transition-colors"
-                    aria-label="Email"
+                    className="text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white transition-colors p-2 rounded-full hover:bg-secondary-100 dark:hover:bg-dark-800"
+                    aria-label="Send Email"
                     variants={socialIconVariants}
                     whileHover="hover"
                   >
-                    <Mail size={24} />
+                    <Mail size={20} className="sm:w-6 sm:h-6" />
                   </motion.a>
                 )}
               </motion.div>
             </div>
             
+            {/* Right side: Image */}
             <motion.div 
-              className="relative hidden lg:block"
+              className="flex-1 w-full max-w-sm sm:max-w-md lg:max-w-none lg:flex lg:justify-end"
               variants={itemVariants}
               style={{ opacity }}
             >
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl transform rotate-6 blur opacity-20"
+                className="absolute inset-0 bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl transform rotate-6 blur opacity-20"
                 animate={{
                   rotate: [6, -6, 6],
                   scale: [1, 1.02, 1],
@@ -340,19 +382,20 @@ export function HomePage() {
                 }}
               />
               <motion.div 
-                className="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-md mx-auto"
+                className="relative bg-white dark:bg-dark-800 rounded-2xl shadow-2xl overflow-hidden w-full max-w-xs mx-auto lg:max-w-sm xl:max-w-md aspect-[4/5] sm:aspect-[3/4] lg:aspect-[4/5]"
                 whileHover={{ scale: 1.02 }}
                 transition={{ type: "spring", stiffness: 300 }}
               >
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
-                    alt={profile.full_name}
-                    className="w-full h-[500px] object-cover object-center"
+                    alt={`${profile.full_name} - Professional headshot`}
+                    className="w-full h-full object-cover object-center"
+                    loading="eager"
                   />
                 ) : (
-                  <div className="w-full h-[500px] bg-secondary-100 flex items-center justify-center">
-                    <p className="text-secondary-400 text-lg">Add your photo in profile settings</p>
+                  <div className="w-full h-full bg-secondary-100 dark:bg-dark-700 flex items-center justify-center">
+                    <p className="text-secondary-400 dark:text-secondary-500 text-sm sm:text-base lg:text-lg px-4 text-center">Add your photo in profile settings</p>
                   </div>
                 )}
               </motion.div>
@@ -364,13 +407,13 @@ export function HomePage() {
       {/* Contact Section */}
       <motion.section 
         id="contact" 
-        className="py-20 bg-white"
+        className="py-16 sm:py-20 bg-white dark:bg-dark-900"
         initial={{ opacity: 0 }}
         whileInView={{ opacity: 1 }}
         viewport={{ once: true }}
         transition={{ duration: 0.6 }}
       >
-        <div className="container">
+        <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16">
           <SectionHeader
             title="Get in Touch"
             subtitle="Have a question or want to work together? I'd love to hear from you."
@@ -384,17 +427,17 @@ export function HomePage() {
               viewport={{ once: true }}
               transition={{ duration: 0.6 }}
             >
-              <div className="bg-secondary-50 rounded-xl p-8">
-                <h3 className="text-2xl font-semibold mb-6">Contact Information</h3>
+              <div className="bg-secondary-50 dark:bg-dark-800 rounded-xl p-6 sm:p-8">
+                <h3 className="text-xl sm:text-2xl font-semibold mb-6">Contact Information</h3>
                 <div className="space-y-6">
                   <motion.div 
                     className="flex items-start"
                     whileHover={{ scale: 1.02 }}
                   >
-                    <Mail className="w-6 h-6 text-primary-600 mt-1" />
+                    <Mail className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 mt-1 flex-shrink-0" />
                     <div className="ml-4">
-                      <h4 className="text-lg font-medium">Email</h4>
-                      <p className="text-secondary-600">{profile?.email || 'contact@example.com'}</p>
+                      <h4 className="text-base sm:text-lg font-medium">Email</h4>
+                      <p className="text-secondary-600 dark:text-secondary-300 text-sm sm:text-base">{profile?.email || 'contact@example.com'}</p>
                     </div>
                   </motion.div>
 
@@ -402,14 +445,14 @@ export function HomePage() {
                     className="flex items-start"
                     whileHover={{ scale: 1.02 }}
                   >
-                    <Github className="w-6 h-6 text-primary-600 mt-1" />
+                    <Github className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 mt-1 flex-shrink-0" />
                     <div className="ml-4">
-                      <h4 className="text-lg font-medium">GitHub</h4>
+                      <h4 className="text-base sm:text-lg font-medium">GitHub</h4>
                       <a
                         href={profile?.github_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-secondary-600 hover:text-primary-600 transition-colors"
+                        className="text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white transition-colors"
                       >
                         View Profile
                       </a>
@@ -420,14 +463,14 @@ export function HomePage() {
                     className="flex items-start"
                     whileHover={{ scale: 1.02 }}
                   >
-                    <Linkedin className="w-6 h-6 text-primary-600 mt-1" />
+                    <Linkedin className="w-5 h-5 sm:w-6 sm:h-6 text-primary-600 mt-1 flex-shrink-0" />
                     <div className="ml-4">
-                      <h4 className="text-lg font-medium">LinkedIn</h4>
+                      <h4 className="text-base sm:text-lg font-medium">LinkedIn</h4>
                       <a
                         href={profile?.linkedin_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="text-secondary-600 hover:text-primary-600 transition-colors"
+                        className="text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white transition-colors"
                       >
                         Connect with me
                       </a>
@@ -448,7 +491,7 @@ export function HomePage() {
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
-                  <label htmlFor="name" className="block text-sm font-medium text-secondary-700">
+                  <label htmlFor="name" className="block text-sm font-medium text-dark-700 dark:text-dark-200">
                     Name
                   </label>
                   <input
@@ -466,7 +509,7 @@ export function HomePage() {
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
-                  <label htmlFor="email" className="block text-sm font-medium text-secondary-700">
+                  <label htmlFor="email" className="block text-sm font-medium text-dark-700 dark:text-dark-200">
                     Email
                   </label>
                   <input
@@ -490,7 +533,7 @@ export function HomePage() {
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
-                  <label htmlFor="subject" className="block text-sm font-medium text-secondary-700">
+                  <label htmlFor="subject" className="block text-sm font-medium text-dark-700 dark:text-dark-200">
                     Subject
                   </label>
                   <input
@@ -508,7 +551,7 @@ export function HomePage() {
                   whileHover={{ scale: 1.02 }}
                   transition={{ type: "spring", stiffness: 400 }}
                 >
-                  <label htmlFor="message" className="block text-sm font-medium text-secondary-700">
+                  <label htmlFor="message" className="block text-sm font-medium text-dark-700 dark:text-dark-200">
                     Message
                   </label>
                   <textarea
