@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink, useLocation } from 'react-router-dom';
-import { Menu, X } from 'lucide-react';
+import { Menu, X, Download } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../ui/theme-toggle';
+import { Button } from '../ui/button';
 
 export function MainHeader() {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
@@ -49,7 +50,7 @@ export function MainHeader() {
   const navLinkClasses = ({ isActive }: { isActive: boolean }) => {
     const baseClasses = 'px-3 py-2 text-sm font-medium transition-all duration-300 relative group';
     const activeClasses = isActive 
-      ? 'text-primary-600 dark:text-primary-400' 
+      ? 'text-cyan-500 dark:text-cyan-400' 
       : 'text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white';
     
     return `${baseClasses} ${activeClasses}`;
@@ -66,20 +67,40 @@ export function MainHeader() {
   ];
   
   return (
-    <header className={`sticky top-0 z-50 transition-all duration-300 backdrop-blur-sm ${
-      isScrolled ? 'bg-white/95 shadow-lg py-3 dark:bg-dark-900/95' : 'bg-transparent py-4 sm:py-5'
-    }`}>
+    <motion.header 
+      className={`sticky top-0 z-50 transition-all duration-500 backdrop-blur-md border-b ${
+        isScrolled 
+          ? 'bg-white/80 shadow-xl shadow-black/5 py-3 dark:bg-dark-900/80 border-secondary-200/20 dark:border-dark-700/20' 
+          : 'bg-transparent py-4 sm:py-5 border-transparent'
+      }`}
+      initial={{ y: -100 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.6 }}
+    >
       <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link to="/" className="flex items-center group flex-shrink-0">
-            <motion.span 
-              className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent group-hover:from-primary-700 group-hover:to-primary-600 transition-all duration-300"
-              whileHover={{ scale: 1.05 }}
+            <motion.div
+              className="relative p-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-500/20"
+              whileHover={{ 
+                scale: 1.05,
+                boxShadow: '0 0 20px rgba(6, 182, 212, 0.3)'
+              }}
               whileTap={{ scale: 0.95 }}
             >
-              GN
-            </motion.span>
+              <span className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">
+                GN
+              </span>
+              {/* Glowing effect */}
+              <motion.div
+                className="absolute inset-0 bg-gradient-to-r from-cyan-500/20 to-blue-600/20 rounded-lg blur-sm"
+                animate={{
+                  opacity: [0.3, 0.6, 0.3],
+                }}
+                transition={{ duration: 2, repeat: Infinity, ease: 'easeInOut' }}
+              />
+            </motion.div>
           </Link>
           
           {/* Desktop Navigation */}
@@ -92,9 +113,9 @@ export function MainHeader() {
                 className={navLinkClasses}
               >
                 {item.label}
-                {/* Animated underline */}
+                {/* Enhanced animated underline */}
                 <motion.div
-                  className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full"
+                  className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"
                   initial={{ width: 0 }}
                   animate={{ 
                     width: (location.pathname === item.to || (item.to === '/' && location.pathname === '/')) ? '100%' : 0 
@@ -102,22 +123,40 @@ export function MainHeader() {
                   transition={{ duration: 0.3 }}
                   whileHover={{ width: '100%' }}
                 />
+                {/* Hover glow effect */}
+                <motion.div
+                  className="absolute inset-0 bg-gradient-to-r from-cyan-500/5 to-blue-600/5 rounded-lg opacity-0"
+                  whileHover={{ opacity: 1 }}
+                  transition={{ duration: 0.2 }}
+                />
               </NavLink>
             ))}
           </nav>
 
-          {/* Desktop Theme Toggle */}
+          {/* Desktop Actions */}
           <div className="hidden lg:flex items-center space-x-4">
+            <Button
+              variant="gradient"
+              size="sm"
+              className="group"
+              onClick={() => window.open('/resume.pdf', '_blank')}
+            >
+              <Download size={16} className="mr-2 group-hover:animate-bounce" />
+              Resume
+            </Button>
             <ThemeToggle />
           </div>
           
           {/* Mobile Menu Button */}
           <motion.button 
-            className="p-2 rounded-md lg:hidden text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 transition-colors dark:text-secondary-300 dark:hover:text-white dark:hover:bg-dark-800"
+            className="p-2 rounded-lg lg:hidden text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100/50 transition-all duration-300 dark:text-secondary-300 dark:hover:text-white dark:hover:bg-dark-800/50 border border-transparent hover:border-cyan-500/20"
             onClick={toggleMenu}
             aria-expanded={isMenuOpen}
             aria-label="Toggle menu"
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ 
+              scale: 1.05,
+              boxShadow: '0 0 15px rgba(6, 182, 212, 0.2)'
+            }}
             whileTap={{ scale: 0.95 }}
           >
             <AnimatePresence mode="wait">
@@ -151,20 +190,29 @@ export function MainHeader() {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
-            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-sm dark:bg-dark-900/95 lg:hidden"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            transition={{ duration: 0.2 }}
+            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-md dark:bg-dark-900/95 lg:hidden border-t border-secondary-200/20 dark:border-dark-700/20"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: 0.3 }}
           >
             <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 py-4 sm:py-5 flex justify-between items-center">
               <Link to="/" className="flex items-center" onClick={toggleMenu}>
-                <span className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-primary-500 bg-clip-text text-transparent">GN</span>
+                <div className="relative p-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-500/20">
+                  <span className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">GN</span>
+                </div>
               </Link>
               <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => window.open('/resume.pdf', '_blank')}
+                >
+                  <Download size={16} />
+                </Button>
                 <ThemeToggle />
                 <motion.button 
-                  className="p-2 rounded-md text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100 transition-colors dark:text-secondary-300 dark:hover:text-white dark:hover:bg-dark-800"
+                  className="p-2 rounded-lg text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100/50 transition-all duration-300 dark:text-secondary-300 dark:hover:text-white dark:hover:bg-dark-800/50 border border-transparent hover:border-cyan-500/20"
                   onClick={toggleMenu}
                   aria-label="Close menu"
                   whileHover={{ scale: 1.05 }}
@@ -190,7 +238,7 @@ export function MainHeader() {
                   >
                     {item.label}
                     <motion.div
-                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-primary-600 to-primary-500 rounded-full"
+                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"
                       initial={{ width: 0 }}
                       animate={{ 
                         width: (location.pathname === item.to || (item.to === '/' && location.pathname === '/')) ? '100%' : 0 
@@ -204,6 +252,6 @@ export function MainHeader() {
           </motion.div>
         )}
       </AnimatePresence>
-    </header>
+    </motion.header>
   );
 }

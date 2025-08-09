@@ -13,7 +13,6 @@ interface SkillFormData {
   name: string;
   category: string;
   proficiency: number;
-  icon_name: string;
 }
 
 const SKILL_CATEGORIES = [
@@ -48,7 +47,6 @@ export function AdminSkillsPage() {
       setValue('name', editingSkill.name);
       setValue('category', editingSkill.category);
       setValue('proficiency', editingSkill.proficiency);
-      setValue('icon_name', editingSkill.icon_name || '');
     }
   }, [editingSkill, setValue]);
   
@@ -167,35 +165,23 @@ export function AdminSkillsPage() {
           
           <div>
             <label htmlFor="proficiency" className="block text-sm font-medium text-secondary-700">
-              Proficiency (1-10)
+              Proficiency (1-5)
             </label>
             <input
               type="number"
               id="proficiency"
               min="1"
-              max="10"
+              max="5"
               className="mt-1 input"
               {...register('proficiency', {
                 required: 'Proficiency is required',
                 min: { value: 1, message: 'Minimum value is 1' },
-                max: { value: 10, message: 'Maximum value is 10' },
+                max: { value: 5, message: 'Maximum value is 5' },
               })}
             />
             {errors.proficiency && (
               <p className="mt-1 text-sm text-red-600">{errors.proficiency.message}</p>
             )}
-          </div>
-          
-          <div>
-            <label htmlFor="icon_name" className="block text-sm font-medium text-secondary-700">
-              Icon Name (emoji or icon class)
-            </label>
-            <input
-              type="text"
-              id="icon_name"
-              className="mt-1 input"
-              {...register('icon_name')}
-            />
           </div>
           
           <div className="flex gap-4">
@@ -238,9 +224,6 @@ export function AdminSkillsPage() {
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center">
-                        {skill.icon_name && (
-                          <span className="mr-2 text-xl">{skill.icon_name}</span>
-                        )}
                         <h4 className="text-lg font-medium text-secondary-900">
                           {skill.name}
                         </h4>

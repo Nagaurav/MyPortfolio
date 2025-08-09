@@ -1,14 +1,7 @@
 import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
-import { useNavigate } from 'react-router-dom';
-
-type User = {
-  id: string;
-  email: string;
-};
-
-type Session = {
-  user: User;
-};
+import { useNavigate, useLocation } from 'react-router-dom';
+import { supabase } from '../lib/supabase';
+import type { User, Session } from '@supabase/supabase-js';
 
 type AuthContextType = {
   session: Session | null;
@@ -31,79 +24,97 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isInitialized, setIsInitialized] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
 
   useEffect(() => {
-    // Check for existing session in localStorage
-    const savedSession = localStorage.getItem('auth-session');
-    if (savedSession) {
+    // Get initial session from Supabase
+    const getInitialSession = async () => {
       try {
-        const parsedSession = JSON.parse(savedSession);
-        setSession(parsedSession);
-        setUser(parsedSession.user);
+        const { data: { session } } = await supabase.auth.getSession();
+        setSession(session);
+        setUser(session?.user ?? null);
       } catch (error) {
-        console.error('Error parsing saved session:', error);
-        localStorage.removeItem('auth-session');
+        console.error('Error getting initial session:', error);
+      } finally {
+        setIsInitialized(true);
       }
-    }
-    setIsInitialized(true);
-  }, []);
+    };
+
+    getInitialSession();
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange(
+      async (event, session) => {
+        console.log('Auth state changed:', event, session?.user?.id);
+        setSession(session);
+        setUser(session?.user ?? null);
+        
+        // Only redirect if we're on admin pages and not authenticated
+        if (event === 'SIGNED_OUT' && location.pathname.startsWith('/admin')) {
+          navigate('/admin/login');
+        }
+        // Don't automatically redirect on sign in - let the login page handle it
+      }
+    );
+
+    return () => subscription.unsubscribe();
+  }, [navigate, location.pathname]);
 
   const signIn = async (email: string, password: string) => {
     try {
-      // Simple mock authentication - accept any email/password for development
-      // In production, this would validate against Supabase
-      const mockUser: User = {
-        id: 'dev-user-1',
-        email: email,
-      };
-      
-      const mockSession: Session = {
-        user: mockUser,
-      };
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
+      });
 
-      // Save to localStorage
-      localStorage.setItem('auth-session', JSON.stringify(mockSession));
-      
-      setSession(mockSession);
-      setUser(mockUser);
-      
-      navigate('/admin');
+      if (error) {
+        console.error('Sign in error:', error);
+        return { error };
+      }
+
+      console.log('Signed in successfully:', data.user?.id);
+      // Only redirect to admin dashboard if we're on the login page
+      if (location.pathname === '/admin/login') {
+        navigate('/admin/dashboard');
+      }
       return { error: null };
     } catch (error) {
+      console.error('Sign in error:', error);
       return { error: error as Error };
     }
   };
 
   const signUp = async (email: string, password: string) => {
     try {
-      // Simple mock registration - create user for development
-      const mockUser: User = {
-        id: 'dev-user-' + Date.now(),
-        email: email,
-      };
-      
-      const mockSession: Session = {
-        user: mockUser,
-      };
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+      });
 
-      // Save to localStorage
-      localStorage.setItem('auth-session', JSON.stringify(mockSession));
-      
-      setSession(mockSession);
-      setUser(mockUser);
-      
-      navigate('/admin');
+      if (error) {
+        console.error('Sign up error:', error);
+        return { error };
+      }
+
+      console.log('Signed up successfully:', data.user?.id);
       return { error: null };
     } catch (error) {
+      console.error('Sign up error:', error);
       return { error: error as Error };
     }
   };
 
   const signOut = async () => {
-    localStorage.removeItem('auth-session');
-    setSession(null);
-    setUser(null);
-    navigate('/admin/login');
+    try {
+      const { error } = await supabase.auth.signOut();
+      if (error) {
+        console.error('Sign out error:', error);
+      }
+      // Redirect to home page after sign out
+      navigate('/');
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
   const value = {

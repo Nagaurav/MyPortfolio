@@ -1,10 +1,19 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, List, Github, ExternalLink, Search, ArrowRight } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { Grid, List, Github, ExternalLink, Search, ArrowRight, Filter, Sparkles } from 'lucide-react';
+import { motion, AnimatePresence, useInView } from 'framer-motion';
+import { useRef } from 'react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
+import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
+import { TiltCard } from '../../components/ui/3d-tilt-card';
+import { 
+  staggerContainerVariants, 
+  fadeInUpVariants, 
+  scaleInVariants,
+  projectCardVariants 
+} from '../../lib/utils';
 import type { Database } from '../../types/database.types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -83,236 +92,332 @@ export function ProjectsPage() {
     );
   };
 
-  const ProjectCard = ({ project }: { project: Project }) => (
+  const ProjectCard = ({ project, index }: { project: Project; index: number }) => (
     <motion.div
       layout
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      exit={{ opacity: 0, y: -20 }}
-      className={`group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 ${
-        viewMode === 'list' ? 'flex' : ''
-      }`}
+      variants={projectCardVariants}
+      initial="hidden"
+      whileInView="visible"
+      viewport={{ once: true, margin: "-50px" }}
+      transition={{ duration: 0.5, delay: index * 0.1 }}
     >
-      <div className={`relative ${viewMode === 'list' ? 'w-64' : ''}`}>
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-500/20 to-accent-500/20 mix-blend-multiply group-hover:opacity-0 transition-opacity duration-300"></div>
-        <img
-          src={project.image_url || "https://images.pexels.com/photos/5483071/pexels-photo-5483071.jpeg"}
-          alt={project.title}
-          className="w-full h-48 object-cover transition-transform duration-500 group-hover:scale-105"
-        />
-        {project.featured && (
-          <div className="absolute top-4 right-4 px-3 py-1 bg-gradient-to-r from-primary-600 to-accent-500 text-white text-sm font-medium rounded-full shadow-lg">
-            Featured
-          </div>
-        )}
-      </div>
-      <div className="p-6 flex-1">
-        <h3 className="text-xl font-semibold mb-2 bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent group-hover:from-primary-700 group-hover:to-accent-600 transition-all">
-          {project.title}
-        </h3>
-        <p className="text-secondary-600 mb-4 line-clamp-2">
-          {project.short_description}
-        </p>
-        <div className="flex flex-wrap gap-2 mb-4">
-          {project.tags?.map(tag => (
-            <button
-              key={tag}
-              onClick={(e) => {
-                e.preventDefault();
-                toggleTag(tag);
-              }}
-              className={`px-3 py-1 rounded-full text-sm font-medium transition-all transform hover:scale-105 ${
-                selectedTags.includes(tag)
-                  ? 'bg-gradient-to-r from-primary-600 to-accent-500 text-white shadow-md'
-                  : 'bg-secondary-100 text-secondary-700 hover:bg-secondary-200'
-              }`}
-            >
-              {tag}
-            </button>
-          ))}
-        </div>
-        <div className="flex items-center justify-between">
-          <Link
-            to={`/projects/${project.id}`}
-            className="inline-flex items-center text-primary-600 hover:text-primary-700 font-medium group/link"
-          >
-            View Details
-            <ArrowRight size={16} className="ml-1 transform transition-transform group-hover/link:translate-x-1" />
-          </Link>
-          <div className="flex space-x-3">
-            {project.github_url && (
-              <a
-                href={project.github_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-secondary-400 hover:text-secondary-900 transition-colors"
-                aria-label="View on GitHub"
-              >
-                <Github size={20} />
-              </a>
+      <TiltCard
+        maxTilt={12}
+        scale={1.02}
+        speed={400}
+        glare={true}
+        glareColor="rgba(255, 255, 255, 0.3)"
+        glarePosition="top"
+        className="h-full"
+      >
+        <Card3D 
+          variant="tech" 
+          className={`group overflow-hidden h-full ${
+            viewMode === 'list' ? 'flex' : ''
+          }`}
+        >
+          {/* Project Image */}
+          <div className={`relative overflow-hidden ${
+            viewMode === 'list' ? 'w-1/3' : 'w-full'
+          }`}>
+            {project.image_url ? (
+              <img
+                src={project.image_url}
+                alt={project.title}
+                className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            ) : (
+              <div className="w-full h-48 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center">
+                <Sparkles className="w-12 h-12 text-cyan-500" />
+              </div>
             )}
-            {project.live_url && (
-              <a
-                href={project.live_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-secondary-400 hover:text-secondary-900 transition-colors"
-                aria-label="View live site"
-              >
-                <ExternalLink size={20} />
-              </a>
+            
+            {/* Featured Badge */}
+            {project.featured && (
+              <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
+                Featured
+              </div>
             )}
+            
+            {/* Project Links */}
+            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+              {project.github_url && (
+                <a
+                  href={project.github_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-colors"
+                >
+                  <Github className="w-4 h-4" />
+                </a>
+              )}
+              {project.live_url && (
+                <a
+                  href={project.live_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-colors"
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+              )}
+            </div>
           </div>
-        </div>
-      </div>
+
+          {/* Project Content */}
+          <div className={`p-6 flex-1 ${
+            viewMode === 'list' ? 'w-2/3' : ''
+          }`}>
+            <div className="space-y-4">
+              <div>
+                <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-100 mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
+                  {project.title}
+                </h3>
+                <p className="text-secondary-600 dark:text-secondary-400 line-clamp-3 mb-3">
+                  {project.short_description || project.description}
+                </p>
+                
+                {/* Problem Statement */}
+                {project.challenge && (
+                  <div className="mb-3">
+                    <h4 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-1">Challenge:</h4>
+                    <p className="text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
+                      {project.challenge}
+                    </p>
+                  </div>
+                )}
+
+                {/* Solution/Key Features */}
+                {project.key_features && project.key_features.length > 0 && (
+                  <div className="mb-3">
+                    <h4 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-1">Key Features:</h4>
+                    <ul className="text-sm text-secondary-600 dark:text-secondary-400 space-y-1">
+                      {project.key_features.slice(0, 2).map((feature, index) => (
+                        <li key={index} className="flex items-start gap-2">
+                          <span className="w-1 h-1 rounded-full bg-cyan-500 mt-2 flex-shrink-0"></span>
+                          <span className="line-clamp-1">{feature}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+              </div>
+
+              {/* Project Tags */}
+              {project.tags && project.tags.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                  {project.tags.slice(0, 4).map((tag) => (
+                    <span
+                      key={tag}
+                      className="px-3 py-1 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 text-sm rounded-full font-medium"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  {project.tags.length > 4 && (
+                    <span className="px-3 py-1 bg-secondary-100 dark:bg-secondary-800 text-secondary-600 dark:text-secondary-400 text-sm rounded-full">
+                      +{project.tags.length - 4}
+                    </span>
+                  )}
+                </div>
+              )}
+
+              {/* Project Actions */}
+              <div className="flex items-center justify-between pt-4 border-t border-secondary-200 dark:border-secondary-700">
+                <div className="flex items-center gap-3">
+                  {project.github_url && (
+                    <a
+                      href={project.github_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-sm text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-100 transition-colors btn-lift"
+                    >
+                      <Github className="w-4 h-4" />
+                      Code
+                    </a>
+                  )}
+                  {project.live_url && (
+                    <a
+                      href={project.live_url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="flex items-center gap-1 text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors btn-lift"
+                    >
+                      <ExternalLink className="w-4 h-4" />
+                      Live Demo
+                    </a>
+                  )}
+                </div>
+                <Link
+                  to={`/projects/${project.id}`}
+                  className="flex items-center gap-1 text-sm text-secondary-600 dark:text-secondary-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors btn-lift"
+                >
+                  Learn More
+                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
+                </Link>
+              </div>
+            </div>
+          </div>
+        </Card3D>
+      </TiltCard>
     </motion.div>
   );
 
   return (
     <>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
-          <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
-        </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-        
-        <div className="container relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-secondary-900">Explore My </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]">
-                Projects
-              </span>
-            </h1>
-            <p className="text-xl text-secondary-600 mb-8">
-              Discover a collection of my work that showcases innovation, creativity, and technical expertise
-            </p>
+      <section className="py-16 sm:py-20 lg:py-24">
+        <div className="responsive-container">
+          <SectionHeader 
+            title="Explore My Projects" 
+            subtitle="Discover my latest work and creative solutions across various technologies"
+            variant="tech"
+            centered
+          />
 
-            <div className="relative max-w-xl mx-auto">
+          {/* Search and Filter Controls */}
+          <motion.div 
+            variants={staggerContainerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className="flex flex-col lg:flex-row gap-6 mb-8"
+          >
+            {/* Search Bar */}
+            <motion.div 
+              variants={fadeInUpVariants}
+              className="flex-1 relative"
+            >
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
               <input
                 type="text"
                 placeholder="Search projects..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full pl-12 pr-4 py-3 bg-white/80 backdrop-blur-sm border border-secondary-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-lg"
+                className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-secondary-700 dark:text-secondary-300 placeholder-secondary-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
               />
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-secondary-400" size={20} />
-            </div>
+            </motion.div>
+
+            {/* View Mode Toggle */}
+            <motion.div 
+              variants={fadeInUpVariants}
+              className="flex items-center gap-2"
+            >
+              <Button
+                variant={viewMode === 'grid' ? 'tech' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="flex items-center gap-2"
+              >
+                <Grid className="w-4 h-4" />
+                Grid
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'tech' : 'outline'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="flex items-center gap-2"
+              >
+                <List className="w-4 h-4" />
+                List
+              </Button>
+            </motion.div>
+
+            {/* Sort Dropdown */}
+            <motion.div 
+              variants={fadeInUpVariants}
+              className="relative"
+            >
+              <select
+                value={sortBy}
+                onChange={(e) => setSortBy(e.target.value as SortOption)}
+                className="appearance-none bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-secondary-700 dark:text-secondary-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 cursor-pointer"
+              >
+                <option value="date">Latest First</option>
+                <option value="featured">Featured First</option>
+                <option value="title">Alphabetical</option>
+              </select>
+              <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4 pointer-events-none" />
+            </motion.div>
           </motion.div>
+
+          {/* Tags Filter */}
+          {allTags.length > 0 && (
+            <motion.div 
+              variants={staggerContainerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              className="flex flex-wrap gap-2 mb-8"
+            >
+              {allTags.map((tag, index) => (
+                <motion.button
+                  key={tag}
+                  variants={scaleInVariants}
+                  onClick={() => toggleTag(tag)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    selectedTags.includes(tag)
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
+                      : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300'
+                  }`}
+                >
+                  {tag}
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+
+          {/* Projects Grid */}
+          <motion.div 
+            variants={staggerContainerVariants}
+            initial="hidden"
+            whileInView="visible"
+            viewport={{ once: true, margin: "-100px" }}
+            className={`grid gap-6 ${
+              viewMode === 'list' 
+                ? 'grid-cols-1' 
+                : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
+            }`}
+          >
+            {loading ? (
+              // Loading skeleton
+              Array.from({ length: 6 }).map((_, index) => (
+                <motion.div
+                  key={index}
+                  variants={projectCardVariants}
+                  className="h-80 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl animate-pulse"
+                />
+              ))
+            ) : (
+              filteredProjects.map((project, index) => (
+                <ProjectCard key={project.id} project={project} index={index} />
+              ))
+            )}
+          </motion.div>
+
+          {/* Empty State */}
+          {!loading && filteredProjects.length === 0 && (
+            <motion.div
+              variants={fadeInUpVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true }}
+              className="text-center py-12"
+            >
+              <div className="text-6xl mb-4">🚀</div>
+              <h3 className="text-xl font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
+                No projects found
+              </h3>
+              <p className="text-secondary-600 dark:text-secondary-400">
+                {searchQuery || selectedTags.length > 0
+                  ? "Try adjusting your search criteria or filters."
+                  : "No projects have been added yet."
+                }
+              </p>
+            </motion.div>
+          )}
         </div>
       </section>
-
-      <div className="container pb-20">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div className="flex flex-wrap gap-2">
-            {allTags.map(tag => (
-              <motion.button
-                key={tag}
-                onClick={() => toggleTag(tag)}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
-                  selectedTags.includes(tag)
-                    ? 'bg-gradient-to-r from-primary-600 to-accent-500 text-white shadow-md'
-                    : 'bg-white text-secondary-700 hover:bg-secondary-50 border border-secondary-200'
-                }`}
-              >
-                {tag}
-              </motion.button>
-            ))}
-          </div>
-
-          <div className="flex items-center space-x-4">
-            <select
-              value={sortBy}
-              onChange={(e) => setSortBy(e.target.value as SortOption)}
-              className="bg-white border border-secondary-200 rounded-lg px-4 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-primary-500 shadow-sm"
-            >
-              <option value="date">Most Recent</option>
-              <option value="featured">Featured First</option>
-              <option value="title">Alphabetical</option>
-            </select>
-
-            <div className="flex bg-white border border-secondary-200 rounded-lg shadow-sm">
-              <button
-                onClick={() => setViewMode('grid')}
-                className={`p-2 transition-colors ${viewMode === 'grid' ? 'text-primary-600' : 'text-secondary-400 hover:text-secondary-600'}`}
-                aria-label="Grid view"
-              >
-                <Grid size={20} />
-              </button>
-              <button
-                onClick={() => setViewMode('list')}
-                className={`p-2 transition-colors ${viewMode === 'list' ? 'text-primary-600' : 'text-secondary-400 hover:text-secondary-600'}`}
-                aria-label="List view"
-              >
-                <List size={20} />
-              </button>
-            </div>
-          </div>
-        </div>
-
-        {loading ? (
-          <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {[1, 2, 3].map(i => (
-              <div key={i} className="animate-pulse">
-                <div className="h-48 bg-secondary-200 rounded-t-xl" />
-                <div className="p-6 bg-white rounded-b-xl space-y-4">
-                  <div className="h-6 bg-secondary-200 rounded w-3/4" />
-                  <div className="h-4 bg-secondary-200 rounded w-full" />
-                  <div className="h-4 bg-secondary-200 rounded w-2/3" />
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <AnimatePresence mode="popLayout">
-            {filteredProjects.length > 0 ? (
-              <motion.div
-                layout
-                className={`grid gap-6 ${
-                  viewMode === 'grid'
-                    ? 'md:grid-cols-2 lg:grid-cols-3'
-                    : 'grid-cols-1'
-                }`}
-              >
-                {filteredProjects.map(project => (
-                  <ProjectCard key={project.id} project={project} />
-                ))}
-              </motion.div>
-            ) : (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="text-center py-12"
-              >
-                <p className="text-secondary-600 text-lg mb-4">
-                  No projects found matching your criteria.
-                </p>
-                <Button
-                  variant="ghost"
-                  onClick={() => {
-                    setSelectedTags([]);
-                    setSearchQuery('');
-                  }}
-                >
-                  Clear filters
-                </Button>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        )}
-      </div>
     </>
   );
 }

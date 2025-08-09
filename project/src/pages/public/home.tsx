@@ -327,31 +327,41 @@ export function HomePage() {
               variants={itemVariants}
               style={{ opacity }}
             >
+              {/* Floating Holographic Animated Ring */}
+              <div className="absolute inset-0 flex items-center justify-center z-0 pointer-events-none">
+                <div
+                  className="w-[360px] h-[360px] md:w-[420px] md:h-[420px] rounded-[2.5rem] border-4 animate-spin-slow"
+                  style={{
+                    borderImage: "conic-gradient(from 180deg at 50% 50%, #f1d2b6, #d9aa90, #a65e46, #f1d2b6) 1",
+                    borderStyle: "solid",
+                    borderWidth: "4px",
+                    filter: "blur(2px) opacity(0.7)",
+                  }}
+                />
+              </div>
+              {/* Glassmorphism Photo Container with Hover Effect */}
               <motion.div
-                className="absolute inset-0 bg-gradient-to-r from-primary-500 to-accent-500 rounded-2xl transform rotate-6 blur opacity-20"
-                animate={{
-                  rotate: [6, -6, 6],
-                  scale: [1, 1.02, 1],
-                }}
-                transition={{
-                  duration: 8,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-              />
-              <motion.div 
-                className="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-md mx-auto"
-                whileHover={{ scale: 1.02 }}
+                className="relative z-10 flex items-center justify-center rounded-3xl shadow-2xl overflow-hidden max-w-md mx-auto"
+                whileHover={{ y: -12, rotate: -4, scale: 1.04 }}
                 transition={{ type: "spring", stiffness: 300 }}
+                style={{
+                  background: "rgba(255,255,255,0.25)",
+                  backdropFilter: "blur(16px)",
+                  WebkitBackdropFilter: "blur(16px)",
+                  border: "1.5px solid rgba(241,210,182,0.25)",
+                  boxShadow: "0 8px 32px 0 rgba(166,94,70,0.15)",
+                  padding: "1.5rem",
+                }}
               >
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
                     alt={profile.name}
-                    className="w-full h-[500px] object-cover object-center"
+                    className="w-[260px] h-[320px] md:w-[320px] md:h-[400px] object-cover object-center rounded-2xl transition-all duration-300"
+                    style={{ aspectRatio: "4/5" }}
                   />
                 ) : (
-                  <div className="w-full h-[500px] bg-secondary-100 flex items-center justify-center">
+                  <div className="w-[260px] h-[320px] md:w-[320px] md:h-[400px] bg-secondary-100 flex items-center justify-center rounded-2xl">
                     <p className="text-secondary-400 text-lg">Add your photo in profile settings</p>
                   </div>
                 )}

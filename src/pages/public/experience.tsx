@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Briefcase, Calendar, MapPin } from 'lucide-react';
+import { Briefcase, Calendar, MapPin, Building2, Clock, Award } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
+import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
 import type { Database } from '../../types/database.types';
 
 type Experience = Database['public']['Tables']['experiences']['Row'];
@@ -53,10 +54,24 @@ export function ExperiencePage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
           <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
         </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+        <motion.div 
+          className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-br from-primary-300/30 to-accent-300/30 rounded-full mix-blend-multiply filter blur-xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, 90, 180, 270, 360],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div 
+          className="absolute bottom-20 left-20 w-72 h-72 bg-gradient-to-br from-accent-300/30 to-primary-400/30 rounded-full mix-blend-multiply filter blur-xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [360, 270, 180, 90, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
         
-        <div className="container relative">
+        <div className="responsive-container relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -65,7 +80,7 @@ export function ExperiencePage() {
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="text-secondary-900">Professional </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-600 animate-gradient bg-[length:200%_auto]">
                 Experience
               </span>
             </h1>
@@ -76,21 +91,27 @@ export function ExperiencePage() {
         </div>
       </section>
 
-      <div className="container pb-20">
+      <div className="responsive-container pb-20">
         {loading ? (
           <div className="space-y-8">
             {[1, 2, 3].map((i) => (
-              <div
+              <motion.div
                 key={i}
-                className="bg-white rounded-xl shadow-lg p-6 animate-pulse"
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ delay: i * 0.1 }}
               >
-                <div className="h-8 bg-secondary-200 rounded w-1/3 mb-4"></div>
-                <div className="space-y-3">
-                  <div className="h-4 bg-secondary-200 rounded w-1/4"></div>
-                  <div className="h-4 bg-secondary-200 rounded w-1/2"></div>
-                  <div className="h-4 bg-secondary-200 rounded w-3/4"></div>
-                </div>
-              </div>
+                <Card3D variant="tech" className="p-6">
+                  <div className="animate-pulse">
+                    <div className="h-8 bg-secondary-200/50 rounded w-1/3 mb-4"></div>
+                    <div className="space-y-3">
+                      <div className="h-4 bg-secondary-200/50 rounded w-1/4"></div>
+                      <div className="h-4 bg-secondary-200/50 rounded w-1/2"></div>
+                      <div className="h-4 bg-secondary-200/50 rounded w-3/4"></div>
+                    </div>
+                  </div>
+                </Card3D>
+              </motion.div>
             ))}
           </div>
         ) : (
@@ -100,8 +121,8 @@ export function ExperiencePage() {
             animate="show"
             className="relative"
           >
-            {/* Timeline line */}
-            <div className="absolute left-8 top-8 bottom-8 w-0.5 bg-gradient-to-b from-primary-600 to-accent-500"></div>
+            {/* Enhanced Timeline line */}
+            <div className="absolute left-8 top-8 bottom-8 w-1 bg-gradient-to-b from-primary-500 via-accent-600 to-primary-700 rounded-full shadow-lg"></div>
 
             <div className="space-y-12">
               {experiences.map((experience, index) => (
@@ -110,58 +131,138 @@ export function ExperiencePage() {
                   variants={item}
                   className="relative pl-12"
                 >
-                  {/* Timeline dot */}
-                  <div className="absolute left-0 top-8 w-4 h-4 rounded-full bg-gradient-to-r from-primary-600 to-accent-500 shadow-lg transform -translate-x-1/2"></div>
+                  {/* Enhanced Timeline dot */}
+                  <motion.div 
+                    className="absolute left-0 top-8 w-6 h-6 rounded-full bg-gradient-to-r from-primary-500 to-accent-600 shadow-lg transform -translate-x-1/2 border-4 border-white"
+                    whileHover={{ scale: 1.2 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <motion.div
+                      className="absolute inset-0 rounded-full bg-gradient-to-r from-primary-400 to-accent-500"
+                      animate={{
+                        scale: [1, 1.2, 1],
+                        opacity: [0.5, 1, 0.5],
+                      }}
+                      transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                    />
+                  </motion.div>
 
-                  <div className="bg-white rounded-xl shadow-lg p-6 hover:shadow-xl transition-shadow">
-                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-4">
-                      <div>
-                        <h3 className="text-2xl font-bold text-secondary-900">
+                  <Card3D variant="tech" className="p-6 hover:shadow-2xl transition-all duration-300">
+                    <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
+                      <div className="flex-1">
+                        <motion.h3 
+                          className="text-2xl font-bold bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent mb-2"
+                          whileHover={{ scale: 1.02 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
                           {experience.title}
-                        </h3>
-                        <div className="flex flex-wrap gap-4 mt-2">
-                          <div className="flex items-center text-secondary-600">
-                            <Briefcase size={16} className="mr-2" />
+                        </motion.h3>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                                                     <motion.div 
+                             className="flex items-center text-secondary-600 p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                             whileHover={{ scale: 1.05, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                             transition={{ type: "spring", stiffness: 300 }}
+                           >
+                             <Building2 size={16} className="mr-2 text-primary-500" />
                             {experience.company}
-                          </div>
-                          <div className="flex items-center text-secondary-600">
-                            <MapPin size={16} className="mr-2" />
+                          </motion.div>
+                                                     <motion.div 
+                             className="flex items-center text-secondary-600 p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                             whileHover={{ scale: 1.05, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                             transition={{ type: "spring", stiffness: 300 }}
+                           >
+                             <MapPin size={16} className="mr-2 text-primary-500" />
                             {experience.location}
-                          </div>
-                          <div className="flex items-center text-secondary-600">
-                            <Calendar size={16} className="mr-2" />
+                          </motion.div>
+                                                     <motion.div 
+                             className="flex items-center text-secondary-600 p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                             whileHover={{ scale: 1.05, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                             transition={{ type: "spring", stiffness: 300 }}
+                           >
+                             <Clock size={16} className="mr-2 text-primary-500" />
                             {format(new Date(experience.start_date), 'MMM yyyy')} -{' '}
                             {experience.current
                               ? 'Present'
                               : format(new Date(experience.end_date!), 'MMM yyyy')}
-                          </div>
+                          </motion.div>
                         </div>
                       </div>
-                      <span className="mt-2 md:mt-0 px-4 py-1 rounded-full text-sm font-medium bg-primary-100 text-primary-700">
+                                             <motion.span 
+                         className="mt-4 md:mt-0 px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-primary-500 to-accent-600 text-white shadow-lg"
+                         whileHover={{ scale: 1.05 }}
+                         transition={{ type: "spring", stiffness: 300 }}
+                       >
                         {experience.type}
-                      </span>
+                      </motion.span>
                     </div>
 
-                    <p className="text-secondary-600 whitespace-pre-line mb-4">
+                    <motion.p 
+                      className="text-secondary-600 whitespace-pre-line mb-6 leading-relaxed"
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      transition={{ delay: 0.3 }}
+                    >
                       {experience.description}
-                    </p>
+                    </motion.p>
 
                     {experience.technologies && experience.technologies.length > 0 && (
-                      <div className="flex flex-wrap gap-2">
-                        {experience.technologies.map((tech) => (
-                          <span
-                            key={tech}
-                            className="px-3 py-1 rounded-full text-sm font-medium bg-secondary-100 text-secondary-700"
-                          >
-                            {tech}
-                          </span>
-                        ))}
+                      <div className="border-t border-white/20 pt-4">
+                                                 <h4 className="text-sm font-medium text-secondary-700 mb-3 flex items-center">
+                           <Award className="w-4 h-4 mr-2 text-primary-500" />
+                           Technologies & Skills
+                         </h4>
+                        <div className="flex flex-wrap gap-2">
+                          {experience.technologies.map((tech) => (
+                                                         <motion.span
+                               key={tech}
+                               className="px-3 py-1 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-secondary-700 border border-white/20 hover:bg-primary-500/20 hover:text-primary-600 transition-all duration-300"
+                               whileHover={{ scale: 1.05 }}
+                               whileTap={{ scale: 0.95 }}
+                             >
+                               {tech}
+                             </motion.span>
+                          ))}
+                        </div>
                       </div>
                     )}
-                  </div>
+                  </Card3D>
                 </motion.div>
               ))}
             </div>
+          </motion.div>
+        )}
+
+        {/* Experience Summary */}
+        {!loading && experiences.length > 0 && (
+          <motion.div 
+            className="mt-16"
+            initial={{ opacity: 0, y: 20 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            transition={{ delay: 0.5 }}
+          >
+            <GlassCard className="p-8">
+              <div className="grid md:grid-cols-3 gap-8 text-center">
+                                 <div>
+                   <div className="text-3xl font-bold bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent mb-2">
+                     {experiences.length}
+                   </div>
+                   <div className="text-secondary-600">Total Positions</div>
+                 </div>
+                 <div>
+                   <div className="text-3xl font-bold bg-gradient-to-r from-accent-500 to-primary-700 bg-clip-text text-transparent mb-2">
+                     {new Set(experiences.map(exp => exp.company)).size}
+                   </div>
+                   <div className="text-secondary-600">Companies</div>
+                 </div>
+                 <div>
+                   <div className="text-3xl font-bold bg-gradient-to-r from-primary-400 to-accent-500 bg-clip-text text-transparent mb-2">
+                     {Math.floor((new Date().getTime() - new Date(experiences[experiences.length - 1]?.start_date || Date.now()).getTime()) / (1000 * 60 * 60 * 24 * 365))}
+                   </div>
+                   <div className="text-secondary-600">Years Experience</div>
+                 </div>
+              </div>
+            </GlassCard>
           </motion.div>
         )}
       </div>

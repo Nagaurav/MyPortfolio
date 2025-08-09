@@ -230,45 +230,36 @@ export interface Database {
           id: string
           created_at: string
           updated_at: string
-          name: string
-          title: string
+          full_name: string
           bio: string
           avatar_url: string | null
-          location: string | null
           email: string | null
-          phone: string | null
-          linkedin_url: string | null
           github_url: string | null
+          linkedin_url: string | null
           twitter_url: string | null
         }
         Insert: {
           id: string
           created_at?: string
           updated_at?: string
-          name: string
-          title: string
+          full_name: string
           bio: string
           avatar_url?: string | null
-          location?: string | null
           email?: string | null
-          phone?: string | null
-          linkedin_url?: string | null
           github_url?: string | null
+          linkedin_url?: string | null
           twitter_url?: string | null
         }
         Update: {
           id?: string
           created_at?: string
           updated_at?: string
-          name?: string
-          title?: string
+          full_name?: string
           bio?: string
           avatar_url?: string | null
-          location?: string | null
           email?: string | null
-          phone?: string | null
-          linkedin_url?: string | null
           github_url?: string | null
+          linkedin_url?: string | null
           twitter_url?: string | null
         }
       }

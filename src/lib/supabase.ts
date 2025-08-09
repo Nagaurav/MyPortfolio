@@ -3,6 +3,7 @@ import type { Database } from '../types/database.types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
+const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
 
 // Create a mock Supabase client for development
 const createMockClient = () => ({
@@ -21,10 +22,12 @@ const createMockClient = () => ({
 
 // Initialize supabase client
 let supabase: any;
+let supabaseAdmin: any;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   console.warn('Supabase credentials not found. Using mock client for development.');
   supabase = createMockClient();
+  supabaseAdmin = createMockClient();
 } else {
   // Log the URL (but not the key for security)
   console.log('Connecting to Supabase URL:', supabaseUrl);
@@ -34,6 +37,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
       autoRefreshToken: true,
     },
   });
+  
+  // Create admin client with service role key for development operations
+  if (supabaseServiceKey) {
+    supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    });
+  } else {
+    supabaseAdmin = supabase; // Fallback to regular client
+  }
 }
 
-export { supabase };
+export { supabase, supabaseAdmin };

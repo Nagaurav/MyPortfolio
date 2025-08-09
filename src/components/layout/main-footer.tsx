@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Linkedin, Mail, Heart, ExternalLink } from 'lucide-react';
+import { Github, Linkedin, Mail, Heart, ExternalLink, Sparkles } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/database.types';
@@ -36,42 +36,70 @@ export function MainFooter() {
       name: 'GitHub',
       url: profile?.github_url || 'https://github.com',
       icon: Github,
-      color: 'hover:text-white hover:bg-gray-800'
+      gradient: 'from-gray-700 to-gray-900'
     },
     {
       name: 'LinkedIn',
       url: profile?.linkedin_url || 'https://linkedin.com',
       icon: Linkedin,
-      color: 'hover:text-white hover:bg-blue-600'
+      gradient: 'from-blue-600 to-blue-700'
     },
     {
       name: 'Email',
       url: `mailto:${profile?.email || 'contact@example.com'}`,
       icon: Mail,
-      color: 'hover:text-white hover:bg-red-500'
+      gradient: 'from-red-500 to-red-600'
     }
   ];
   
   return (
-    <footer className="bg-dark-900 dark:bg-dark-950 text-white py-12 sm:py-16">
-      <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16">
+    <footer className="relative bg-gradient-to-br from-dark-900 via-dark-950 to-dark-900 text-white py-12 sm:py-16 overflow-hidden">
+      {/* Background Effects */}
+      <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.1]"></div>
+      <motion.div 
+        className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary-500/10 to-accent-600/10 rounded-full mix-blend-multiply filter blur-3xl"
+        animate={{
+          scale: [1, 1.1, 1],
+          rotate: [0, 90, 180, 270, 360],
+        }}
+        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+      />
+      <motion.div 
+        className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-accent-500/10 to-primary-700/10 rounded-full mix-blend-multiply filter blur-3xl"
+        animate={{
+          scale: [1, 1.1, 1],
+          rotate: [360, 270, 180, 90, 0],
+        }}
+        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+      />
+      
+      <div className="relative w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16">
         <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
           {/* Brand and Bio */}
           <div className="md:col-span-1 lg:col-span-1">
             <Link to="/" className="inline-block mb-4 group">
-              <motion.span 
-                className="text-xl sm:text-2xl font-black tracking-tighter text-primary-400 group-hover:text-primary-300 transition-colors duration-300"
+              <motion.div 
+                className="relative"
                 whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.95 }}
               >
-                GN
-              </motion.span>
+                <span className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent group-hover:from-primary-300 group-hover:to-accent-300 transition-all duration-300">
+                  GN
+                </span>
+                <motion.div
+                  className="absolute -inset-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"
+                  animate={{
+                    scale: [1, 1.1, 1],
+                  }}
+                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
+                />
+              </motion.div>
             </Link>
             <p className="text-secondary-300 mb-6 leading-relaxed text-sm sm:text-base">
               {profile?.bio || 'Showcasing my work, skills, and professional journey in web development and digital solutions.'}
             </p>
             <div className="flex space-x-3">
-              {socialLinks.map((social) => {
+              {socialLinks.map((social, index) => {
                 const Icon = social.icon;
                 return (
                   <motion.a 
@@ -79,12 +107,14 @@ export function MainFooter() {
                     href={social.url}
                     target={social.name === 'Email' ? undefined : '_blank'}
                     rel={social.name === 'Email' ? undefined : 'noopener noreferrer'}
-                    className={`p-2 rounded-full text-secondary-400 transition-all duration-300 ${social.color} focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2`}
-                    style={{ '--tw-ring-offset-color': '#041421' } as React.CSSProperties}
+                    className={`p-3 rounded-xl bg-gradient-to-r ${social.gradient} text-white shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-dark-900`}
                     aria-label={`Visit ${social.name} profile`}
-                    whileHover={{ scale: 1.1 }}
+                    whileHover={{ scale: 1.1, y: -2 }}
                     whileTap={{ scale: 0.95 }}
                     title={`Visit ${social.name}`}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: index * 0.1 }}
                   >
                     <Icon size={18} className="sm:w-5 sm:h-5" />
                   </motion.a>
@@ -95,7 +125,10 @@ export function MainFooter() {
           
           {/* Navigation */}
           <div className="md:col-span-1 lg:col-span-1">
-            <h4 className="text-base sm:text-lg font-semibold mb-4 text-white">Navigation</h4>
+            <h4 className="text-base sm:text-lg font-semibold mb-4 text-white flex items-center">
+              <Sparkles className="w-4 h-4 mr-2 text-primary-400" />
+              Navigation
+            </h4>
             <ul className="space-y-2 sm:space-y-3">
               {[
                 { to: '/', label: 'Home' },
@@ -105,22 +138,36 @@ export function MainFooter() {
                 { to: '/certificates', label: 'Certificates' },
                 { to: '/resume', label: 'Resume' },
                 { to: '/contact', label: 'Contact' },
-              ].map((item) => (
-                <li key={item.to}>
+              ].map((item, index) => (
+                <motion.li 
+                  key={item.to}
+                  initial={{ opacity: 0, x: -20 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: index * 0.05 }}
+                >
                   <Link 
                     to={item.to} 
-                    className="text-secondary-300 hover:text-white transition-colors duration-300 hover:translate-x-1 inline-block text-sm sm:text-base"
+                    className="text-secondary-300 hover:text-primary-400 transition-all duration-300 hover:translate-x-1 inline-block text-sm sm:text-base group"
                   >
-                    {item.label}
+                    <span className="relative">
+                      {item.label}
+                                             <motion.span
+                         className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-400 to-accent-400 group-hover:w-full transition-all duration-300"
+                         whileHover={{ width: '100%' }}
+                       />
+                    </span>
                   </Link>
-                </li>
+                </motion.li>
               ))}
             </ul>
           </div>
           
           {/* Get in Touch */}
           <div className="md:col-span-2 lg:col-span-2">
-            <h4 className="text-base sm:text-lg font-semibold mb-4 text-white">Get in Touch</h4>
+            <h4 className="text-base sm:text-lg font-semibold mb-4 text-white flex items-center">
+              <Sparkles className="w-4 h-4 mr-2 text-primary-400" />
+              Get in Touch
+            </h4>
             <p className="text-secondary-300 mb-6 leading-relaxed text-sm sm:text-base">
               {profile?.contact_message || 'Interested in working together or have a question? Feel free to reach out! I\'m always open to discussing new opportunities and collaborations.'}
             </p>
@@ -130,7 +177,7 @@ export function MainFooter() {
             >
               <Link 
                 to="/contact" 
-                className="inline-flex items-center text-primary-400 hover:text-primary-300 transition-colors duration-300 group text-sm sm:text-base"
+                className="inline-flex items-center bg-gradient-to-r from-primary-500 to-accent-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group text-sm sm:text-base font-medium"
               >
                 Contact me 
                 <motion.span 
@@ -146,7 +193,13 @@ export function MainFooter() {
         </div>
         
         {/* Copyright */}
-        <div className="mt-12 pt-8 border-t border-dark-800 flex flex-col sm:flex-row sm:justify-between items-center space-y-4 sm:space-y-0">
+        <motion.div 
+          className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:justify-between items-center space-y-4 sm:space-y-0"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.3 }}
+        >
           <p className="text-secondary-400 text-xs sm:text-sm text-center sm:text-left">
             © {currentYear} {profile?.full_name || 'GN'}. All rights reserved.
           </p>
@@ -161,7 +214,7 @@ export function MainFooter() {
             </motion.span> 
             using React & Tailwind CSS
           </p>
-        </div>
+        </motion.div>
       </div>
     </footer>
   );

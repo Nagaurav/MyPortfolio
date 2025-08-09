@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { User, Mail, Github, Linkedin, Twitter } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { User, Mail, Github, Linkedin, Twitter, Briefcase } from 'lucide-react';
+import { supabase, supabaseAdmin } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { FileUpload } from '../../components/ui/file-upload';
+import { useAuth } from '../../context/auth-context';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -23,6 +24,7 @@ interface ProfileFormData {
 export function AdminSettingsPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+  const { user } = useAuth();
   
   const {
     register,
@@ -37,10 +39,12 @@ export function AdminSettingsPage() {
   
   useEffect(() => {
     async function loadProfile() {
-      try {
-        const { data: { user } } = await supabase.auth.getUser();
-        if (!user) return;
+      if (!user) {
+        setLoading(false);
+        return;
+      }
 
+      try {
         const { data: profile, error: selectError } = await supabase
           .from('profiles')
           .select('*')
@@ -66,7 +70,10 @@ export function AdminSettingsPage() {
               avatar_url: '',
             }]);
 
-          if (insertError) throw insertError;
+          if (insertError) {
+            console.error('Error creating profile:', insertError);
+            // Don't throw error, just reset with empty values
+          }
 
           reset({
             email: user.email || '',
@@ -87,13 +94,15 @@ export function AdminSettingsPage() {
     }
     
     loadProfile();
-  }, [reset]);
+  }, [reset, user]);
   
   const onSubmit = async (data: ProfileFormData) => {
     setSaving(true);
     try {
-      const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('No user found');
+
+      console.log('Updating profile for user:', user.id);
+      console.log('Profile data:', data);
 
       const { error } = await supabase
         .from('profiles')
@@ -103,12 +112,15 @@ export function AdminSettingsPage() {
           updated_at: new Date().toISOString(),
         });
       
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
       
       toast.success('Profile updated successfully');
     } catch (error) {
       console.error('Error saving profile:', error);
-      toast.error('Failed to update profile');
+      toast.error(`Failed to update profile: ${error instanceof Error ? error.message : 'Unknown error'}`);
     } finally {
       setSaving(false);
     }

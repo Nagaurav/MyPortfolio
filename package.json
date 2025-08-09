@@ -15,12 +15,15 @@
     "test:e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@react-three/drei": "^9.56.15",
+    "@react-three/fiber": "^8.13.7",
     "@supabase/supabase-js": "^2.38.4",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^2.30.0",
     "framer-motion": "^11.0.8",
     "lucide-react": "^0.344.0",
+    "maath": "^0.10.8",
     "portfolio-website": "file:",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
@@ -28,7 +31,8 @@
     "react-router-dom": "^6.18.0",
     "react-virtualized": "^9.22.6",
     "sonner": "^1.2.0",
-    "tailwind-merge": "^3.3.1"
+    "tailwind-merge": "^3.3.1",
+    "three": "^0.150.0"
   },
   "devDependencies": {
     "@babel/plugin-transform-react-jsx": "^7.23.4",

@@ -2,9 +2,10 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Mail, Phone, MapPin, Send, Copy, Github, Linkedin } from 'lucide-react';
+import { Mail, Phone, MapPin, Send, Copy, Github, Linkedin, MessageSquare, User, AtSign } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
+import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
 import { generateCSRFToken, storeCSRFToken, getStoredCSRFToken } from '../../lib/csrf';
 import type { Database } from '../../types/database.types';
 
@@ -107,10 +108,24 @@ export function ContactPage() {
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
           <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
         </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
+        <motion.div 
+          className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-br from-primary-300/30 to-accent-300/30 rounded-full mix-blend-multiply filter blur-xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, 90, 180, 270, 360],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div 
+          className="absolute bottom-20 left-20 w-72 h-72 bg-gradient-to-br from-accent-300/30 to-primary-400/30 rounded-full mix-blend-multiply filter blur-xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [360, 270, 180, 90, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
         
-        <div className="container relative">
+        <div className="responsive-container relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -119,7 +134,7 @@ export function ContactPage() {
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
               <span className="text-secondary-900">Let's </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]">
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-600 animate-gradient bg-[length:200%_auto]">
                 Connect
               </span>
             </h1>
@@ -130,179 +145,218 @@ export function ContactPage() {
         </div>
       </section>
 
-      <div className="container pb-20">
+      <div className="responsive-container pb-20">
         <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+          {/* Contact Information */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
-            className="bg-white rounded-xl shadow-lg p-8"
           >
-            <h2 className="text-2xl font-semibold mb-6">Contact Information</h2>
-            <div className="space-y-6">
-              {profile?.email && (
-                <div className="flex items-start">
-                  <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
-                    <Mail className="w-5 h-5 text-primary-600" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium">Email</h3>
-                    <div className="flex items-center mt-1">
-                      <p className="text-secondary-600">{profile.email}</p>
-                      <button
-                        onClick={copyEmail}
-                        className="ml-2 text-secondary-400 hover:text-secondary-600 transition-colors"
-                        aria-label="Copy email"
-                      >
-                        <Copy size={16} />
-                      </button>
+            <Card3D variant="tech" className="p-8 h-full">
+                             <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent">
+                 Contact Information
+               </h2>
+              <div className="space-y-6">
+                {profile?.email && (
+                                     <motion.div 
+                     className="flex items-start p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                     transition={{ type: "spring", stiffness: 300 }}
+                   >
+                     <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-accent-600 flex items-center justify-center shadow-lg">
+                       <Mail className="w-6 h-6 text-white" />
+                     </div>
+                    <div className="ml-4 flex-1">
+                      <h3 className="text-lg font-medium text-secondary-900">Email</h3>
+                      <div className="flex items-center mt-1">
+                        <p className="text-secondary-600">{profile.email}</p>
+                                                 <motion.button
+                           onClick={copyEmail}
+                           className="ml-2 text-secondary-400 hover:text-primary-500 transition-colors p-1 rounded-lg hover:bg-primary-500/10"
+                           aria-label="Copy email"
+                           whileHover={{ scale: 1.1 }}
+                           whileTap={{ scale: 0.9 }}
+                         >
+                          <Copy size={16} />
+                        </motion.button>
+                      </div>
                     </div>
-                  </div>
-                </div>
-              )}
+                  </motion.div>
+                )}
 
-              {profile?.phone && (
-                <div className="flex items-start">
-                  <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
-                    <Phone className="w-5 h-5 text-primary-600" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium">Phone</h3>
-                    <a
-                      href={`tel:${profile.phone}`}
-                      className="text-secondary-600 hover:text-primary-600 transition-colors"
-                    >
-                      {profile.phone}
-                    </a>
-                  </div>
-                </div>
-              )}
+                {profile?.phone && (
+                                     <motion.div 
+                     className="flex items-start p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                     transition={{ type: "spring", stiffness: 300 }}
+                   >
+                     <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-accent-500 to-primary-700 flex items-center justify-center shadow-lg">
+                       <Phone className="w-6 h-6 text-white" />
+                     </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-medium text-secondary-900">Phone</h3>
+                                             <a
+                         href={`tel:${profile.phone}`}
+                         className="text-secondary-600 hover:text-primary-500 transition-colors"
+                       >
+                        {profile.phone}
+                      </a>
+                    </div>
+                  </motion.div>
+                )}
 
-              {profile?.location && (
-                <div className="flex items-start">
-                  <div className="w-10 h-10 rounded-lg bg-primary-100 flex items-center justify-center">
-                    <MapPin className="w-5 h-5 text-primary-600" />
-                  </div>
-                  <div className="ml-4">
-                    <h3 className="text-lg font-medium">Location</h3>
-                    <p className="text-secondary-600">{profile.location}</p>
-                  </div>
-                </div>
-              )}
+                {profile?.location && (
+                                     <motion.div 
+                     className="flex items-start p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                     transition={{ type: "spring", stiffness: 300 }}
+                   >
+                     <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-400 to-accent-500 flex items-center justify-center shadow-lg">
+                       <MapPin className="w-6 h-6 text-white" />
+                     </div>
+                    <div className="ml-4">
+                      <h3 className="text-lg font-medium text-secondary-900">Location</h3>
+                      <p className="text-secondary-600">{profile.location}</p>
+                    </div>
+                  </motion.div>
+                )}
 
-              <div className="pt-6 border-t border-secondary-200">
-                <h3 className="text-lg font-medium mb-4">Connect with me</h3>
-                <div className="flex space-x-4">
-                  {profile?.github_url && (
-                    <a
-                      href={profile.github_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center text-secondary-600 hover:bg-secondary-200 transition-colors"
-                      aria-label="GitHub"
-                    >
-                      <Github size={20} />
-                    </a>
-                  )}
-                  {profile?.linkedin_url && (
-                    <a
-                      href={profile.linkedin_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="w-10 h-10 rounded-lg bg-secondary-100 flex items-center justify-center text-secondary-600 hover:bg-secondary-200 transition-colors"
-                      aria-label="LinkedIn"
-                    >
-                      <Linkedin size={20} />
-                    </a>
-                  )}
+                <div className="pt-6 border-t border-white/20">
+                  <h3 className="text-lg font-medium mb-4 text-secondary-900">Connect with me</h3>
+                  <div className="flex space-x-4">
+                    {profile?.github_url && (
+                      <motion.a
+                        href={profile.github_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-12 h-12 rounded-xl bg-gradient-to-r from-gray-700 to-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                        whileHover={{ scale: 1.1, y: -2 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Github size={20} />
+                      </motion.a>
+                    )}
+                    {profile?.linkedin_url && (
+                      <motion.a
+                        href={profile.linkedin_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300"
+                        whileHover={{ scale: 1.1, y: -2 }}
+                        whileTap={{ scale: 0.9 }}
+                      >
+                        <Linkedin size={20} />
+                      </motion.a>
+                    )}
+                  </div>
                 </div>
               </div>
-            </div>
+            </Card3D>
           </motion.div>
 
+          {/* Contact Form */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
-            className="bg-white rounded-xl shadow-lg p-8"
+            transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <h2 className="text-2xl font-semibold mb-6">Send a Message</h2>
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-              <div>
-                <label htmlFor="name" className="block text-sm font-medium text-secondary-700">
-                  Name
-                </label>
-                <input
-                  type="text"
-                  id="name"
-                  className="mt-1 input"
-                  {...register('name', { required: 'Name is required' })}
-                />
-                {errors.name && (
-                  <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
-                )}
-              </div>
+            <Card3D variant="glass" className="p-8">
+                             <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent">
+                 Send Message
+               </h2>
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+                <div>
+                  <label className="block text-sm font-medium text-secondary-700 mb-2">
+                    <User className="w-4 h-4 inline mr-2" />
+                    Name
+                  </label>
+                  <input
+                    {...register('name', { required: 'Name is required' })}
+                    type="text"
+                                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400"
+                     placeholder="Your name"
+                  />
+                  {errors.name && (
+                    <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+                  )}
+                </div>
 
-              <div>
-                <label htmlFor="email" className="block text-sm font-medium text-secondary-700">
-                  Email
-                </label>
-                <input
-                  type="email"
-                  id="email"
-                  className="mt-1 input"
-                  {...register('email', {
-                    required: 'Email is required',
-                    pattern: {
-                      value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                      message: 'Invalid email address',
-                    },
-                  })}
-                />
-                {errors.email && (
-                  <p className="mt-1 text-sm text-red-600">{errors.email.message}</p>
-                )}
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-secondary-700 mb-2">
+                    <AtSign className="w-4 h-4 inline mr-2" />
+                    Email
+                  </label>
+                  <input
+                    {...register('email', { 
+                      required: 'Email is required',
+                      pattern: {
+                        value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                        message: 'Invalid email address'
+                      }
+                    })}
+                    type="email"
+                                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400"
+                     placeholder="your.email@example.com"
+                  />
+                  {errors.email && (
+                    <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                  )}
+                </div>
 
-              <div>
-                <label htmlFor="subject" className="block text-sm font-medium text-secondary-700">
-                  Subject
-                </label>
-                <input
-                  type="text"
-                  id="subject"
-                  className="mt-1 input"
-                  {...register('subject', { required: 'Subject is required' })}
-                />
-                {errors.subject && (
-                  <p className="mt-1 text-sm text-red-600">{errors.subject.message}</p>
-                )}
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-secondary-700 mb-2">
+                    <MessageSquare className="w-4 h-4 inline mr-2" />
+                    Subject
+                  </label>
+                  <input
+                    {...register('subject', { required: 'Subject is required' })}
+                    type="text"
+                                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400"
+                     placeholder="What's this about?"
+                  />
+                  {errors.subject && (
+                    <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>
+                  )}
+                </div>
 
-              <div>
-                <label htmlFor="message" className="block text-sm font-medium text-secondary-700">
-                  Message
-                </label>
-                <textarea
-                  id="message"
-                  rows={4}
-                  className="mt-1 input"
-                  {...register('message', { required: 'Message is required' })}
-                />
-                {errors.message && (
-                  <p className="mt-1 text-sm text-red-600">{errors.message.message}</p>
-                )}
-              </div>
+                <div>
+                  <label className="block text-sm font-medium text-secondary-700 mb-2">
+                    <MessageSquare className="w-4 h-4 inline mr-2" />
+                    Message
+                  </label>
+                  <textarea
+                    {...register('message', { required: 'Message is required' })}
+                    rows={5}
+                                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400 resize-none"
+                     placeholder="Tell me about your project or question..."
+                  />
+                  {errors.message && (
+                    <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>
+                  )}
+                </div>
 
-              <Button
-                type="submit"
-                isLoading={isSubmitting}
-                leftIcon={<Send size={16} />}
-                fullWidth
-              >
-                Send Message
-              </Button>
-            </form>
+                                 <motion.button
+                   type="submit"
+                   disabled={isSubmitting}
+                   className="w-full bg-gradient-to-r from-primary-500 to-accent-600 text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                   whileHover={{ scale: 1.02 }}
+                   whileTap={{ scale: 0.98 }}
+                 >
+                  {isSubmitting ? (
+                    <div className="flex items-center justify-center">
+                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
+                      Sending...
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-center">
+                      <Send className="w-5 h-5 mr-2" />
+                      Send Message
+                    </div>
+                  )}
+                </motion.button>
+              </form>
+            </Card3D>
           </motion.div>
         </div>
       </div>
