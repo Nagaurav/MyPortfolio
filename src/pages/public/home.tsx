@@ -223,19 +223,19 @@ export function HomePage() {
             variants={staggerContainerVariants}
             initial="hidden"
             animate="visible"
-            className="grid lg:grid-cols-2 gap-12 items-center min-h-[80vh]"
+            className="grid grid-cols-1 lg:grid-cols-2 gap-6 sm:gap-8 lg:gap-12 items-center min-h-[80vh]"
           >
             {/* Expanded Content Container for Full Name */}
-            <div className="flex flex-col items-center justify-center text-center w-full max-w-none">
+            <div className="flex flex-col items-center justify-center text-center w-full max-w-none order-1 lg:order-1">
               {/* Staggered Hero Animations */}
               {/* Enhanced Hero Text with Floating Animation */}
               <div className="text-center space-y-4 mb-6">
                 {/* Greeting */}
                 <motion.h1
                   variants={fadeInUpVariants}
-                  className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold tracking-tight"
+                  className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold tracking-tight"
                 >
-                  <span className="bg-gradient-to-r from-[#a65e46] via-[#d9aa90] to-[#f1d2b6] bg-clip-text text-transparent dark:bg-none dark:text-[#d9d9d9] dark:bg-clip-border">
+                  <span className="bg-gradient-to-r from-[#a65e46] via-[#d9aa90] to-[#f1d2b6] dark:from-[#d9d9d9] dark:via-[#b8b8b8] dark:to-[#9a9a9a] bg-clip-text text-transparent">
                     Hello, I'm
                   </span>
                 </motion.h1>
@@ -254,7 +254,7 @@ export function HomePage() {
                     ease: [0.4, 0, 0.2, 1]
                   }}
                   onAnimationComplete={() => setHeroAnimationComplete(true)}
-                  className="relative min-h-[120px] flex items-center justify-center"
+                  className="relative min-h-[80px] sm:min-h-[100px] lg:min-h-[120px] flex items-center justify-center"
                 >
                   <motion.h2
                     animate={{ 
@@ -265,7 +265,7 @@ export function HomePage() {
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="text-5xl sm:text-6xl md:text-7xl lg:text-8xl xl:text-9xl font-black tracking-tight bg-gradient-to-r from-[#a65e46] via-[#d9aa90] to-[#f1d2b6] bg-clip-text text-transparent dark:bg-none dark:text-[#d9d9d9] dark:bg-clip-border drop-shadow-lg whitespace-nowrap"
+                    className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl xl:text-7xl 2xl:text-8xl font-black tracking-tight bg-gradient-to-r from-[#a65e46] via-[#d9aa90] to-[#f1d2b6] dark:from-[#d9d9d9] dark:via-[#b8b8b8] dark:to-[#9a9a9a] bg-clip-text text-transparent drop-shadow-lg whitespace-nowrap"
                     style={{
                       filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.1))',
                       willChange: 'transform'
@@ -285,7 +285,7 @@ export function HomePage() {
                       repeat: Infinity,
                       ease: "easeInOut"
                     }}
-                    className="absolute inset-0 bg-gradient-to-r from-[#a65e46]/20 via-[#d9aa90]/20 to-[#f1d2b6]/20 blur-xl -z-10 rounded-lg"
+                    className="absolute inset-0 bg-gradient-to-r from-[#a65e46]/20 via-[#d9aa90]/20 to-[#f1d2b6]/20 dark:from-[#d9d9d9]/20 dark:via-[#b8b8b8]/20 dark:to-[#9a9a9a]/20 blur-xl -z-10 rounded-lg"
                   />
                 </motion.div>
               </div>
@@ -297,7 +297,7 @@ export function HomePage() {
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ duration: 0.6, delay: 0.3 }}
-                    className="text-xl sm:text-2xl md:text-3xl text-secondary-600 dark:text-[#d9d9d9] mb-8 max-w-4xl mx-auto"
+                    className="text-lg sm:text-xl md:text-2xl lg:text-3xl text-secondary-600 dark:text-[#d9d9d9] mb-6 sm:mb-8 max-w-4xl mx-auto px-4"
                   >
                     {bios[bioIndex]}
                   </motion.div>
@@ -311,7 +311,7 @@ export function HomePage() {
                     variants={staggerContainerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="flex flex-wrap justify-center gap-4 mb-8"
+                    className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 px-4"
                   >
                     {roles.map((role, i) => (
                       <motion.div
@@ -323,14 +323,14 @@ export function HomePage() {
                           scale: 1.08,
                         }}
                         whileTap={{ scale: 0.97 }}
-                        className={`flex items-center gap-2 px-4 py-2 rounded-full bg-gradient-to-r ${role.color} text-white font-semibold shadow-md cursor-pointer transition-all`}
+                        className={`flex items-center gap-1 sm:gap-2 px-3 sm:px-4 py-2 rounded-full bg-gradient-to-r ${role.color} text-white font-semibold shadow-md cursor-pointer transition-all text-sm sm:text-base`}
                       >
                         <motion.span
-                          className="mr-2"
+                          className="mr-1 sm:mr-2"
                           whileHover={{ rotate: [0, 15, -15, 0], scale: 1.2 }}
                           transition={{ repeat: Infinity, duration: 0.7, repeatType: 'loop' }}
                         >
-                          <role.icon size={20} />
+                          <role.icon size={18} className="sm:w-5 sm:h-5" />
                         </motion.span>
                         {role.title}
                       </motion.div>
@@ -346,13 +346,13 @@ export function HomePage() {
                     variants={fadeInUpVariants}
                     initial="hidden"
                     animate="visible"
-                    className="flex flex-col sm:flex-row gap-4 justify-center mb-8"
+                    className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8"
                   >
                     <Button 
                       variant="tech" 
-                      size="lg" 
+                      size="md"
+                      className="group w-full sm:w-auto"
                       onClick={handleProjectsClick}
-                      className="group"
                     >
                       View My Work
                       <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
@@ -360,9 +360,9 @@ export function HomePage() {
 
                     <Button 
                       variant="outline" 
-                      size="lg" 
+                      size="md"
+                      className="group w-full sm:w-auto"
                       onClick={handleContactClick}
-                      className="group"
                     >
                       Get In Touch
                       <Mail className="ml-2 group-hover:scale-110 transition-transform duration-300" />
@@ -378,7 +378,7 @@ export function HomePage() {
                     variants={staggerContainerVariants}
                     initial="hidden"
                     animate="visible"
-                    className="flex justify-center space-x-4"
+                    className="flex justify-center space-x-3 sm:space-x-4"
                   >
                     {[
                       { icon: Github, href: profile?.github_url || '#', label: 'GitHub' },
@@ -390,11 +390,11 @@ export function HomePage() {
                         href={social.href}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-600 hover:text-[#a65e46] hover:bg-[#a65e46]/10 hover:border-[#a65e46]/30 transition-all duration-300 group dark:bg-[#0f1b27] dark:text-[#d9d9d9] dark:border-[#bfafaf] dark:hover:bg-[#bfafaf] dark:hover:text-[#0f1b27]"
+                        className="p-2 sm:p-3 rounded-xl bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-600 hover:text-[#a65e46] hover:bg-[#a65e46]/10 hover:border-[#a65e46]/30 transition-all duration-300 group dark:bg-secondary-800/50 dark:text-secondary-300 dark:border-secondary-600 dark:hover:bg-secondary-700 dark:hover:text-secondary-100 dark:hover:border-secondary-500"
                         variants={socialIconVariants}
                         whileHover="hover"
                       >
-                        <social.icon className="w-6 h-6 group-hover:scale-110 transition-transform duration-300" />
+                        <social.icon className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition-transform duration-300" />
                       </motion.a>
                     ))}
                   </motion.div>
@@ -404,12 +404,12 @@ export function HomePage() {
 
             {/* Profile Photo with hover glow and scale */}
             <motion.div 
-              className="hidden lg:flex items-center justify-center -mt-8"
+              className="flex items-center justify-center lg:justify-end order-2 lg:order-2 w-full mt-6 lg:mt-0"
               variants={slideInRightVariants}
               style={{ opacity }}
             >
               <motion.div
-                className="relative bg-white rounded-2xl shadow-2xl overflow-hidden max-w-md"
+                className="relative bg-white rounded-2xl shadow-2xl overflow-hidden w-full max-w-sm lg:max-w-md mx-auto lg:ml-auto"
                 whileHover={{ scale: 1.05, boxShadow: '0 0 32px 8px #60a5fa' }}
                 transition={{ type: "spring", stiffness: 300 }}
                 style={{ border: '4px solid transparent' }}
@@ -418,11 +418,11 @@ export function HomePage() {
                   <img
                     src={profile.avatar_url}
                     alt={profile.name || 'Profile'}
-                    className="w-full h-[500px] object-cover object-center transition-all duration-300"
+                    className="w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] object-cover object-center transition-all duration-300"
                   />
                 ) : (
-                  <div className="w-full h-[500px] bg-secondary-100 flex items-center justify-center">
-                    <p className="text-secondary-400 text-lg">Add your photo in profile settings</p>
+                  <div className="w-full h-[250px] sm:h-[300px] md:h-[400px] lg:h-[500px] bg-secondary-100 dark:bg-secondary-800 flex items-center justify-center">
+                    <p className="text-secondary-400 dark:text-secondary-500 text-base sm:text-lg text-center px-4">Add your photo in profile settings</p>
                   </div>
                 )}
               </motion.div>

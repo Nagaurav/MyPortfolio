@@ -159,25 +159,25 @@ export function ContactPage() {
                </h2>
               <div className="space-y-6">
                 {profile?.email && (
-                                     <motion.div 
-                     className="flex items-start p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
-                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                     transition={{ type: "spring", stiffness: 300 }}
-                   >
-                     <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-accent-600 flex items-center justify-center shadow-lg">
-                       <Mail className="w-6 h-6 text-white" />
-                     </div>
+                  <motion.div 
+                    className="flex items-start p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
+                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-accent-600 flex items-center justify-center shadow-lg">
+                      <Mail className="w-6 h-6 text-white" />
+                    </div>
                     <div className="ml-4 flex-1">
-                      <h3 className="text-lg font-medium text-secondary-900">Email</h3>
+                      <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Email</h3>
                       <div className="flex items-center mt-1">
-                        <p className="text-secondary-600">{profile.email}</p>
-                                                 <motion.button
-                           onClick={copyEmail}
-                           className="ml-2 text-secondary-400 hover:text-primary-500 transition-colors p-1 rounded-lg hover:bg-primary-500/10"
-                           aria-label="Copy email"
-                           whileHover={{ scale: 1.1 }}
-                           whileTap={{ scale: 0.9 }}
-                         >
+                        <p className="text-secondary-600 dark:text-secondary-300">{profile.email}</p>
+                        <motion.button
+                          onClick={copyEmail}
+                          className="ml-2 text-secondary-400 hover:text-primary-500 transition-colors p-1 rounded-lg hover:bg-primary-500/10"
+                          aria-label="Copy email"
+                          whileHover={{ scale: 1.1 }}
+                          whileTap={{ scale: 0.9 }}
+                        >
                           <Copy size={16} />
                         </motion.button>
                       </div>
@@ -186,20 +186,20 @@ export function ContactPage() {
                 )}
 
                 {profile?.phone && (
-                                     <motion.div 
-                     className="flex items-start p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
-                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                     transition={{ type: "spring", stiffness: 300 }}
-                   >
-                     <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-accent-500 to-primary-700 flex items-center justify-center shadow-lg">
-                       <Phone className="w-6 h-6 text-white" />
-                     </div>
+                  <motion.div 
+                    className="flex items-start p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
+                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-accent-500 to-primary-700 flex items-center justify-center shadow-lg">
+                      <Phone className="w-6 h-6 text-white" />
+                    </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-medium text-secondary-900">Phone</h3>
-                                             <a
-                         href={`tel:${profile.phone}`}
-                         className="text-secondary-600 hover:text-primary-500 transition-colors"
-                       >
+                      <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Phone</h3>
+                      <a
+                        href={`tel:${profile.phone}`}
+                        className="text-secondary-600 dark:text-secondary-300 hover:text-primary-500 transition-colors"
+                      >
                         {profile.phone}
                       </a>
                     </div>
@@ -207,23 +207,23 @@ export function ContactPage() {
                 )}
 
                 {profile?.location && (
-                                     <motion.div 
-                     className="flex items-start p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
-                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                     transition={{ type: "spring", stiffness: 300 }}
-                   >
-                     <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-400 to-accent-500 flex items-center justify-center shadow-lg">
-                       <MapPin className="w-6 h-6 text-white" />
-                     </div>
+                  <motion.div 
+                    className="flex items-start p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
+                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-400 to-accent-500 flex items-center justify-center shadow-lg">
+                      <MapPin className="w-6 h-6 text-white" />
+                    </div>
                     <div className="ml-4">
-                      <h3 className="text-lg font-medium text-secondary-900">Location</h3>
-                      <p className="text-secondary-600">{profile.location}</p>
+                      <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Location</h3>
+                      <p className="text-secondary-600 dark:text-secondary-300">{profile.location}</p>
                     </div>
                   </motion.div>
                 )}
 
-                <div className="pt-6 border-t border-white/20">
-                  <h3 className="text-lg font-medium mb-4 text-secondary-900">Connect with me</h3>
+                <div className="pt-6 border-t border-white/20 dark:border-secondary-600">
+                  <h3 className="text-lg font-medium mb-4 text-secondary-900 dark:text-white">Connect with me</h3>
                   <div className="flex space-x-4">
                     {profile?.github_url && (
                       <motion.a
@@ -267,23 +267,23 @@ export function ContactPage() {
                </h2>
               <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
                 <div>
-                  <label className="block text-sm font-medium text-secondary-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
                     <User className="w-4 h-4 inline mr-2" />
                     Name
                   </label>
                   <input
                     {...register('name', { required: 'Name is required' })}
                     type="text"
-                                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400"
-                     placeholder="Your name"
+                    className="w-full px-4 py-3 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-secondary-500"
+                    placeholder="Your name"
                   />
                   {errors.name && (
-                    <p className="mt-1 text-sm text-red-500">{errors.name.message}</p>
+                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.name.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-secondary-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
                     <AtSign className="w-4 h-4 inline mr-2" />
                     Email
                   </label>
@@ -296,43 +296,43 @@ export function ContactPage() {
                       }
                     })}
                     type="email"
-                                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400"
-                     placeholder="your.email@example.com"
+                    className="w-full px-4 py-3 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-secondary-500"
+                    placeholder="your.email@example.com"
                   />
                   {errors.email && (
-                    <p className="mt-1 text-sm text-red-500">{errors.email.message}</p>
+                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.email.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-secondary-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
                     <MessageSquare className="w-4 h-4 inline mr-2" />
                     Subject
                   </label>
                   <input
                     {...register('subject', { required: 'Subject is required' })}
                     type="text"
-                                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400"
-                     placeholder="What's this about?"
+                    className="w-full px-4 py-3 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-secondary-500"
+                    placeholder="What's this about?"
                   />
                   {errors.subject && (
-                    <p className="mt-1 text-sm text-red-500">{errors.subject.message}</p>
+                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.subject.message}</p>
                   )}
                 </div>
 
                 <div>
-                  <label className="block text-sm font-medium text-secondary-700 mb-2">
+                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
                     <MessageSquare className="w-4 h-4 inline mr-2" />
                     Message
                   </label>
                   <textarea
                     {...register('message', { required: 'Message is required' })}
                     rows={5}
-                                         className="w-full px-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 placeholder-secondary-400 resize-none"
-                     placeholder="Tell me about your project or question..."
+                    className="w-full px-4 py-3 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-secondary-500 resize-none"
+                    placeholder="Tell me about your project or question..."
                   />
                   {errors.message && (
-                    <p className="mt-1 text-sm text-red-500">{errors.message.message}</p>
+                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.message.message}</p>
                   )}
                 </div>
 

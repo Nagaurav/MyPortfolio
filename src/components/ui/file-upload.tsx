@@ -86,7 +86,7 @@ export function FileUpload({
       </label>
       
       <div className={`relative border-2 border-dashed rounded-lg p-6 transition-colors ${
-        error ? 'border-red-300 bg-red-50 dark:bg-red-900/20' : 'border-secondary-300 bg-secondary-50 dark:border-dark-600 dark:bg-dark-800/50'
+        error ? 'border-red-300 bg-red-50 dark:bg-red-900/20' : 'border-secondary-300 bg-secondary-50 dark:border-secondary-600 dark:bg-secondary-800/50'
       }`}>
         <input
           type="file"
@@ -133,7 +133,7 @@ export function FileUpload({
       )}
 
       {preview && isImage && (
-        <div className="relative rounded-lg overflow-hidden border border-secondary-200 dark:border-dark-600">
+        <div className="relative rounded-lg overflow-hidden border border-secondary-200 dark:border-secondary-600">
           <img
             src={preview}
             alt="Preview"
@@ -142,7 +142,7 @@ export function FileUpload({
           <Button
             variant="ghost"
             size="sm"
-            className="absolute top-2 right-2 bg-white/80 hover:bg-white dark:bg-dark-800/80 dark:hover:bg-dark-700"
+            className="absolute top-2 right-2 bg-white/80 hover:bg-white dark:bg-secondary-800/80 dark:hover:bg-secondary-700"
             onClick={handleRemove}
           >
             <X size={16} />
@@ -151,7 +151,7 @@ export function FileUpload({
       )}
 
       {preview && (isPDF || isDoc) && (
-        <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-dark-800 rounded-lg border border-secondary-200 dark:border-dark-600">
+        <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-800 rounded-lg border border-secondary-200 dark:border-secondary-600">
           <div className="flex items-center space-x-3">
             <FileText size={20} className="text-secondary-400 dark:text-secondary-500" />
             <span className="text-sm text-secondary-600 dark:text-secondary-300">File uploaded successfully</span>

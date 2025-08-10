@@ -128,16 +128,16 @@ export function AdminDashboardPage() {
   return (
     <div className="space-y-6">
       {/* Header */}
-      <div className="bg-white rounded-lg shadow-sm p-6 border border-secondary-200">
-        <h1 className="text-3xl font-bold text-secondary-900">Welcome to Your Portfolio Dashboard</h1>
-        <p className="mt-2 text-secondary-600">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow-sm p-6 border border-secondary-200 dark:border-secondary-700">
+        <h1 className="text-3xl font-bold text-secondary-900 dark:text-white">Welcome to Your Portfolio Dashboard</h1>
+        <p className="mt-2 text-secondary-600 dark:text-secondary-300">
           Manage your portfolio content and keep track of important statistics.
         </p>
         
         {error && (
-          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-md">
-            <p className="text-yellow-800 text-sm">{error}</p>
-            <p className="text-yellow-700 text-xs mt-1">
+          <div className="mt-4 p-4 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-700 rounded-md">
+            <p className="text-yellow-800 dark:text-yellow-200 text-sm">{error}</p>
+            <p className="text-yellow-700 dark:text-yellow-300 text-xs mt-1">
               To connect to your database, create a .env file with your Supabase credentials.
             </p>
           </div>
@@ -150,10 +150,10 @@ export function AdminDashboardPage() {
           Array(5).fill(0).map((_, index) => (
             <div 
               key={index} 
-              className="bg-white p-6 rounded-lg shadow-sm border border-secondary-200 animate-pulse h-32"
+              className="bg-white dark:bg-secondary-800 p-6 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700 animate-pulse h-32"
             >
-              <div className="h-6 bg-secondary-200 rounded mb-4"></div>
-              <div className="h-8 bg-secondary-200 rounded"></div>
+              <div className="h-6 bg-secondary-200 dark:bg-secondary-600 rounded mb-4"></div>
+              <div className="h-8 bg-secondary-200 dark:bg-secondary-600 rounded"></div>
             </div>
           ))
         ) : (
@@ -161,18 +161,18 @@ export function AdminDashboardPage() {
             <Link 
               key={card.title} 
               to={card.link}
-              className="bg-white p-6 rounded-lg shadow-sm border border-secondary-200 transition-all hover:shadow-md hover:border-secondary-300 group"
+              className="bg-white dark:bg-secondary-800 p-6 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700 transition-all hover:shadow-md hover:border-secondary-300 dark:hover:border-secondary-600 group"
             >
               <div className="flex items-start justify-between">
                 <div className={`p-3 rounded-full ${card.bgColor} group-hover:scale-110 transition-transform`}>
                   {card.icon}
                 </div>
                 <div className="text-right">
-                  <p className="text-3xl font-bold text-secondary-900">{card.count}</p>
-                  <p className="text-sm text-secondary-500">{card.title}</p>
+                  <p className="text-3xl font-bold text-secondary-900 dark:text-white">{card.count}</p>
+                  <p className="text-sm text-secondary-500 dark:text-secondary-400">{card.title}</p>
                 </div>
               </div>
-              <p className="mt-4 text-sm text-secondary-600">{card.description}</p>
+              <p className="mt-4 text-sm text-secondary-600 dark:text-secondary-300">{card.description}</p>
             </Link>
           ))
         )}
@@ -181,10 +181,10 @@ export function AdminDashboardPage() {
       {/* Quick Actions and Analytics */}
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         {/* Quick Actions */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-secondary-200">
+        <div className="bg-white dark:bg-secondary-800 p-6 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-secondary-900">Quick Actions</h2>
-            <Plus size={20} className="text-secondary-400" />
+            <h2 className="text-xl font-semibold text-secondary-900 dark:text-white">Quick Actions</h2>
+            <Plus size={20} className="text-secondary-400 dark:text-secondary-500" />
           </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <Button 
@@ -227,32 +227,32 @@ export function AdminDashboardPage() {
         </div>
         
         {/* Analytics Overview */}
-        <div className="bg-white p-6 rounded-lg shadow-sm border border-secondary-200">
+        <div className="bg-white dark:bg-secondary-800 p-6 rounded-lg shadow-sm border border-secondary-200 dark:border-secondary-700">
           <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-secondary-900">Analytics Overview</h2>
+            <h2 className="text-xl font-semibold text-secondary-900 dark:text-white">Analytics Overview</h2>
             <Button 
               variant="ghost" 
               size="sm"
               as={Link}
               to="/admin/analytics"
-              className="text-secondary-600 hover:text-secondary-900"
+              className="text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white"
             >
               <BarChart size={16} className="mr-2" />
               View Details
             </Button>
           </div>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg">
-              <span className="text-sm text-secondary-600">Portfolio Views</span>
-              <span className="text-lg font-semibold text-secondary-900">1,234</span>
+            <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
+              <span className="text-sm text-secondary-600 dark:text-secondary-300">Portfolio Views</span>
+              <span className="text-lg font-semibold text-secondary-900 dark:text-white">1,234</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg">
-              <span className="text-sm text-secondary-600">Contact Submissions</span>
-              <span className="text-lg font-semibold text-secondary-900">56</span>
+            <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
+              <span className="text-sm text-secondary-600 dark:text-secondary-300">Contact Submissions</span>
+              <span className="text-lg font-semibold text-secondary-900 dark:text-white">56</span>
             </div>
-            <div className="flex items-center justify-between p-3 bg-secondary-50 rounded-lg">
-              <span className="text-sm text-secondary-600">Download Rate</span>
-              <span className="text-lg font-semibold text-secondary-900">23%</span>
+            <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
+              <span className="text-sm text-secondary-600 dark:text-secondary-300">Download Rate</span>
+              <span className="text-lg font-semibold text-secondary-900 dark:text-white">23%</span>
             </div>
           </div>
         </div>

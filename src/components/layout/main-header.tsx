@@ -70,7 +70,7 @@ export function MainHeader() {
     <motion.header 
       className={`sticky top-0 z-50 transition-all duration-500 backdrop-blur-md border-b ${
         isScrolled 
-          ? 'bg-white/80 shadow-xl shadow-black/5 py-3 dark:bg-dark-900/80 border-secondary-200/20 dark:border-dark-700/20' 
+          ? 'bg-white/80 shadow-xl shadow-black/5 py-3 dark:bg-secondary-900/80 border-secondary-200/20 dark:border-secondary-700/20' 
           : 'bg-transparent py-4 sm:py-5 border-transparent'
       }`}
       initial={{ y: -100 }}
@@ -149,7 +149,7 @@ export function MainHeader() {
           
           {/* Mobile Menu Button */}
           <motion.button 
-            className="p-2 rounded-lg lg:hidden text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100/50 transition-all duration-300 dark:text-secondary-300 dark:hover:text-white dark:hover:bg-dark-800/50 border border-transparent hover:border-cyan-500/20"
+            className="p-2 rounded-lg lg:hidden text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100/50 transition-all duration-300 dark:text-secondary-300 dark:hover:text-white dark:hover:bg-secondary-800/50 border border-transparent hover:border-cyan-500/20 touch-manipulation"
             onClick={toggleMenu}
             aria-expanded={isMenuOpen}
             aria-label="Toggle menu"
@@ -190,13 +190,13 @@ export function MainHeader() {
       <AnimatePresence>
         {isMenuOpen && (
           <motion.div 
-            className="fixed inset-0 z-40 bg-white/95 backdrop-blur-md dark:bg-dark-900/95 lg:hidden border-t border-secondary-200/20 dark:border-dark-700/20"
+            className="fixed inset-0 z-50 bg-white/95 backdrop-blur-md dark:bg-secondary-900/95 lg:hidden"
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 py-4 sm:py-5 flex justify-between items-center">
+            <div className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 py-4 sm:py-5 flex justify-between items-center border-b border-secondary-200/20 dark:border-secondary-700/20">
               <Link to="/" className="flex items-center" onClick={toggleMenu}>
                 <div className="relative p-2 rounded-lg bg-gradient-to-r from-cyan-500/10 to-blue-600/10 border border-cyan-500/20">
                   <span className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-cyan-500 to-blue-600 bg-clip-text text-transparent">GN</span>
@@ -212,7 +212,7 @@ export function MainHeader() {
                 </Button>
                 <ThemeToggle />
                 <motion.button 
-                  className="p-2 rounded-lg text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100/50 transition-all duration-300 dark:text-secondary-300 dark:hover:text-white dark:hover:bg-dark-800/50 border border-transparent hover:border-cyan-500/20"
+                  className="p-2 rounded-lg text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100/50 transition-all duration-300 dark:text-secondary-300 dark:hover:text-white dark:hover:bg-secondary-800/50 border border-transparent hover:border-cyan-500/20"
                   onClick={toggleMenu}
                   aria-label="Close menu"
                   whileHover={{ scale: 1.05 }}
@@ -222,7 +222,7 @@ export function MainHeader() {
                 </motion.button>
               </div>
             </div>
-            <nav className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 flex flex-col space-y-2 py-8">
+            <nav className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 flex flex-col space-y-1 py-8">
               {navItems.map((item, index) => (
                 <motion.div
                   key={item.to}

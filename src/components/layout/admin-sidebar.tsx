@@ -15,19 +15,19 @@ export function AdminSidebar() {
   const navLinkClasses = ({ isActive }: { isActive: boolean }) => 
     `flex items-center px-4 py-3 text-sm font-medium rounded-md transition-colors ${
       isActive 
-        ? 'bg-primary-100 text-primary-600' 
-        : 'text-secondary-600 hover:text-secondary-900 hover:bg-secondary-100'
+        ? 'bg-primary-100 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400' 
+        : 'text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white hover:bg-secondary-100 dark:hover:bg-secondary-800'
     }`;
   
   return (
-    <div className="w-64 bg-white border-r border-secondary-200 hidden md:block">
+    <div className="w-64 bg-white dark:bg-secondary-800 border-r border-secondary-200 dark:border-secondary-700 hidden md:block">
       <div className="h-full flex flex-col">
-        <div className="px-4 py-6 border-b border-secondary-200">
+        <div className="px-4 py-6 border-b border-secondary-200 dark:border-secondary-700">
           <Link to="/admin" className="flex items-center">
             <span className="text-3xl font-black tracking-tighter bg-gradient-to-r from-primary-600 to-accent-500 bg-clip-text text-transparent font-['Helvetica_Neue'] transform hover:scale-105 transition-transform">
               GN
             </span>
-            <span className="ml-2 text-xl font-bold text-secondary-900">Admin</span>
+            <span className="ml-2 text-xl font-bold text-secondary-900 dark:text-white">Admin</span>
           </Link>
         </div>
         
@@ -61,7 +61,7 @@ export function AdminSidebar() {
             Contact
           </NavLink>
           
-          <div className="pt-4 mt-4 border-t border-secondary-200">
+          <div className="pt-4 mt-4 border-t border-secondary-200 dark:border-secondary-700">
             <NavLink to="/admin/settings" className={navLinkClasses}>
               <Settings size={18} className="mr-3" />
               Settings
@@ -73,10 +73,10 @@ export function AdminSidebar() {
           </div>
         </nav>
         
-        <div className="p-4 border-t border-secondary-200">
+        <div className="p-4 border-t border-secondary-200 dark:border-secondary-700">
           <NavLink 
             to="/" 
-            className="flex items-center text-sm font-medium text-secondary-600 hover:text-secondary-900"
+            className="flex items-center text-sm font-medium text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white"
           >
             View Site
           </NavLink>

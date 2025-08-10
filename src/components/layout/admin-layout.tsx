@@ -7,7 +7,7 @@ export function AdminLayout() {
   const location = useLocation();
 
   return (
-    <div className="flex h-screen bg-secondary-100">
+    <div className="flex h-screen bg-secondary-100 dark:bg-secondary-900">
       <AdminSidebar />
       <div className="flex flex-col flex-1 overflow-hidden">
         <AdminHeader />

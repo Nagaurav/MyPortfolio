@@ -146,7 +146,7 @@ export function SkillsPage() {
               className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                 selectedCategory === null
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                  : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300 hover:bg-gradient-to-r hover:from-cyan-500/20 hover:to-blue-600/20'
+                  : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700 hover:bg-gradient-to-r hover:from-cyan-500/20 hover:to-blue-600/20'
               }`}
             >
               All Skills
@@ -159,7 +159,7 @@ export function SkillsPage() {
                 className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                   selectedCategory === category
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                    : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300 hover:bg-gradient-to-r hover:from-cyan-500/20 hover:to-blue-600/20'
+                    : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700 hover:bg-gradient-to-r hover:from-cyan-500/20 hover:to-blue-600/20'
                 }`}
               >
                 {category}
@@ -181,7 +181,7 @@ export function SkillsPage() {
                 <motion.div
                   key={i}
                   variants={skillCardVariants}
-                  className="h-48 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl animate-pulse"
+                  className="h-48 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-xl animate-pulse"
                 />
               ))
             ) : (

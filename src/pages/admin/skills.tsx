@@ -125,10 +125,10 @@ export function AdminSkillsPage() {
         subtitle="Manage your skills and proficiency levels"
       />
       
-      <div className="bg-white rounded-lg shadow p-6 mb-8">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow p-6 mb-8">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="name" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Skill Name
             </label>
             <input
@@ -138,12 +138,12 @@ export function AdminSkillsPage() {
               {...register('name', { required: 'Skill name is required' })}
             />
             {errors.name && (
-              <p className="mt-1 text-sm text-red-600">{errors.name.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="category" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="category" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Category
             </label>
             <select
@@ -159,12 +159,12 @@ export function AdminSkillsPage() {
               ))}
             </select>
             {errors.category && (
-              <p className="mt-1 text-sm text-red-600">{errors.category.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.category.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="proficiency" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="proficiency" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Proficiency (1-5)
             </label>
             <input
@@ -180,7 +180,7 @@ export function AdminSkillsPage() {
               })}
             />
             {errors.proficiency && (
-              <p className="mt-1 text-sm text-red-600">{errors.proficiency.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.proficiency.message}</p>
             )}
           </div>
           
@@ -209,34 +209,34 @@ export function AdminSkillsPage() {
         </form>
       </div>
       
-      <div className="bg-white rounded-lg shadow overflow-hidden">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow overflow-hidden">
         <div className="p-6">
-          <h3 className="text-lg font-medium text-secondary-900">Skills List</h3>
+          <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Skills List</h3>
         </div>
         
-        <div className="border-t border-secondary-200">
+        <div className="border-t border-secondary-200 dark:border-secondary-700">
           {loading ? (
-            <div className="p-6 text-center">Loading...</div>
+            <div className="p-6 text-center text-secondary-500 dark:text-secondary-400">Loading...</div>
           ) : skills.length > 0 ? (
-            <div className="divide-y divide-secondary-200">
+            <div className="divide-y divide-secondary-200 dark:divide-secondary-700">
               {skills.map((skill) => (
                 <div key={skill.id} className="p-6">
                   <div className="flex items-center justify-between">
                     <div>
                       <div className="flex items-center">
-                        <h4 className="text-lg font-medium text-secondary-900">
+                        <h4 className="text-lg font-medium text-secondary-900 dark:text-white">
                           {skill.name}
                         </h4>
                       </div>
-                      <p className="mt-1 text-sm text-secondary-500">
+                      <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
                         {skill.category}
                       </p>
                       <div className="mt-2">
-                        <div className="flex justify-between text-sm text-secondary-600 mb-1">
+                        <div className="flex justify-between text-sm text-secondary-600 dark:text-secondary-300 mb-1">
                           <span>Proficiency</span>
                           <span>{Math.round((skill.proficiency / 5) * 100)}%</span>
                         </div>
-                        <div className="w-full bg-secondary-200 rounded-full h-2">
+                        <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
                           <div
                             className="bg-primary-600 h-2 rounded-full"
                             style={{ width: `${(skill.proficiency / 5) * 100}%` }}
@@ -265,7 +265,7 @@ export function AdminSkillsPage() {
               ))}
             </div>
           ) : (
-            <div className="p-6 text-center text-secondary-500">
+            <div className="p-6 text-center text-secondary-500 dark:text-secondary-400">
               No skills found. Add your first skill using the form above.
             </div>
           )}

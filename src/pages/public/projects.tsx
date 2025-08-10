@@ -423,7 +423,7 @@ export function ProjectsPage() {
                 className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                   selectedCategory === null
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                    : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300'
+                    : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700'
                 }`}
               >
                 All Categories
@@ -436,7 +436,7 @@ export function ProjectsPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     selectedCategory === category
                       ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                      : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300'
+                      : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700'
                   }`}
                 >
                   {category}
@@ -462,7 +462,7 @@ export function ProjectsPage() {
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
                     selectedTags.includes(tag)
                       ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                      : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300'
+                      : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700'
                   }`}
                 >
                   {tag}
@@ -494,7 +494,7 @@ export function ProjectsPage() {
                 <motion.div
                   key={index}
                   variants={projectCardVariants}
-                  className="h-80 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl animate-pulse"
+                  className="h-80 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-xl animate-pulse"
                 />
               ))
             ) : (

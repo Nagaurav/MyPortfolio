@@ -184,35 +184,35 @@ export function AdminResumePage() {
         subtitle="Manage your resume versions"
       />
       
-      <div className="bg-white rounded-lg shadow p-4 md:p-6 border border-secondary-200">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow p-4 md:p-6 border border-secondary-200 dark:border-secondary-700">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label htmlFor="title" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="title" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Resume Title
             </label>
             <input
               type="text"
               id="title"
-              className="mt-1 w-full px-3 py-2 border border-secondary-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className="mt-1 w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
               {...register('title', { required: 'Resume title is required' })}
             />
             {errors.title && (
-              <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.title.message}</p>
             )}
           </div>
           
           <div>
-            <label htmlFor="version" className="block text-sm font-medium text-secondary-700">
+            <label htmlFor="version" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Version
             </label>
             <input
               type="text"
               id="version"
-              className="mt-1 w-full px-3 py-2 border border-secondary-300 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500"
+              className="mt-1 w-full px-3 py-2 border border-secondary-300 dark:border-secondary-600 rounded-md shadow-sm focus:outline-none focus:ring-primary-500 focus:border-primary-500 bg-white dark:bg-secondary-700 text-secondary-900 dark:text-white"
               {...register('version', { required: 'Version is required' })}
             />
             {errors.version && (
-              <p className="mt-1 text-sm text-red-600">{errors.version.message}</p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.version.message}</p>
             )}
           </div>
           
@@ -230,10 +230,10 @@ export function AdminResumePage() {
             <input
               type="checkbox"
               id="is_active"
-              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 rounded"
+              className="h-4 w-4 text-primary-600 focus:ring-primary-500 border-secondary-300 dark:border-secondary-600 rounded"
               {...register('is_active')}
             />
-            <label htmlFor="is_active" className="ml-2 block text-sm text-secondary-700">
+            <label htmlFor="is_active" className="ml-2 block text-sm text-secondary-700 dark:text-secondary-200">
               Set as Active Resume
             </label>
           </div>
@@ -265,32 +265,32 @@ export function AdminResumePage() {
         </form>
       </div>
       
-      <div className="bg-white rounded-lg shadow overflow-hidden border border-secondary-200">
+      <div className="bg-white dark:bg-secondary-800 rounded-lg shadow overflow-hidden border border-secondary-200 dark:border-secondary-700">
         <div className="p-4 md:p-6">
-          <h3 className="text-lg font-medium text-secondary-900">Resume Versions</h3>
+          <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Resume Versions</h3>
         </div>
         
-        <div className="border-t border-secondary-200">
+        <div className="border-t border-secondary-200 dark:border-secondary-700">
           {loading ? (
-            <div className="p-4 md:p-6 text-center text-secondary-500">Loading...</div>
+            <div className="p-4 md:p-6 text-center text-secondary-500 dark:text-secondary-400">Loading...</div>
           ) : resumes.length > 0 ? (
-            <div className="divide-y divide-secondary-200">
+            <div className="divide-y divide-secondary-200 dark:divide-secondary-700">
               {resumes.map((resume) => (
                 <div key={resume.id} className="p-4 md:p-6">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                     <div>
-                      <h4 className="text-lg font-medium text-secondary-900 flex items-center gap-2">
+                      <h4 className="text-lg font-medium text-secondary-900 dark:text-white flex items-center gap-2">
                         {resume.title}
                         {resume.is_active && (
-                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200">
                             Active
                           </span>
                         )}
                       </h4>
-                      <p className="mt-1 text-sm text-secondary-500">
+                      <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
                         Version: {resume.version}
                       </p>
-                      <p className="mt-1 text-sm text-secondary-500">
+                      <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
                         Added: {new Date(resume.created_at).toLocaleDateString()}
                       </p>
                     </div>
@@ -299,7 +299,7 @@ export function AdminResumePage() {
                         href={resume.file_url}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-700 bg-white border border-secondary-300 rounded-md hover:bg-secondary-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+                        className="inline-flex items-center gap-2 px-3 py-2 text-sm font-medium text-secondary-700 dark:text-secondary-200 bg-white dark:bg-secondary-700 border border-secondary-300 dark:border-secondary-600 rounded-md hover:bg-secondary-50 dark:hover:bg-secondary-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
                       >
                         <Download size={16} />
                         Download
@@ -326,7 +326,7 @@ export function AdminResumePage() {
               ))}
             </div>
           ) : (
-            <div className="p-4 md:p-6 text-center text-secondary-500">
+            <div className="p-4 md:p-6 text-center text-secondary-500 dark:text-secondary-400">
               No resumes found. Add your first resume using the form above.
             </div>
           )}
