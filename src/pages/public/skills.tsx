@@ -1,12 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { motion, useInView } from 'framer-motion';
-import { useRef } from 'react';
-import { ExternalLink, Code2, Database as DatabaseIcon, Server, Smartphone, Wrench, Brain, Zap, Target } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { ExternalLink, Code2, Database as DatabaseIcon, Server, Smartphone, Wrench, Brain } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { SectionHeader } from '../../components/ui/section-header';
-import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
+import { TechCard, GlassCard } from '../../components/ui/3d-card';
 import { TiltCard } from '../../components/ui/3d-tilt-card';
-import { SkillLogo, skillCategories, type SkillCategory } from '../../components/ui/skill-logo';
+
 import { 
   staggerContainerVariants, 
   fadeInUpVariants, 
@@ -14,6 +12,7 @@ import {
   skillCardVariants 
 } from '../../lib/utils';
 import type { Database } from '../../types/database.types';
+import { Background3D } from '../../components/3d-background';
 
 type Skill = Database['public']['Tables']['skills']['Row'];
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -44,7 +43,6 @@ export function SkillsPage() {
   const [skills, setSkills] = useState<SkillWithProjects[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
-  const [hoveredSkill, setHoveredSkill] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchSkills() {
@@ -58,7 +56,7 @@ export function SkillsPage() {
         if (skillsError) throw skillsError;
 
         const skillsWithProjects = await Promise.all(
-          (skillsData || []).map(async (skill) => {
+          (skillsData || []).map(async (skill: Skill) => {
             const { data: projects } = await supabase
               .from('projects')
               .select('*')
@@ -91,15 +89,48 @@ export function SkillsPage() {
 
   return (
     <>
+      {/* Animated 3D Background */}
+      <Background3D variant="minimal" enabled={true} />
+      
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 lg:py-24">
-        <div className="responsive-container">
-          <SectionHeader 
-            title="My Technical Expertise" 
-            subtitle="A comprehensive overview of my skills and technologies I work with"
-            variant="tech"
-            centered
-          />
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
+          <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
+        </div>
+        <motion.div 
+          className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-br from-primary-300/30 to-accent-300/30 rounded-full mix-blend-multiply filter blur-xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, 90, 180, 270, 360],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div 
+          className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 to-primary-400/30 rounded-full mix-blend-multiply filter blur-xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [360, 270, 180, 90, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        
+        <div className="responsive-container relative">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl mx-auto text-center mb-12"
+          >
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="text-secondary-900">My </span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-600 animate-gradient bg-[length:200%_auto]">
+                Technical Expertise
+              </span>
+            </h1>
+            <p className="text-xl text-secondary-600">
+              A comprehensive overview of my skills and technologies I work with
+            </p>
+          </motion.div>
           
           {/* Category Filter */}
           <motion.div 
@@ -115,12 +146,12 @@ export function SkillsPage() {
               className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                 selectedCategory === null
                   ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                  : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300'
+                  : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300 hover:bg-gradient-to-r hover:from-cyan-500/20 hover:to-blue-600/20'
               }`}
             >
               All Skills
             </motion.button>
-            {categories.map((category, index) => (
+            {categories.map((category) => (
               <motion.button
                 key={category}
                 variants={scaleInVariants}
@@ -128,7 +159,7 @@ export function SkillsPage() {
                 className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
                   selectedCategory === category
                     ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                    : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300'
+                    : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300 hover:bg-gradient-to-r hover:from-cyan-500/20 hover:to-blue-600/20'
                 }`}
               >
                 {category}
@@ -142,24 +173,22 @@ export function SkillsPage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6"
+            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-16"
           >
             {loading ? (
               // Loading skeleton
-              Array.from({ length: 6 }).map((_, index) => (
+              Array.from({ length: 6 }).map((_, i) => (
                 <motion.div
-                  key={index}
+                  key={i}
                   variants={skillCardVariants}
                   className="h-48 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl animate-pulse"
                 />
               ))
             ) : (
-              filteredSkills.map((skill, index) => (
+              filteredSkills.map((skill) => (
                 <motion.div
                   key={skill.id}
                   variants={skillCardVariants}
-                  onHoverStart={() => setHoveredSkill(skill.id)}
-                  onHoverEnd={() => setHoveredSkill(null)}
                   className="group"
                 >
                   <TiltCard
@@ -177,11 +206,11 @@ export function SkillsPage() {
                         <div className="flex items-center justify-between">
                           <div className="flex items-center gap-3">
                             <div className={`p-2 rounded-lg bg-gradient-to-r ${CATEGORY_COLORS[skill.category as keyof typeof CATEGORY_COLORS] || 'from-gray-500 to-gray-600'}`}>
-                                                          {CATEGORY_ICONS[skill.category as keyof typeof CATEGORY_ICONS] && 
-                              React.createElement(CATEGORY_ICONS[skill.category as keyof typeof CATEGORY_ICONS], {
-                                className: "w-5 h-5 text-white"
-                              })
-                            }
+                              {CATEGORY_ICONS[skill.category as keyof typeof CATEGORY_COLORS] && 
+                                React.createElement(CATEGORY_ICONS[skill.category as keyof typeof CATEGORY_COLORS], {
+                                  className: "w-5 h-5 text-white"
+                                })
+                              }
                             </div>
                             <div>
                               <h3 className="font-semibold text-secondary-900 dark:text-secondary-100">
@@ -194,7 +223,7 @@ export function SkillsPage() {
                           </div>
                           <div className="text-right">
                             <div className="text-lg font-bold text-cyan-600">
-                              {skill.proficiency}%
+                              {Math.round((skill.proficiency / 5) * 100)}%
                             </div>
                           </div>
                         </div>
@@ -203,25 +232,20 @@ export function SkillsPage() {
                         <div className="space-y-2">
                           <div className="flex justify-between text-sm">
                             <span className="text-secondary-600 dark:text-secondary-400">Proficiency</span>
-                            <span className="text-secondary-700 dark:text-secondary-300">{skill.proficiency}%</span>
+                            <span className="text-secondary-700 dark:text-secondary-300">{Math.round((skill.proficiency / 5) * 100)}%</span>
                           </div>
                           <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2 overflow-hidden">
                             <motion.div
                               className={`h-full bg-gradient-to-r ${CATEGORY_COLORS[skill.category as keyof typeof CATEGORY_COLORS] || 'from-gray-500 to-gray-600'} rounded-full`}
                               initial={{ width: 0 }}
-                              whileInView={{ width: `${skill.proficiency}%` }}
-                              transition={{ duration: 1, delay: index * 0.1 }}
+                              whileInView={{ width: `${(skill.proficiency / 5) * 100}%` }}
+                              transition={{ duration: 1 }}
                               viewport={{ once: true }}
                             />
                           </div>
                         </div>
 
-                        {/* Description */}
-                        {skill.description && (
-                          <p className="text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
-                            {skill.description}
-                          </p>
-                        )}
+                        {/* Description - Removed as it's not in the database schema */}
 
                         {/* Related Projects */}
                         {skill.relatedProjects && skill.relatedProjects.length > 0 && (
@@ -248,13 +272,7 @@ export function SkillsPage() {
                           </div>
                         )}
 
-                        {/* Experience Level */}
-                        {skill.experience_years && (
-                          <div className="flex items-center gap-2 text-sm text-secondary-600 dark:text-secondary-400">
-                            <Target className="w-4 h-4" />
-                            <span>{skill.experience_years} years experience</span>
-                          </div>
-                        )}
+                        {/* Experience Level - Removed as it's not in the database schema */}
                       </div>
                     </TechCard>
                   </TiltCard>
@@ -270,127 +288,24 @@ export function SkillsPage() {
               initial="hidden"
               whileInView="visible"
               viewport={{ once: true }}
-              className="text-center py-12"
+              className="text-center py-20"
             >
-              <div className="text-6xl mb-4">🔧</div>
-              <h3 className="text-xl font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
-                No skills found
-              </h3>
-              <p className="text-secondary-600 dark:text-secondary-400">
-                {selectedCategory 
-                  ? `No skills found in the "${selectedCategory}" category.`
-                  : "No skills have been added yet."
-                }
-              </p>
+              <TiltCard maxTilt={3} scale={1.01} speed={400}>
+                <GlassCard className="max-w-2xl mx-auto p-16">
+                  <div className="text-8xl mb-8">🔧</div>
+                  <h3 className="text-3xl font-semibold text-secondary-700 dark:text-secondary-300 mb-6">
+                    No skills found
+                  </h3>
+                  <p className="text-xl text-secondary-600 dark:text-secondary-400">
+                    {selectedCategory 
+                      ? `No skills found in the "${selectedCategory}" category.`
+                      : "No skills have been added yet."
+                    }
+                  </p>
+                </GlassCard>
+              </TiltCard>
             </motion.div>
           )}
-        </div>
-      </section>
-
-      {/* Professional Skills Grid */}
-      <section className="py-16 bg-secondary-50/50 dark:bg-secondary-900/50">
-        <div className="responsive-container">
-          <SectionHeader 
-            title="Professional Skills" 
-            subtitle="Technologies I work with daily to create exceptional digital experiences"
-            variant="gradient"
-            centered
-          />
-
-          <motion.div
-            variants={staggerContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8"
-          >
-            {Object.entries(skillCategories).map(([category, skills]) => (
-              <motion.div
-                key={category}
-                variants={skillCardVariants}
-                className="space-y-6"
-              >
-                <TiltCard
-                  maxTilt={5}
-                  scale={1.02}
-                  speed={300}
-                  className="h-full"
-                >
-                  <TechCard className="h-full">
-                    <div className="space-y-4">
-                      {/* Category Header */}
-                      <div className="text-center">
-                        <div className="w-12 h-12 mx-auto mb-3 rounded-xl bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center">
-                          {category === 'Frontend' && <Code2 className="w-6 h-6 text-white" />}
-                          {category === 'Backend' && <Server className="w-6 h-6 text-white" />}
-                          {category === 'Database' && <DatabaseIcon className="w-6 h-6 text-white" />}
-                          {category === 'Tools & DevOps' && <Wrench className="w-6 h-6 text-white" />}
-                        </div>
-                        <h3 className="text-lg font-bold text-secondary-900 dark:text-secondary-100">
-                          {category}
-                        </h3>
-                      </div>
-
-                      {/* Skills List */}
-                      <div className="space-y-3">
-                        {skills.map((skill) => (
-                          <div
-                            key={skill}
-                            className="flex items-center gap-3 p-3 rounded-lg bg-white/50 dark:bg-secondary-800/50 hover:bg-white/80 dark:hover:bg-secondary-700/50 transition-all duration-200 skill-tag"
-                          >
-                            <SkillLogo skill={skill} className="w-6 h-6 flex-shrink-0" />
-                            <span className="text-sm font-medium text-secondary-700 dark:text-secondary-300">
-                              {skill}
-                            </span>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </TechCard>
-                </TiltCard>
-              </motion.div>
-            ))}
-          </motion.div>
-
-          {/* Skills Summary */}
-          <motion.div
-            variants={fadeInUpVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="mt-12 text-center"
-          >
-            <TiltCard maxTilt={3} scale={1.01} speed={400}>
-              <GlassCard className="max-w-3xl mx-auto p-8">
-                <div className="flex items-center justify-center gap-8 flex-wrap">
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">
-                      {Object.values(skillCategories).flat().length}+
-                    </div>
-                    <div className="text-sm text-secondary-600 dark:text-secondary-400">
-                      Technologies
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">
-                      {Object.keys(skillCategories).length}
-                    </div>
-                    <div className="text-sm text-secondary-600 dark:text-secondary-400">
-                      Specializations
-                    </div>
-                  </div>
-                  <div className="text-center">
-                    <div className="text-3xl font-bold text-cyan-600 dark:text-cyan-400">
-                      5+
-                    </div>
-                    <div className="text-sm text-secondary-600 dark:text-secondary-400">
-                      Years Experience
-                    </div>
-                  </div>
-                </div>
-              </GlassCard>
-            </TiltCard>
-          </motion.div>
         </div>
       </section>
     </>

@@ -50,8 +50,6 @@ export interface Database {
           user_id?: string
         }
       }
-<<<<<<< HEAD
-=======
       experiences: {
         Row: {
           id: string
@@ -99,7 +97,6 @@ export interface Database {
           updated_at?: string
         }
       }
->>>>>>> 183ebc5 (Initial commit)
       skills: {
         Row: {
           id: string
@@ -230,7 +227,10 @@ export interface Database {
           id: string
           created_at: string
           updated_at: string
-          full_name: string
+          name: string
+          title: string | null
+          location: string | null
+          phone: string | null
           bio: string
           avatar_url: string | null
           email: string | null
@@ -242,7 +242,10 @@ export interface Database {
           id: string
           created_at?: string
           updated_at?: string
-          full_name: string
+          name: string
+          title?: string | null
+          location?: string | null
+          phone?: string | null
           bio: string
           avatar_url?: string | null
           email?: string | null
@@ -254,7 +257,10 @@ export interface Database {
           id?: string
           created_at?: string
           updated_at?: string
-          full_name?: string
+          name?: string
+          title?: string | null
+          location?: string | null
+          phone?: string | null
           bio?: string
           avatar_url?: string | null
           email?: string | null

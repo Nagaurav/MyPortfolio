@@ -201,7 +201,7 @@ export function MainFooter() {
           transition={{ delay: 0.3 }}
         >
           <p className="text-secondary-400 text-xs sm:text-sm text-center sm:text-left">
-            © {currentYear} {profile?.full_name || 'GN'}. All rights reserved.
+            © {currentYear} {profile?.name || 'GN'}. All rights reserved.
           </p>
           <p className="text-secondary-400 text-xs sm:text-sm flex items-center justify-center sm:justify-end">
             Made with 

@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { User, Mail, Github, Linkedin, Twitter, Briefcase } from 'lucide-react';
+import { User, Mail, Github, Linkedin, Twitter, Briefcase, MapPin, Phone } from 'lucide-react';
 import { supabase, supabaseAdmin } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
@@ -12,7 +12,10 @@ import type { Database } from '../../types/database.types';
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
 interface ProfileFormData {
-  full_name: string;
+  name: string;
+  title: string | null;
+  location: string | null;
+  phone: string | null;
   email: string;
   bio: string;
   github_url: string;
@@ -62,7 +65,10 @@ export function AdminSettingsPage() {
             .insert([{
               id: user.id,
               email: user.email,
-              full_name: '',
+              name: '',
+              title: '',
+              location: '',
+              phone: '',
               bio: '',
               github_url: '',
               linkedin_url: '',
@@ -77,7 +83,10 @@ export function AdminSettingsPage() {
 
           reset({
             email: user.email || '',
-            full_name: '',
+            name: '',
+            title: '',
+            location: '',
+            phone: '',
             bio: '',
             github_url: '',
             linkedin_url: '',
@@ -148,21 +157,69 @@ export function AdminSettingsPage() {
       <div className="bg-white dark:bg-dark-800 rounded-lg shadow-md p-6">
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
-            <label htmlFor="full_name" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+            <label htmlFor="name" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Full Name
             </label>
             <div className="mt-1 relative">
               <input
                 type="text"
-                id="full_name"
+                id="name"
                 className="input pl-10"
-                {...register('full_name', { required: 'Full name is required' })}
+                {...register('name', { required: 'Full name is required' })}
               />
               <User className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
             </div>
-            {errors.full_name && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.full_name.message}</p>
+            {errors.name && (
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.name.message}</p>
             )}
+          </div>
+          
+          <div>
+            <label htmlFor="title" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              Professional Title
+            </label>
+            <div className="mt-1 relative">
+              <input
+                type="text"
+                id="title"
+                className="input pl-10"
+                {...register('title')}
+                placeholder="e.g., Senior Software Engineer"
+              />
+              <Briefcase className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
+            </div>
+          </div>
+          
+          <div>
+            <label htmlFor="location" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              Location
+            </label>
+            <div className="mt-1 relative">
+              <input
+                type="text"
+                id="location"
+                className="input pl-10"
+                {...register('location')}
+                placeholder="e.g., San Francisco, CA"
+              />
+              <MapPin className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
+            </div>
+          </div>
+          
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              Phone Number
+            </label>
+            <div className="mt-1 relative">
+              <input
+                type="tel"
+                id="phone"
+                className="input pl-10"
+                {...register('phone')}
+                placeholder="+1 (555) 123-4567"
+              />
+              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400 dark:text-secondary-500" size={18} />
+            </div>
           </div>
           
           <div>

@@ -42,12 +42,12 @@ export function ResumePage() {
         <div className="absolute top-20 right-20 w-72 h-72 bg-primary-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
         <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
         
-        <div className="container relative">
+        <div className="responsive-container relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto text-center px-4"
+            className="max-w-3xl mx-auto text-center"
           >
             <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6">
               <span className="text-secondary-900">My Professional </span>
@@ -62,7 +62,7 @@ export function ResumePage() {
         </div>
       </section>
 
-      <div className="container pb-12 md:pb-20 px-4">
+      <div className="responsive-container pb-12 md:pb-20">
         <div className="max-w-3xl mx-auto">
           {loading ? (
             <div className="bg-white rounded-xl shadow-lg p-6 md:p-8 animate-pulse">

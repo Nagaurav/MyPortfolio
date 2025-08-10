@@ -36,7 +36,7 @@ export function ProjectDetailPage() {
 
   if (loading) {
     return (
-      <div className="container mx-auto px-4 py-12">
+      <div className="responsive-container py-12">
         <div className="animate-pulse">
           <div className="h-8 bg-secondary-200 rounded w-1/3 mb-4"></div>
           <div className="h-96 bg-secondary-200 rounded mb-8"></div>
@@ -52,7 +52,7 @@ export function ProjectDetailPage() {
 
   if (!project) {
     return (
-      <div className="container mx-auto px-4 py-12">
+      <div className="responsive-container py-12">
         <div className="text-center">
           <h2 className="text-2xl font-bold text-secondary-900 mb-4">Project Not Found</h2>
           <p className="text-secondary-600 mb-8">The project you're looking for doesn't exist.</p>
@@ -69,7 +69,7 @@ export function ProjectDetailPage() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       exit={{ opacity: 0, y: -20 }}
-      className="container mx-auto px-4 py-12"
+      className="responsive-container py-12"
     >
       <div className="mb-8">
         <Button

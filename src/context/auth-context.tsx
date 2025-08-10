@@ -26,7 +26,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Check if we're in development mode (no Supabase config)
+  const isDevelopment = !import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY;
+
   useEffect(() => {
+    // If in development mode, skip Supabase initialization
+    if (isDevelopment) {
+      setIsInitialized(true);
+      return;
+    }
+
     // Get initial session from Supabase
     const getInitialSession = async () => {
       try {
@@ -58,7 +67,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, location.pathname]);
+  }, [navigate, location.pathname, isDevelopment]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -121,7 +130,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     user,
     isInitialized,
-    isAuthenticated: !!user,
+    isAuthenticated: isDevelopment ? true : !!user,
     signIn,
     signUp,
     signOut,

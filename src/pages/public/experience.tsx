@@ -232,39 +232,7 @@ export function ExperiencePage() {
           </motion.div>
         )}
 
-        {/* Experience Summary */}
-        {!loading && experiences.length > 0 && (
-          <motion.div 
-            className="mt-16"
-            initial={{ opacity: 0, y: 20 }}
-            whileInView={{ opacity: 1, y: 0 }}
-            viewport={{ once: true }}
-            transition={{ delay: 0.5 }}
-          >
-            <GlassCard className="p-8">
-              <div className="grid md:grid-cols-3 gap-8 text-center">
-                                 <div>
-                   <div className="text-3xl font-bold bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent mb-2">
-                     {experiences.length}
-                   </div>
-                   <div className="text-secondary-600">Total Positions</div>
-                 </div>
-                 <div>
-                   <div className="text-3xl font-bold bg-gradient-to-r from-accent-500 to-primary-700 bg-clip-text text-transparent mb-2">
-                     {new Set(experiences.map(exp => exp.company)).size}
-                   </div>
-                   <div className="text-secondary-600">Companies</div>
-                 </div>
-                 <div>
-                   <div className="text-3xl font-bold bg-gradient-to-r from-primary-400 to-accent-500 bg-clip-text text-transparent mb-2">
-                     {Math.floor((new Date().getTime() - new Date(experiences[experiences.length - 1]?.start_date || Date.now()).getTime()) / (1000 * 60 * 60 * 24 * 365))}
-                   </div>
-                   <div className="text-secondary-600">Years Experience</div>
-                 </div>
-              </div>
-            </GlassCard>
-          </motion.div>
-        )}
+
       </div>
     </>
   );

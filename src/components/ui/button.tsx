@@ -39,10 +39,12 @@ export interface ButtonProps
   asChild?: boolean;
   loading?: boolean;
   ripple?: boolean;
+  leftIcon?: React.ReactNode;
+  rightIcon?: React.ReactNode;
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, loading = false, ripple = true, children, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, loading = false, ripple = true, leftIcon, rightIcon, children, ...props }, ref) => {
     const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
       if (ripple && !loading) {
         const button = e.currentTarget;
@@ -108,7 +110,17 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           initial={{ opacity: 1 }}
           animate={{ opacity: loading ? 0 : 1 }}
         >
+          {leftIcon && (
+            <span className="flex items-center justify-center">
+              {leftIcon}
+            </span>
+          )}
           {children}
+          {rightIcon && (
+            <span className="flex items-center justify-center">
+              {rightIcon}
+            </span>
+          )}
         </motion.span>
       </motion.button>
     );

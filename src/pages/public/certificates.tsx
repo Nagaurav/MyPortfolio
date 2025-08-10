@@ -41,7 +41,7 @@ export function CertificatesPage() {
         <div className="absolute top-20 right-20 w-72 h-72 bg-primary-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
         <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
         
-        <div className="container relative">
+        <div className="responsive-container relative">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -61,7 +61,7 @@ export function CertificatesPage() {
         </div>
       </section>
 
-      <div className="container pb-20">
+      <div className="responsive-container pb-20">
         <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
           {loading ? (
             Array(3).fill(null).map((_, index) => (

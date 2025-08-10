@@ -232,10 +232,14 @@ export function AdminSkillsPage() {
                         {skill.category}
                       </p>
                       <div className="mt-2">
+                        <div className="flex justify-between text-sm text-secondary-600 mb-1">
+                          <span>Proficiency</span>
+                          <span>{Math.round((skill.proficiency / 5) * 100)}%</span>
+                        </div>
                         <div className="w-full bg-secondary-200 rounded-full h-2">
                           <div
                             className="bg-primary-600 h-2 rounded-full"
-                            style={{ width: `${skill.proficiency * 10}%` }}
+                            style={{ width: `${(skill.proficiency / 5) * 100}%` }}
                           ></div>
                         </div>
                       </div>

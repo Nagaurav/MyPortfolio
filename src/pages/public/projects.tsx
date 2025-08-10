@@ -23,11 +23,15 @@ type SortOption = 'date' | 'featured' | 'title';
 export function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
+  const [filterLoading, setFilterLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [allTags, setAllTags] = useState<string[]>([]);
+  const [allCategories, setAllCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [searchLoading, setSearchLoading] = useState(false);
 
   useEffect(() => {
     fetchProjects();
@@ -63,7 +67,15 @@ export function ProjectsPage() {
         return acc.sort();
       }, []) || [];
       
+      const categories = data?.reduce((acc: string[], project) => {
+        if (project.category && !acc.includes(project.category)) {
+          acc.push(project.category);
+        }
+        return acc.sort();
+      }, []) || [];
+      
       setAllTags(tags);
+      setAllCategories(categories);
     } catch (error) {
       console.error('Error fetching projects:', error);
     } finally {
@@ -75,21 +87,41 @@ export function ProjectsPage() {
     const matchesTags = selectedTags.length === 0 || 
       project.tags?.some(tag => selectedTags.includes(tag));
     
+    const matchesCategory = selectedCategory === null || 
+      project.category === selectedCategory;
+    
     const matchesSearch = searchQuery === '' || 
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.short_description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesTags && matchesSearch;
+    return matchesTags && matchesCategory && matchesSearch;
   });
 
   const toggleTag = (tag: string) => {
+    setFilterLoading(true);
     setSelectedTags(prev =>
       prev.includes(tag)
         ? prev.filter(t => t !== tag)
         : [...prev, tag]
     );
+    // Simulate loading for better UX
+    setTimeout(() => setFilterLoading(false), 300);
+  };
+
+  const toggleCategory = (category: string) => {
+    setFilterLoading(true);
+    setSelectedCategory(prev => prev === category ? null : category);
+    // Simulate loading for better UX
+    setTimeout(() => setFilterLoading(false), 300);
+  };
+
+  const handleSearchChange = (query: string) => {
+    setSearchLoading(true);
+    setSearchQuery(query);
+    // Simulate loading for better UX
+    setTimeout(() => setSearchLoading(false), 300);
   };
 
   const ProjectCard = ({ project, index }: { project: Project; index: number }) => (
@@ -266,14 +298,44 @@ export function ProjectsPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="py-16 sm:py-20 lg:py-24">
-        <div className="responsive-container">
-          <SectionHeader 
-            title="Explore My Projects" 
-            subtitle="Discover my latest work and creative solutions across various technologies"
-            variant="tech"
-            centered
-          />
+      <section className="relative py-20 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
+          <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
+        </div>
+        <motion.div 
+          className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-br from-primary-300/30 to-accent-300/30 rounded-full mix-blend-multiply filter blur-xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [0, 90, 180, 270, 360],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        <motion.div 
+          className="absolute bottom-20 left-20 w-72 h-72 bg-gradient-to-br from-accent-300/30 to-primary-400/30 rounded-full mix-blend-multiply filter blur-xl"
+          animate={{
+            scale: [1, 1.1, 1],
+            rotate: [360, 270, 180, 90, 0],
+          }}
+          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
+        />
+        
+        <div className="responsive-container relative">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.6 }}
+            className="max-w-3xl mx-auto text-center"
+          >
+            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+              <span className="text-secondary-900">Explore My </span>
+              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-600 animate-gradient bg-[length:200%_auto]">
+                Projects
+              </span>
+            </h1>
+            <p className="text-xl text-secondary-600">
+              Discover my latest work and creative solutions across various technologies
+            </p>
+          </motion.div>
 
           {/* Search and Filter Controls */}
           <motion.div 
@@ -293,9 +355,14 @@ export function ProjectsPage() {
                 type="text"
                 placeholder="Search projects..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                onChange={(e) => handleSearchChange(e.target.value)}
                 className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-secondary-700 dark:text-secondary-300 placeholder-secondary-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
               />
+              {searchLoading && (
+                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+                  <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
             </motion.div>
 
             {/* View Mode Toggle */}
@@ -341,6 +408,43 @@ export function ProjectsPage() {
             </motion.div>
           </motion.div>
 
+          {/* Category Filter */}
+          {allCategories.length > 0 && (
+            <motion.div 
+              variants={staggerContainerVariants}
+              initial="hidden"
+              whileInView="visible"
+              viewport={{ once: true, margin: "-100px" }}
+              className="flex flex-wrap gap-2 mb-6"
+            >
+              <motion.button
+                variants={scaleInVariants}
+                onClick={() => toggleCategory(null)}
+                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                  selectedCategory === null
+                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
+                    : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300'
+                }`}
+              >
+                All Categories
+              </motion.button>
+              {allCategories.map((category, index) => (
+                <motion.button
+                  key={category}
+                  variants={scaleInVariants}
+                  onClick={() => toggleCategory(category)}
+                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
+                    selectedCategory === category
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
+                      : 'bg-white/10 backdrop-blur-sm border border-white/20 text-secondary-700 hover:bg-white/20 dark:text-secondary-300'
+                  }`}
+                >
+                  {category}
+                </motion.button>
+              ))}
+            </motion.div>
+          )}
+
           {/* Tags Filter */}
           {allTags.length > 0 && (
             <motion.div 
@@ -366,7 +470,12 @@ export function ProjectsPage() {
               ))}
             </motion.div>
           )}
+        </div>
+      </section>
 
+      {/* Content Section */}
+      <div className="responsive-container pb-20">
+        <div className="max-w-3xl mx-auto">
           {/* Projects Grid */}
           <motion.div 
             variants={staggerContainerVariants}
@@ -409,7 +518,7 @@ export function ProjectsPage() {
                 No projects found
               </h3>
               <p className="text-secondary-600 dark:text-secondary-400">
-                {searchQuery || selectedTags.length > 0
+                {searchQuery || selectedTags.length > 0 || selectedCategory
                   ? "Try adjusting your search criteria or filters."
                   : "No projects have been added yet."
                 }
@@ -417,7 +526,7 @@ export function ProjectsPage() {
             </motion.div>
           )}
         </div>
-      </section>
+      </div>
     </>
   );
 }

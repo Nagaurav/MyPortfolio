@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Github, ExternalLink, Mail, Linkedin, Send, Code, Zap, Palette, Target, Download } from 'lucide-react';
+import { ArrowRight, Github, ExternalLink, Mail, Linkedin, Send, Code, Zap, Palette, Target, Download, Code2, Server, DatabaseIcon, Wrench } from 'lucide-react';
 import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -10,6 +10,7 @@ import { SectionHeader } from '../../components/ui/section-header';
 import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
 import { TiltCard } from '../../components/ui/3d-tilt-card';
 import { WordByWordText } from '../../components/ui/word-by-word-text';
+import { SkillLogo } from '../../components/ui/skill-logo';
 import { 
   scrollAnimationVariants, 
   staggerContainerVariants, 
@@ -356,15 +357,7 @@ export function HomePage() {
                       View My Work
                       <ArrowRight className="ml-2 group-hover:translate-x-1 transition-transform duration-300" />
                     </Button>
-                    <Button 
-                      variant="gradient" 
-                      size="lg"
-                      className="group"
-                      onClick={() => window.open('/resume.pdf', '_blank')}
-                    >
-                      <Download size={20} className="mr-2 group-hover:animate-bounce" />
-                      Download Resume
-                    </Button>
+
                     <Button 
                       variant="outline" 
                       size="lg" 
@@ -424,7 +417,7 @@ export function HomePage() {
                 {profile?.avatar_url ? (
                   <img
                     src={profile.avatar_url}
-                    alt={profile.full_name || 'Profile'}
+                    alt={profile.name || 'Profile'}
                     className="w-full h-[500px] object-cover object-center transition-all duration-300"
                   />
                 ) : (
@@ -534,7 +527,7 @@ export function HomePage() {
                     initial="hidden"
                     whileInView="visible"
                     viewport={{ once: true }}
-                    className="space-y-3"
+                    className="grid grid-cols-1 md:grid-cols-2 gap-4"
                   >
                     {loading ? (
                       // Loading skeleton
@@ -542,55 +535,53 @@ export function HomePage() {
                         <motion.div
                           key={index}
                           variants={fadeInUpVariants}
-                          className="flex items-center justify-between p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                          className="p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
                         >
-                          <div className="h-4 bg-secondary-200/50 rounded w-24 animate-pulse"></div>
-                          <div className="w-20 h-2 bg-secondary-200 rounded-full overflow-hidden">
-                            <div className="h-full bg-secondary-200/50 rounded-full animate-pulse"></div>
-                          </div>
+                          <div className="w-8 h-8 mx-auto mb-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 animate-pulse"></div>
+                          <div className="h-4 bg-secondary-200/50 rounded w-20 mx-auto animate-pulse"></div>
                         </motion.div>
                       ))
                     ) : Object.keys(stats.skillCategories).length > 0 ? (
-                      // Real skill categories with counts
+                      // Real skill categories
                       Object.entries(stats.skillCategories).slice(0, 4).map(([category, count], index) => (
                         <motion.div
                           key={category}
                           variants={fadeInUpVariants}
-                          className="flex items-center justify-between p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                          className="text-center p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300"
                         >
-                          <span className="text-secondary-700 dark:text-secondary-300">{category}</span>
-                          <div className="flex items-center gap-2">
-                            <span className="text-xs text-secondary-500">{count} skills</span>
-                            <div className="w-20 h-2 bg-secondary-200 rounded-full overflow-hidden">
-                              <motion.div
-                                className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"
-                                initial={{ width: 0 }}
-                                whileInView={{ width: `${Math.min(90, 60 + count * 5)}%` }}
-                                transition={{ duration: 1, delay: index * 0.2 }}
-                                viewport={{ once: true }}
-                              />
-                            </div>
+                          <div className="w-8 h-8 mx-auto mb-3 rounded-lg bg-gradient-to-r from-cyan-500 to-blue-600 flex items-center justify-center">
+                            {category === 'Frontend' && <Code2 className="w-4 h-4 text-white" />}
+                            {category === 'Backend' && <Server className="w-4 h-4 text-white" />}
+                            {category === 'Database' && <DatabaseIcon className="w-4 h-4 text-white" />}
+                            {category === 'Tools & DevOps' && <Wrench className="w-4 h-4 text-white" />}
+                            {!['Frontend', 'Backend', 'Database', 'Tools & DevOps'].includes(category) && <Code className="w-4 h-4 text-white" />}
                           </div>
+                          <h5 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                            {category}
+                          </h5>
+                          <span className="text-xs text-secondary-500">{count} skills</span>
                         </motion.div>
                       ))
                     ) : (
                       // Fallback when no skills are available
-                      ['Frontend Development', 'Backend Development', 'Database Design', 'DevOps & Cloud'].map((skill, index) => (
+                      [
+                        { name: 'Frontend', icon: Code2, color: 'from-cyan-500 to-blue-600' },
+                        { name: 'Backend', icon: Server, color: 'from-blue-500 to-purple-600' },
+                        { name: 'Database', icon: DatabaseIcon, color: 'from-purple-500 to-pink-600' },
+                        { name: 'DevOps', icon: Wrench, color: 'from-pink-500 to-red-600' }
+                      ].map((skill, index) => (
                         <motion.div
-                          key={skill}
+                          key={skill.name}
                           variants={fadeInUpVariants}
-                          className="flex items-center justify-between p-3 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
+                          className="text-center p-4 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20 hover:bg-white/20 transition-all duration-300"
                         >
-                          <span className="text-secondary-700 dark:text-secondary-300">{skill}</span>
-                          <div className="w-20 h-2 bg-secondary-200 rounded-full overflow-hidden">
-                            <motion.div
-                              className="h-full bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"
-                              initial={{ width: 0 }}
-                              whileInView={{ width: `${85 + Math.random() * 15}%` }}
-                              transition={{ duration: 1, delay: index * 0.2 }}
-                              viewport={{ once: true }}
-                            />
+                          <div className={`w-8 h-8 mx-auto mb-3 rounded-lg bg-gradient-to-r ${skill.color} flex items-center justify-center`}>
+                            <skill.icon className="w-4 h-4 text-white" />
                           </div>
+                          <h5 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-1">
+                            {skill.name}
+                          </h5>
+                          <span className="text-xs text-secondary-500">Coming soon</span>
                         </motion.div>
                       ))
                     )}

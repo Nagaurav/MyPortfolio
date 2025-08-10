@@ -1,5 +1,6 @@
 import { Suspense, lazy } from 'react';
-import { Routes, Route } from 'react-router-dom';
+import { Routes, Route, useLocation } from 'react-router-dom';
+import { AnimatePresence, motion } from 'framer-motion';
 import { MainLayout } from './components/layout/main-layout';
 import { AdminLayout } from './components/layout/admin-layout';
 import { ProtectedRoute } from './components/auth/protected-route';
@@ -25,7 +26,7 @@ const AdminSkillsPage = lazy(() => import('./pages/admin/skills').then(module =>
 const AdminExperiencePage = lazy(() => import('./pages/admin/experience').then(module => ({ default: module.AdminExperiencePage })));
 const AdminCertificatesPage = lazy(() => import('./pages/admin/certificates').then(module => ({ default: module.AdminCertificatesPage })));
 const AdminContactPage = lazy(() => import('./pages/admin/contact').then(module => ({ default: module.AdminContactPage })));
-const AdminResumePage = lazy(() => import('./pages/admin/resumes').then(module => ({ default: module.AdminResumePage })));
+const AdminResumePage = lazy(() => import('./pages/admin/resume').then(module => ({ default: module.AdminResumePage })));
 const AdminAnalyticsPage = lazy(() => import('./pages/admin/analytics').then(module => ({ default: module.AdminAnalyticsPage })));
 const AdminSettingsPage = lazy(() => import('./pages/admin/settings').then(module => ({ default: module.AdminSettingsPage })));
 
@@ -36,6 +37,18 @@ const SuspenseFallback = () => (
   </div>
 );
 
+// Page transition wrapper
+const PageTransition = ({ children }: { children: React.ReactNode }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    exit={{ opacity: 0, y: -20 }}
+    transition={{ duration: 0.3, ease: "easeInOut" }}
+  >
+    {children}
+  </motion.div>
+);
+
 function App() {
   return (
     <div className="min-h-screen text-secondary-900 dark:text-white transition-colors duration-300">
@@ -43,24 +56,32 @@ function App() {
         <Routes>
           {/* Public Routes */}
           <Route path="/" element={<MainLayout />}>
-            <Route index element={<HomePage />} />
-            <Route path="projects" element={<ProjectsPage />} />
-            <Route path="projects/:id" element={<ProjectDetailPage />} />
-            <Route path="skills" element={<SkillsPage />} />
-            <Route path="experience" element={<ExperiencePage />} />
-            <Route path="certificates" element={<CertificatesPage />} />
-            <Route path="contact" element={<ContactPage />} />
-            <Route path="resume" element={<ResumePage />} />
+            <Route index element={<PageTransition><HomePage /></PageTransition>} />
+            <Route path="projects" element={<PageTransition><ProjectsPage /></PageTransition>} />
+            <Route path="projects/:id" element={<PageTransition><ProjectDetailPage /></PageTransition>} />
+            <Route path="skills" element={<PageTransition><SkillsPage /></PageTransition>} />
+            <Route path="experience" element={<PageTransition><ExperiencePage /></PageTransition>} />
+            <Route path="certificates" element={<PageTransition><CertificatesPage /></PageTransition>} />
+            <Route path="contact" element={<PageTransition><ContactPage /></PageTransition>} />
+            <Route path="resume" element={<PageTransition><ResumePage /></PageTransition>} />
           </Route>
 
           {/* Admin Routes */}
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="login" element={<AdminLoginPage />} />
             <Route
+              index
+              element={
+                <ProtectedRoute>
+                  <PageTransition><AdminDashboardPage /></PageTransition>
+                </ProtectedRoute>
+              }
+            />
+            <Route
               path="dashboard"
               element={
                 <ProtectedRoute>
-                  <AdminDashboardPage />
+                  <PageTransition><AdminDashboardPage /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -68,7 +89,7 @@ function App() {
               path="projects"
               element={
                 <ProtectedRoute>
-                  <AdminProjectsPage />
+                  <PageTransition><AdminProjectsPage /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -76,7 +97,7 @@ function App() {
               path="skills"
               element={
                 <ProtectedRoute>
-                  <AdminSkillsPage />
+                  <PageTransition><AdminSkillsPage /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -84,7 +105,7 @@ function App() {
               path="experience"
               element={
                 <ProtectedRoute>
-                  <AdminExperiencePage />
+                  <PageTransition><AdminExperiencePage /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -92,7 +113,7 @@ function App() {
               path="certificates"
               element={
                 <ProtectedRoute>
-                  <AdminCertificatesPage />
+                  <PageTransition><AdminCertificatesPage /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -100,15 +121,15 @@ function App() {
               path="contact"
               element={
                 <ProtectedRoute>
-                  <AdminContactPage />
+                  <PageTransition><AdminContactPage /></PageTransition>
                 </ProtectedRoute>
               }
             />
             <Route
-              path="resumes"
+              path="resume"
               element={
                 <ProtectedRoute>
-                  <AdminResumePage />
+                  <PageTransition><AdminResumePage /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -116,7 +137,7 @@ function App() {
               path="analytics"
               element={
                 <ProtectedRoute>
-                  <AdminAnalyticsPage />
+                  <PageTransition><AdminAnalyticsPage /></PageTransition>
                 </ProtectedRoute>
               }
             />
@@ -124,7 +145,7 @@ function App() {
               path="settings"
               element={
                 <ProtectedRoute>
-                  <AdminSettingsPage />
+                  <PageTransition><AdminSettingsPage /></PageTransition>
                 </ProtectedRoute>
               }
             />
