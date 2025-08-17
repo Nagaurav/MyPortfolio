@@ -51,27 +51,7 @@ export function AdminResumePage() {
     try {
       // Check if Supabase is configured
       if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        // Show sample data for development
-        setResumes([
-          {
-            id: '1',
-            title: 'Software Developer Resume',
-            version: '2024',
-            file_url: 'https://example.com/resume.pdf',
-            is_active: true,
-            user_id: 'dev-user',
-            created_at: new Date().toISOString(),
-          },
-          {
-            id: '2',
-            title: 'Frontend Developer Resume',
-            version: '2023',
-            file_url: 'https://example.com/resume-2023.pdf',
-            is_active: false,
-            user_id: 'dev-user',
-            created_at: new Date().toISOString(),
-          }
-        ]);
+        setError('Supabase not configured. Please check your environment variables.');
         setLoading(false);
         return;
       }
@@ -96,24 +76,7 @@ export function AdminResumePage() {
     try {
       // Check if Supabase is configured
       if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        // Simulate success in development mode
-        if (editingResume) {
-          setResumes(prev => prev.map(r => 
-            r.id === editingResume.id ? { ...r, ...data } : r
-          ));
-          toast.success('Resume updated successfully');
-        } else {
-          const newResume = {
-            id: Date.now().toString(),
-            ...data,
-            user_id: 'dev-user',
-            created_at: new Date().toISOString(),
-          };
-          setResumes(prev => [newResume, ...prev]);
-          toast.success('Resume created successfully');
-        }
-        reset();
-        setEditingResume(null);
+        toast.error('Supabase not configured. Please check your environment variables.');
         return;
       }
 
@@ -152,9 +115,7 @@ export function AdminResumePage() {
     try {
       // Check if Supabase is configured
       if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        // Simulate deletion in development mode
-        setResumes(prev => prev.filter(r => r.id !== id));
-        toast.success('Resume deleted successfully');
+        toast.error('Supabase not configured. Please check your environment variables.');
         return;
       }
 

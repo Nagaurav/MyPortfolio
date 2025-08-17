@@ -51,14 +51,24 @@ export function FileUpload({
         reader.readAsDataURL(file);
       }
 
-      // For development, create a mock URL
-      // In production, this would upload to Supabase Storage
-      const mockUrl = URL.createObjectURL(file);
-      
-      // Simulate upload delay
-      await new Promise(resolve => setTimeout(resolve, 1000));
-      
-      onUpload(mockUrl);
+      // Upload to Supabase Storage
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${Math.random()}.${fileExt}`;
+      const filePath = `${folder}/${fileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from(bucket)
+        .upload(filePath, file);
+
+      if (uploadError) {
+        throw uploadError;
+      }
+
+      const { data: { publicUrl } } = supabase.storage
+        .from(bucket)
+        .getPublicUrl(filePath);
+
+      onUpload(publicUrl);
     } catch (error) {
       console.error('Error uploading file:', error);
       setError('Error uploading file. Please try again.');

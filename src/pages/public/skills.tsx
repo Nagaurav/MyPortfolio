@@ -138,7 +138,7 @@ export function SkillsPage() {
             initial="hidden"
             whileInView="visible"
             viewport={{ once: true, margin: "-100px" }}
-            className="flex flex-wrap justify-center gap-4 mb-12"
+            className="flex flex-col items-center gap-4 mb-12"
           >
             <motion.button
               variants={scaleInVariants}
@@ -151,20 +151,22 @@ export function SkillsPage() {
             >
               All Skills
             </motion.button>
-            {categories.map((category) => (
-              <motion.button
-                key={category}
-                variants={scaleInVariants}
-                onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
-                  selectedCategory === category
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                    : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700 hover:bg-gradient-to-r hover:from-cyan-500/20 hover:to-blue-600/20'
-                }`}
-              >
-                {category}
-              </motion.button>
-            ))}
+            <div className="flex flex-wrap justify-center gap-4">
+              {categories.map((category) => (
+                <motion.button
+                  key={category}
+                  variants={scaleInVariants}
+                  onClick={() => setSelectedCategory(category)}
+                  className={`px-6 py-3 rounded-full font-semibold transition-all duration-300 ${
+                    selectedCategory === category
+                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
+                      : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700 hover:bg-gradient-to-r hover:from-cyan-500/20 hover:to-blue-600/20'
+                  }`}
+                >
+                  {category}
+                </motion.button>
+              ))}
+            </div>
           </motion.div>
 
           {/* Skills Grid */}

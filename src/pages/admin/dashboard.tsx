@@ -30,14 +30,7 @@ export function AdminDashboardPage() {
         
         // Check if Supabase is properly configured
         if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-          // Show sample data for development
-          setCounts({
-            projects: 5,
-            skills: 12,
-            certificates: 8,
-            resumes: 3,
-            unreadMessages: 2,
-          });
+          setError('Supabase not configured. Please check your environment variables.');
           setLoading(false);
           return;
         }
@@ -65,15 +58,7 @@ export function AdminDashboardPage() {
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
-        setError('Failed to fetch dashboard data. Using sample data instead.');
-        // Fallback to sample data
-        setCounts({
-          projects: 5,
-          skills: 12,
-          certificates: 8,
-          resumes: 3,
-          unreadMessages: 2,
-        });
+        setError('Failed to fetch dashboard data. Please check your connection.');
       } finally {
         setLoading(false);
       }
