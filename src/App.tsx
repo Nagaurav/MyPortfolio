@@ -66,9 +66,11 @@ function App() {
             <Route path="resume" element={<PageTransition><ResumePage /></PageTransition>} />
           </Route>
 
-          {/* Admin Routes */}
+          {/* Admin Login Route (outside AdminLayout) */}
+          <Route path="/admin/login" element={<AdminLoginPage />} />
+          
+          {/* Admin Routes (inside AdminLayout) */}
           <Route path="/admin" element={<AdminLayout />}>
-            <Route path="login" element={<AdminLoginPage />} />
             <Route
               index
               element={

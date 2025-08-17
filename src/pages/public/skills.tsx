@@ -47,6 +47,8 @@ export function SkillsPage() {
   useEffect(() => {
     async function fetchSkills() {
       try {
+        // For portfolio display, we'll show all skills (assuming they're all yours)
+        // If you want to restrict to specific user, you can add .eq('user_id', 'your-user-id')
         const { data: skillsData, error: skillsError } = await supabase
           .from('skills')
           .select('*')
@@ -54,6 +56,8 @@ export function SkillsPage() {
           .order('proficiency', { ascending: false });
 
         if (skillsError) throw skillsError;
+
+        console.log('Fetched skills data:', skillsData); // Debug log
 
         const skillsWithProjects = await Promise.all(
           (skillsData || []).map(async (skill: Skill) => {
@@ -70,9 +74,14 @@ export function SkillsPage() {
           })
         );
 
+        console.log('Skills with projects:', skillsWithProjects); // Debug log
         setSkills(skillsWithProjects);
       } catch (error) {
         console.error('Error fetching skills:', error);
+        console.error('Error details:', {
+          message: error instanceof Error ? error.message : 'Unknown error',
+          stack: error instanceof Error ? error.stack : undefined
+        });
       } finally {
         setLoading(false);
       }
