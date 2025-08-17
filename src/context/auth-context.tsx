@@ -59,7 +59,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, location.pathname, isDevelopment]);
+  }, [navigate, location.pathname]);
 
   const signIn = async (email: string, password: string) => {
     try {
@@ -122,7 +122,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     session,
     user,
     isInitialized,
-    isAuthenticated: isDevelopment ? true : !!user,
+    isAuthenticated: !!user,
     signIn,
     signUp,
     signOut,
