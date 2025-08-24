@@ -40,9 +40,15 @@ export function FileUpload({
         return;
       }
 
+      // Validate file type for images
+      if (accept.includes('image') && !file.type.startsWith('image/')) {
+        setError('Please select a valid image file (JPEG, PNG, GIF, etc.)');
+        return;
+      }
+
       setUploading(true);
 
-      // Create a preview for images
+      // Create a preview for images (including JPEG, PNG, GIF, etc.)
       if (file.type.startsWith('image/')) {
         const reader = new FileReader();
         reader.onloadend = () => {
@@ -86,6 +92,7 @@ export function FileUpload({
   };
 
   const isImage = accept.includes('image');
+  const isJPEG = accept.includes('jpeg') || accept.includes('jpg') || accept.includes('image');
   const isPDF = accept.includes('pdf');
   const isDoc = accept.includes('doc') || accept.includes('docx');
 
@@ -129,7 +136,7 @@ export function FileUpload({
               )}
             </p>
             <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-              {isImage && 'PNG, JPG, GIF up to 5MB'}
+              {isImage && 'PNG, JPEG, JPG, GIF, WebP up to 5MB'}
               {isPDF && 'PDF files up to 10MB'}
               {isDoc && 'DOC, DOCX files up to 5MB'}
               {!isImage && !isPDF && !isDoc && 'All file types supported'}

@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-import { Award, ExternalLink } from 'lucide-react';
+import { Award, ExternalLink, Eye } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { SectionHeader } from '../../components/ui/section-header';
+import { Modal } from '../../components/ui/modal';
 import type { Database } from '../../types/database.types';
 
 type Certificate = Database['public']['Tables']['certificates']['Row'];
@@ -10,6 +11,8 @@ type Certificate = Database['public']['Tables']['certificates']['Row'];
 export function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
+  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   useEffect(() => {
     async function fetchCertificates() {
@@ -30,6 +33,16 @@ export function CertificatesPage() {
 
     fetchCertificates();
   }, []);
+
+  const handleImageClick = (certificate: Certificate) => {
+    setSelectedCertificate(certificate);
+    setIsModalOpen(true);
+  };
+
+  const closeModal = () => {
+    setIsModalOpen(false);
+    setSelectedCertificate(null);
+  };
 
   return (
     <>
@@ -85,13 +98,28 @@ export function CertificatesPage() {
                 className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
               >
                 {certificate.certificate_url ? (
-                  <div className="relative h-48">
+                  <div className="relative h-48 cursor-pointer group">
                     <img
                       src={certificate.certificate_url}
                       alt={certificate.title}
                       className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
+                      onClick={() => handleImageClick(certificate)}
                     />
                     <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
+                    
+                    {/* Click indicator overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <div className="bg-white/90 dark:bg-dark-800/90 rounded-full p-3 shadow-lg">
+                        <Eye size={24} className="text-primary-600" />
+                      </div>
+                    </div>
+                    
+                    {/* Click hint text */}
+                    <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                      <span className="text-white text-sm font-medium bg-black/50 px-2 py-1 rounded">
+                        Click to preview
+                      </span>
+                    </div>
                   </div>
                 ) : (
                   <div className="h-48 bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center">
@@ -111,17 +139,31 @@ export function CertificatesPage() {
                       <p>Expires: {new Date(certificate.expiry_date).toLocaleDateString()}</p>
                     )}
                   </div>
-                  {certificate.credential_url && (
-                    <a
-                      href={certificate.credential_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="inline-flex items-center text-primary-600 hover:text-primary-700 transition-colors"
-                    >
-                      View Credential
-                      <ExternalLink size={16} className="ml-2" />
-                    </a>
-                  )}
+                  
+                  {/* Action buttons */}
+                  <div className="flex flex-col sm:flex-row gap-3">
+                    {certificate.credential_url && (
+                      <a
+                        href={certificate.credential_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                      >
+                        Verify Credential ↗
+                        <ExternalLink size={16} className="ml-2" />
+                      </a>
+                    )}
+                    
+                    {certificate.certificate_url && (
+                      <button
+                        onClick={() => handleImageClick(certificate)}
+                        className="inline-flex items-center justify-center px-4 py-2 bg-secondary-100 hover:bg-secondary-200 text-secondary-700 font-medium rounded-lg transition-colors duration-200"
+                      >
+                        <Eye size={16} className="mr-2" />
+                        Preview
+                      </button>
+                    )}
+                  </div>
                 </div>
               </motion.div>
             ))
@@ -133,6 +175,74 @@ export function CertificatesPage() {
           )}
         </div>
       </div>
+
+      {/* Certificate Preview Modal */}
+      <Modal
+        isOpen={isModalOpen}
+        onClose={closeModal}
+        title={selectedCertificate?.title}
+      >
+        {selectedCertificate && (
+          <div className="space-y-6">
+            {/* Certificate Image */}
+            {selectedCertificate.certificate_url && (
+              <div className="flex justify-center">
+                <img
+                  src={selectedCertificate.certificate_url}
+                  alt={selectedCertificate.title}
+                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                />
+              </div>
+            )}
+            
+            {/* Certificate Details */}
+            <div className="bg-secondary-50 dark:bg-dark-700 rounded-lg p-4">
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="font-medium text-secondary-700 dark:text-secondary-300">Issuer:</span>
+                  <p className="text-secondary-900 dark:text-secondary-100">{selectedCertificate.issuer}</p>
+                </div>
+                <div>
+                  <span className="font-medium text-secondary-700 dark:text-secondary-300">Issue Date:</span>
+                  <p className="text-secondary-900 dark:text-secondary-100">
+                    {new Date(selectedCertificate.issue_date).toLocaleDateString()}
+                  </p>
+                </div>
+                {selectedCertificate.expiry_date && (
+                  <div>
+                    <span className="font-medium text-secondary-700 dark:text-secondary-300">Expiry Date:</span>
+                    <p className="text-secondary-900 dark:text-secondary-100">
+                      {new Date(selectedCertificate.expiry_date).toLocaleDateString()}
+                    </p>
+                  </div>
+                )}
+              </div>
+            </div>
+            
+            {/* Action Buttons */}
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              {selectedCertificate.credential_url && (
+                <a
+                  href={selectedCertificate.credential_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
+                >
+                  Verify Credential ↗
+                  <ExternalLink size={18} className="ml-2" />
+                </a>
+              )}
+              
+              <button
+                onClick={closeModal}
+                className="inline-flex items-center justify-center px-6 py-3 bg-secondary-200 hover:bg-secondary-300 text-secondary-700 font-medium rounded-lg transition-colors duration-200"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </>
   );
 }

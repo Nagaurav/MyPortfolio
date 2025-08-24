@@ -151,59 +151,68 @@ export function ExperiencePage() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
                       <div className="flex-1">
                         <motion.h3 
-                          className="text-2xl font-bold bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent mb-2"
+                          className="text-2xl font-bold text-secondary-900 dark:text-white mb-2"
                           whileHover={{ scale: 1.02 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
                           {experience.title}
                         </motion.h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
-                                                     <motion.div 
-                             className="flex items-center text-secondary-600 p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
-                             whileHover={{ scale: 1.05, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                             transition={{ type: "spring", stiffness: 300 }}
-                           >
-                             <Building2 size={16} className="mr-2 text-primary-500" />
-                            {experience.company}
+                          <motion.div 
+                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-dark-700 border border-secondary-200 dark:border-dark-600"
+                            whileHover={{ scale: 1.02, backgroundColor: 'rgb(241, 245, 249)', borderColor: 'rgb(148, 163, 184)' }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <Building2 size={18} className="mr-3 text-primary-600" />
+                            <span className="font-medium">{experience.company}</span>
                           </motion.div>
-                                                     <motion.div 
-                             className="flex items-center text-secondary-600 p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
-                             whileHover={{ scale: 1.05, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                             transition={{ type: "spring", stiffness: 300 }}
-                           >
-                             <MapPin size={16} className="mr-2 text-primary-500" />
-                            {experience.location}
+                          <motion.div 
+                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-dark-700 border border-secondary-200 dark:border-dark-600"
+                            whileHover={{ scale: 1.02, backgroundColor: 'rgb(241, 245, 249)', borderColor: 'rgb(148, 163, 184)' }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <MapPin size={18} className="mr-3 text-primary-600" />
+                            <span className="font-medium">{experience.location}</span>
                           </motion.div>
-                                                     <motion.div 
-                             className="flex items-center text-secondary-600 p-2 rounded-lg bg-white/10 backdrop-blur-sm border border-white/20"
-                             whileHover={{ scale: 1.05, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                             transition={{ type: "spring", stiffness: 300 }}
-                           >
-                             <Clock size={16} className="mr-2 text-primary-500" />
-                            {format(new Date(experience.start_date), 'MMM yyyy')} -{' '}
-                            {experience.current
-                              ? 'Present'
-                              : format(new Date(experience.end_date!), 'MMM yyyy')}
+                          <motion.div 
+                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-dark-700 border border-secondary-200 dark:border-dark-600"
+                            whileHover={{ scale: 1.02, backgroundColor: 'rgb(241, 245, 249)', borderColor: 'rgb(148, 163, 184)' }}
+                            transition={{ type: "spring", stiffness: 300 }}
+                          >
+                            <Clock size={18} className="mr-3 text-primary-600" />
+                            <span className="font-medium">
+                              {format(new Date(experience.start_date), 'MMM yyyy')} -{' '}
+                              {experience.current
+                                ? 'Present'
+                                : format(new Date(experience.end_date!), 'MMM yyyy')}
+                            </span>
                           </motion.div>
                         </div>
                       </div>
-                                             <motion.span 
-                         className="mt-4 md:mt-0 px-4 py-2 rounded-full text-sm font-medium bg-gradient-to-r from-primary-500 to-accent-600 text-white shadow-lg"
-                         whileHover={{ scale: 1.05 }}
-                         transition={{ type: "spring", stiffness: 300 }}
-                       >
-                        {experience.type}
-                      </motion.span>
+                        <motion.span 
+                          className="mt-4 md:mt-0 px-4 py-2 rounded-full text-sm font-semibold bg-primary-600 hover:bg-primary-700 text-white shadow-lg border border-primary-500/20"
+                          whileHover={{ scale: 1.05, y: -2 }}
+                          transition={{ type: "spring", stiffness: 300 }}
+                        >
+                          {experience.type}
+                        </motion.span>
                     </div>
 
-                    <motion.p 
-                      className="text-secondary-600 whitespace-pre-line mb-6 leading-relaxed"
+                    <motion.div 
+                      className="mb-6"
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       transition={{ delay: 0.3 }}
                     >
-                      {experience.description}
-                    </motion.p>
+                      <h4 className="text-lg font-semibold text-secondary-800 dark:text-secondary-200 mb-3">
+                        Key Responsibilities & Achievements
+                      </h4>
+                      <div className="prose prose-secondary dark:prose-invert max-w-none">
+                        <p className="text-secondary-700 dark:text-secondary-300 whitespace-pre-line leading-relaxed text-base">
+                          {experience.description}
+                        </p>
+                      </div>
+                    </motion.div>
 
                     {experience.technologies && experience.technologies.length > 0 && (
                       <div className="border-t border-white/20 pt-4">
