@@ -5,7 +5,7 @@ import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
-import { FileUpload } from '../../components/ui/file-upload';
+
 import type { Database } from '../../types/database.types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -14,8 +14,7 @@ interface ProjectFormData {
   title: string;
   description: string;
   short_description: string;
-  tags: string;
-  image_url: string;
+  tech_stack: string;
   github_url: string;
   live_url: string;
   featured: boolean;
@@ -35,7 +34,7 @@ export function AdminProjectsPage() {
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormData>();
 
-  const imageUrl = watch('image_url');
+
   
   useEffect(() => {
     fetchProjects();
@@ -46,8 +45,8 @@ export function AdminProjectsPage() {
       setValue('title', editingProject.title);
       setValue('description', editingProject.description);
       setValue('short_description', editingProject.short_description || '');
-      setValue('tags', editingProject.tags?.join(', ') || '');
-      setValue('image_url', editingProject.image_url || '');
+      setValue('tech_stack', editingProject.tech_stack?.join(', ') || '');
+
       setValue('github_url', editingProject.github_url || '');
       setValue('live_url', editingProject.live_url || '');
       setValue('featured', editingProject.featured);
@@ -74,36 +73,77 @@ export function AdminProjectsPage() {
   
   const onSubmit = async (data: ProjectFormData) => {
     try {
+      console.log('Form data being submitted:', data);
+      
+      // Validate required fields
+      if (!data.title || !data.description) {
+        toast.error('Title and Description are required fields');
+        return;
+      }
+
       const projectData = {
         ...data,
-        tags: data.tags.split(',').map(tag => tag.trim()).filter(Boolean),
+        tech_stack: data.tech_stack ? data.tech_stack.split(',').map(tech => tech.trim()).filter(Boolean) : [],
       };
+
+      console.log('Processed project data:', projectData);
       
       if (editingProject) {
-        const { error } = await supabase
+        console.log('Updating project with ID:', editingProject.id);
+        const { data: updateResult, error } = await supabase
           .from('projects')
           .update(projectData)
-          .eq('id', editingProject.id);
+          .eq('id', editingProject.id)
+          .select();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase update error:', error);
+          throw error;
+        }
         
+        console.log('Update result:', updateResult);
         toast.success('Project updated successfully');
       } else {
-        const { error } = await supabase
+        console.log('Creating new project');
+        const { data: userData } = await supabase.auth.getUser();
+        
+        if (!userData.user?.id) {
+          toast.error('User not authenticated');
+          return;
+        }
+
+        const { data: insertResult, error } = await supabase
           .from('projects')
-          .insert([{ ...projectData, user_id: (await supabase.auth.getUser()).data.user?.id }]);
+          .insert([{ ...projectData, user_id: userData.user.id }])
+          .select();
         
-        if (error) throw error;
+        if (error) {
+          console.error('Supabase insert error:', error);
+          throw error;
+        }
         
+        console.log('Insert result:', insertResult);
         toast.success('Project created successfully');
       }
       
       reset();
       setEditingProject(null);
       fetchProjects();
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error saving project:', error);
-      toast.error('Failed to save project');
+      
+      // Provide more specific error messages
+      if (error.code === '23505') {
+        toast.error('A project with this title already exists');
+      } else if (error.code === '23502') {
+        toast.error('Missing required fields. Please check your input.');
+      } else if (error.code === '23503') {
+        toast.error('Invalid user reference. Please try logging in again.');
+      } else if (error.message) {
+        toast.error(`Error: ${error.message}`);
+      } else {
+        toast.error('Failed to save project. Please check the console for details.');
+      }
     }
   };
   
@@ -126,9 +166,7 @@ export function AdminProjectsPage() {
     }
   };
 
-  const handleImageUpload = (url: string) => {
-    setValue('image_url', url);
-  };
+
   
   return (
     <div>
@@ -160,47 +198,52 @@ export function AdminProjectsPage() {
             </label>
             <textarea
               id="description"
-              rows={4}
-              className="mt-1 input"
+              rows={8}
+              className="mt-1 input resize-y"
+              placeholder="Write a detailed description of your project, including technologies used, challenges faced, and key features implemented..."
               {...register('description', { required: 'Description is required' })}
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description.message}</p>
             )}
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Provide a comprehensive description that showcases your project's technical details and achievements.
+            </p>
           </div>
           
           <div>
             <label htmlFor="short_description" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Short Description
             </label>
-            <input
-              type="text"
+            <textarea
               id="short_description"
-              className="mt-1 input"
+              rows={3}
+              className="mt-1 input resize-y"
+              placeholder="A brief summary of your project (2-3 sentences) that will appear in project cards and previews..."
               {...register('short_description')}
             />
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Keep this concise but informative for project previews and summaries.
+            </p>
           </div>
           
           <div>
-            <label htmlFor="tags" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
-              Tags (comma-separated)
+            <label htmlFor="tech_stack" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              Tech Stack (comma-separated)
             </label>
             <input
               type="text"
-              id="tags"
+              id="tech_stack"
               className="mt-1 input"
-              {...register('tags')}
+              placeholder="React, TypeScript, Tailwind CSS, Supabase"
+              {...register('tech_stack')}
             />
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Separate multiple technologies with commas. Tech stack helps showcase the technologies used in your project.
+            </p>
           </div>
           
-          <FileUpload
-            onUpload={handleImageUpload}
-            accept="image/*"
-            bucket="projects"
-            folder="images"
-            currentFile={imageUrl}
-            label="Project Image"
-          />
+
           
           <div>
             <label htmlFor="github_url" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
@@ -210,8 +253,12 @@ export function AdminProjectsPage() {
               type="url"
               id="github_url"
               className="mt-1 input"
+              placeholder="https://github.com/username/project-name"
               {...register('github_url')}
             />
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Optional: Link to your project's GitHub repository
+            </p>
           </div>
           
           <div>
@@ -222,8 +269,12 @@ export function AdminProjectsPage() {
               type="url"
               id="live_url"
               className="mt-1 input"
+              placeholder="https://your-project.com"
               {...register('live_url')}
             />
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Optional: Link to your live project demo
+            </p>
           </div>
           
           <div className="flex items-center">
@@ -289,12 +340,12 @@ export function AdminProjectsPage() {
                         {project.short_description}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
-                        {project.tags?.map((tag) => (
+                        {project.tech_stack?.map((tech) => (
                           <span
-                            key={tag}
+                            key={tech}
                             className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-secondary-100 text-secondary-800"
                           >
-                            {tag}
+                            {tech}
                           </span>
                         ))}
                       </div>

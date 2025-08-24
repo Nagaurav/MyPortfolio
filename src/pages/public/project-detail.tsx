@@ -85,14 +85,14 @@ export function ProjectDetailPage() {
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
           <div>
             <h1 className="text-4xl font-bold text-secondary-900">{project.title}</h1>
-            {project.tags && (
+            {project.tech_stack && (
               <div className="flex flex-wrap gap-2 mt-4">
-                {project.tags.map(tag => (
+                {project.tech_stack.map(tech => (
                   <span
-                    key={tag}
+                    key={tech}
                     className="px-3 py-1 bg-secondary-100 text-secondary-700 rounded-full text-sm"
                   >
-                    {tag}
+                    {tech}
                   </span>
                 ))}
               </div>
@@ -160,12 +160,12 @@ export function ProjectDetailPage() {
             <div className="bg-secondary-50 rounded-lg p-6">
               <h3 className="text-lg font-semibold mb-4">Tech Stack</h3>
               <div className="flex flex-wrap gap-2">
-                {project.tags?.map(tag => (
+                {project.tech_stack?.map(tech => (
                   <span
-                    key={tag}
+                    key={tech}
                     className="px-3 py-1 bg-white text-secondary-700 rounded-full text-sm shadow-sm"
                   >
-                    {tag}
+                    {tech}
                   </span>
                 ))}
               </div>

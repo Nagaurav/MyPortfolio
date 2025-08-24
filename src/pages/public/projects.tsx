@@ -25,10 +25,10 @@ export function ProjectsPage() {
   const [loading, setLoading] = useState(true);
   const [filterLoading, setFilterLoading] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [selectedTags, setSelectedTags] = useState<string[]>([]);
+  const [selectedTechStack, setSelectedTechStack] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('date');
-  const [allTags, setAllTags] = useState<string[]>([]);
+  const [allTechStack, setAllTechStack] = useState<string[]>([]);
   const [allCategories, setAllCategories] = useState<string[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [searchLoading, setSearchLoading] = useState(false);
@@ -58,10 +58,10 @@ export function ProjectsPage() {
 
       setProjects(data || []);
       
-      const tags = data?.reduce((acc: string[], project) => {
-        project.tags?.forEach(tag => {
-          if (!acc.includes(tag)) {
-            acc.push(tag);
+      const techStack = data?.reduce((acc: string[], project) => {
+        project.tech_stack?.forEach(tech => {
+          if (!acc.includes(tech)) {
+            acc.push(tech);
           }
         });
         return acc.sort();
@@ -74,7 +74,7 @@ export function ProjectsPage() {
         return acc.sort();
       }, []) || [];
       
-      setAllTags(tags);
+      setAllTechStack(techStack);
       setAllCategories(categories);
     } catch (error) {
       console.error('Error fetching projects:', error);
@@ -84,8 +84,8 @@ export function ProjectsPage() {
   }
 
   const filteredProjects = projects.filter(project => {
-    const matchesTags = selectedTags.length === 0 || 
-      project.tags?.some(tag => selectedTags.includes(tag));
+    const matchesTechStack = selectedTechStack.length === 0 || 
+      project.tech_stack?.some(tech => selectedTechStack.includes(tech));
     
     const matchesCategory = selectedCategory === null || 
       project.category === selectedCategory;
@@ -94,17 +94,17 @@ export function ProjectsPage() {
       project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       project.short_description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.tags?.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
+      project.tech_stack?.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()));
 
-    return matchesTags && matchesCategory && matchesSearch;
+    return matchesTechStack && matchesCategory && matchesSearch;
   });
 
-  const toggleTag = (tag: string) => {
+  const toggleTechStack = (tech: string) => {
     setFilterLoading(true);
-    setSelectedTags(prev =>
-      prev.includes(tag)
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTechStack(prev =>
+      prev.includes(tech)
+        ? prev.filter(t => t !== tech)
+        : [...prev, tech]
     );
     // Simulate loading for better UX
     setTimeout(() => setFilterLoading(false), 300);
@@ -235,20 +235,20 @@ export function ProjectsPage() {
                 )}
               </div>
 
-              {/* Project Tags */}
-              {project.tags && project.tags.length > 0 && (
+              {/* Project Tech Stack */}
+              {project.tech_stack && project.tech_stack.length > 0 && (
                 <div className="flex flex-wrap gap-2">
-                  {project.tags.slice(0, 4).map((tag) => (
+                  {project.tech_stack.slice(0, 4).map((tech) => (
                     <span
-                      key={tag}
+                      key={tech}
                       className="px-3 py-1 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 text-sm rounded-full font-medium"
                     >
-                      {tag}
+                      {tech}
                     </span>
                   ))}
-                  {project.tags.length > 4 && (
+                  {project.tech_stack.length > 4 && (
                     <span className="px-3 py-1 bg-secondary-100 dark:bg-secondary-800 text-secondary-600 dark:text-secondary-400 text-sm rounded-full">
-                      +{project.tags.length - 4}
+                      +{project.tech_stack.length - 4}
                     </span>
                   )}
                 </div>
@@ -445,8 +445,8 @@ export function ProjectsPage() {
             </motion.div>
           )}
 
-          {/* Tags Filter */}
-          {allTags.length > 0 && (
+          {/* Tech Stack Filter */}
+          {allTechStack.length > 0 && (
             <motion.div 
               variants={staggerContainerVariants}
               initial="hidden"
@@ -454,18 +454,18 @@ export function ProjectsPage() {
               viewport={{ once: true, margin: "-100px" }}
               className="flex flex-wrap gap-2 mb-8"
             >
-              {allTags.map((tag, index) => (
+              {allTechStack.map((tech, index) => (
                 <motion.button
-                  key={tag}
+                  key={tech}
                   variants={scaleInVariants}
-                  onClick={() => toggleTag(tag)}
+                  onClick={() => toggleTechStack(tech)}
                   className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                    selectedTags.includes(tag)
+                    selectedTechStack.includes(tech)
                       ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
                       : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700'
                   }`}
                 >
-                  {tag}
+                  {tech}
                 </motion.button>
               ))}
             </motion.div>
@@ -518,7 +518,7 @@ export function ProjectsPage() {
                 No projects found
               </h3>
               <p className="text-secondary-600 dark:text-secondary-400">
-                {searchQuery || selectedTags.length > 0 || selectedCategory
+                {searchQuery || selectedTechStack.length > 0 || selectedCategory
                   ? "Try adjusting your search criteria or filters."
                   : "No projects have been added yet."
                 }
