@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { Card3D } from '../../components/ui/3d-card';
 import type { Database } from '../../types/database.types';
 
+
 type Skill = Database['public']['Tables']['skills']['Row'];
 
 const CATEGORY_ICONS = {
@@ -83,6 +84,22 @@ export function SkillsPage() {
     hidden: { opacity: 0, y: 20 },
     show: { opacity: 1, y: 0 },
   };
+
+  function renderStars(value: number) {
+    const clamped = Math.max(0, Math.min(5, value));
+    const widthPercent = `${(clamped / 5) * 100}%`;
+    return (
+      <div className="relative inline-block align-middle" aria-label={`${clamped} out of 5`}>
+        <span className="text-secondary-300 dark:text-secondary-600 select-none tracking-[2px]">★★★★★</span>
+        <span
+          className="absolute left-0 top-0 overflow-hidden text-yellow-400 dark:text-yellow-300 select-none tracking-[2px]"
+          style={{ width: widthPercent }}
+        >
+          ★★★★★
+        </span>
+      </div>
+    );
+  }
 
   return (
     <>
@@ -220,27 +237,10 @@ export function SkillsPage() {
                         </div>
                       </div>
                       <div className="text-right">
-                        <div className="text-xl font-bold text-primary-600">
-                          {Math.round((skill.proficiency / 5) * 100)}%
-                        </div>
+                        {renderStars(skill.proficiency)}
                       </div>
                     </div>
-
-                    <div className="space-y-2">
-                      <div className="flex justify-between text-sm">
-                        <span className="text-secondary-600 dark:text-secondary-400">Proficiency</span>
-                        <span className="text-secondary-700 dark:text-secondary-300 font-medium">{Math.round((skill.proficiency / 5) * 100)}%</span>
-                      </div>
-                      <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-3 overflow-hidden">
-                        <motion.div
-                          className={`h-full bg-gradient-to-r ${CATEGORY_COLORS[skill.category as keyof typeof CATEGORY_COLORS] || 'from-gray-500 to-gray-600'} rounded-full`}
-                          initial={{ width: 0 }}
-                          whileInView={{ width: `${(skill.proficiency / 5) * 100}%` }}
-                          transition={{ duration: 1, delay: 0.2 }}
-                          viewport={{ once: true }}
-                        />
-                      </div>
-                    </div>
+                    
                   </div>
                 </Card3D>
               </motion.div>
@@ -264,8 +264,7 @@ export function SkillsPage() {
               <p className="text-xl text-secondary-600 dark:text-secondary-400">
                 {selectedCategory 
                   ? `No skills found in the "${selectedCategory}" category.`
-                  : "No skills have been added yet."
-                }
+                  : "No skills have been added yet."}
               </p>
 
             </Card3D>

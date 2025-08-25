@@ -5,6 +5,7 @@ import { supabase } from '../../lib/supabase';
 import { Modal } from '../../components/ui/modal';
 import type { Database } from '../../types/database.types';
 
+
 type Certificate = Database['public']['Tables']['certificates']['Row'];
 
 export function CertificatesPage() {
@@ -61,12 +62,12 @@ export function CertificatesPage() {
             className="max-w-3xl mx-auto text-center"
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-secondary-900">Professional </span>
+              <span className="text-secondary-900 dark:text-secondary-50">Professional </span>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]">
                 Certifications
               </span>
             </h1>
-            <p className="text-xl text-secondary-600">
+            <p className="text-xl text-secondary-600 dark:text-secondary-400">
               Explore my professional certifications and achievements that demonstrate expertise and continuous learning
             </p>
           </motion.div>
@@ -79,11 +80,11 @@ export function CertificatesPage() {
             Array(3).fill(null).map((_, index) => (
               <div
                 key={index}
-                className="bg-white rounded-xl shadow-lg p-6 animate-pulse"
+                className="rounded-xl p-6 animate-pulse bg-white/80 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600"
               >
-                <div className="h-48 bg-secondary-200 rounded-lg mb-4"></div>
-                <div className="h-6 bg-secondary-200 rounded w-3/4 mb-2"></div>
-                <div className="h-4 bg-secondary-200 rounded w-1/2"></div>
+                <div className="h-48 rounded-lg mb-4 bg-secondary-200 dark:bg-secondary-700"></div>
+                <div className="h-6 rounded w-3/4 mb-2 bg-secondary-200 dark:bg-secondary-700"></div>
+                <div className="h-4 rounded w-1/2 bg-secondary-200 dark:bg-secondary-700"></div>
               </div>
             ))
           ) : certificates.length > 0 ? (
@@ -94,7 +95,7 @@ export function CertificatesPage() {
                 whileInView={{ opacity: 1, y: 0 }}
                 viewport={{ once: true }}
                 transition={{ duration: 0.6 }}
-                className="group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300"
+                className="group rounded-xl overflow-hidden transition-all duration-300 bg-white/80 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600 hover:shadow-xl"
               >
                 {certificate.certificate_url ? (
                   <div className="relative h-48 cursor-pointer group">
@@ -108,7 +109,7 @@ export function CertificatesPage() {
                     
                     {/* Click indicator overlay */}
                     <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="bg-white/90 dark:bg-dark-800/90 rounded-full p-3 shadow-lg">
+                      <div className="bg-white/90 dark:bg-secondary-800/90 rounded-full p-3 shadow-lg">
                         <Eye size={24} className="text-primary-600" />
                       </div>
                     </div>
@@ -121,18 +122,18 @@ export function CertificatesPage() {
                     </div>
                   </div>
                 ) : (
-                  <div className="h-48 bg-gradient-to-br from-primary-100 to-accent-100 flex items-center justify-center">
+                  <div className="h-48 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-secondary-800 dark:to-secondary-700 flex items-center justify-center">
                     <Award className="w-16 h-16 text-primary-600" />
                   </div>
                 )}
                 <div className="p-6">
-                  <h3 className="text-xl font-semibold text-secondary-900 mb-2">
+                  <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
                     {certificate.title}
                   </h3>
-                  <p className="text-secondary-600 mb-4">
+                  <p className="text-secondary-600 dark:text-secondary-400 mb-4">
                     Issued by {certificate.issuer}
                   </p>
-                  <div className="text-sm text-secondary-500 mb-4">
+                  <div className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
                     <p>Issued: {new Date(certificate.issue_date).toLocaleDateString()}</p>
                     {certificate.expiry_date && (
                       <p>Expires: {new Date(certificate.expiry_date).toLocaleDateString()}</p>
@@ -156,7 +157,7 @@ export function CertificatesPage() {
                     {certificate.certificate_url && (
                       <button
                         onClick={() => handleImageClick(certificate)}
-                        className="inline-flex items-center justify-center px-4 py-2 bg-secondary-100 hover:bg-secondary-200 text-secondary-700 font-medium rounded-lg transition-colors duration-200"
+                        className="inline-flex items-center justify-center px-4 py-2 bg-secondary-100 hover:bg-secondary-200 text-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 dark:text-secondary-100 font-medium rounded-lg transition-colors duration-200"
                       >
                         <Eye size={16} className="mr-2" />
                         Preview
@@ -169,7 +170,7 @@ export function CertificatesPage() {
           ) : (
             <div className="col-span-full text-center py-12">
               <Award className="w-16 h-16 text-secondary-400 mx-auto mb-4" />
-              <p className="text-secondary-600">No certificates found.</p>
+              <p className="text-secondary-600 dark:text-secondary-400">No certificates found.</p>
             </div>
           )}
         </div>
@@ -195,7 +196,7 @@ export function CertificatesPage() {
             )}
             
             {/* Certificate Details */}
-            <div className="bg-secondary-50 dark:bg-dark-700 rounded-lg p-4">
+            <div className="rounded-lg p-4 bg-secondary-50 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                 <div>
                   <span className="font-medium text-secondary-700 dark:text-secondary-300">Issuer:</span>
@@ -234,7 +235,7 @@ export function CertificatesPage() {
               
               <button
                 onClick={closeModal}
-                className="inline-flex items-center justify-center px-6 py-3 bg-secondary-200 hover:bg-secondary-300 text-secondary-700 font-medium rounded-lg transition-colors duration-200"
+                className="inline-flex items-center justify-center px-6 py-3 bg-secondary-200 hover:bg-secondary-300 text-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 dark:text-secondary-100 font-medium rounded-lg transition-colors duration-200"
               >
                 Close
               </button>

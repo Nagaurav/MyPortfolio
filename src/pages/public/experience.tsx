@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
 import type { Database } from '../../types/database.types';
 
+
 type Experience = Database['public']['Tables']['experiences']['Row'];
 
 export function ExperiencePage() {
@@ -79,12 +80,12 @@ export function ExperiencePage() {
             className="max-w-3xl mx-auto text-center"
           >
             <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-secondary-900">Professional </span>
+              <span className="text-secondary-900 dark:text-secondary-50">Professional </span>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-600 animate-gradient bg-[length:200%_auto]">
                 Experience
               </span>
             </h1>
-            <p className="text-xl text-secondary-600">
+            <p className="text-xl text-secondary-600 dark:text-secondary-400">
               A journey through my professional career and achievements
             </p>
           </motion.div>
@@ -103,11 +104,11 @@ export function ExperiencePage() {
               >
                 <Card3D variant="tech" className="p-6">
                   <div className="animate-pulse">
-                    <div className="h-8 bg-secondary-200/50 rounded w-1/3 mb-4"></div>
+                    <div className="h-8 bg-secondary-200/50 dark:bg-secondary-700 rounded w-1/3 mb-4"></div>
                     <div className="space-y-3">
-                      <div className="h-4 bg-secondary-200/50 rounded w-1/4"></div>
-                      <div className="h-4 bg-secondary-200/50 rounded w-1/2"></div>
-                      <div className="h-4 bg-secondary-200/50 rounded w-3/4"></div>
+                      <div className="h-4 bg-secondary-200/50 dark:bg-secondary-700 rounded w-1/4"></div>
+                      <div className="h-4 bg-secondary-200/50 dark:bg-secondary-700 rounded w-1/2"></div>
+                      <div className="h-4 bg-secondary-200/50 dark:bg-secondary-700 rounded w-3/4"></div>
                     </div>
                   </div>
                 </Card3D>
@@ -133,7 +134,7 @@ export function ExperiencePage() {
                 >
                   {/* Enhanced Timeline dot */}
                   <motion.div 
-                    className="absolute left-0 top-8 w-6 h-6 rounded-full bg-gradient-to-r from-primary-500 to-accent-600 shadow-lg transform -translate-x-1/2 border-4 border-white"
+                    className="absolute left-0 top-8 w-6 h-6 rounded-full bg-gradient-to-r from-primary-500 to-accent-600 shadow-lg transform -translate-x-1/2 border-4 border-white dark:border-secondary-800"
                     whileHover={{ scale: 1.2 }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
@@ -151,7 +152,7 @@ export function ExperiencePage() {
                     <div className="flex flex-col md:flex-row md:items-center justify-between mb-6">
                       <div className="flex-1">
                         <motion.h3 
-                          className="text-2xl font-bold text-secondary-900 dark:text-white mb-2"
+                          className="text-2xl font-bold text-secondary-900 dark:text-secondary-100 mb-2"
                           whileHover={{ scale: 1.02 }}
                           transition={{ type: "spring", stiffness: 300 }}
                         >
@@ -159,24 +160,24 @@ export function ExperiencePage() {
                         </motion.h3>
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
                           <motion.div 
-                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-dark-700 border border-secondary-200 dark:border-dark-600"
-                            whileHover={{ scale: 1.02, backgroundColor: 'rgb(241, 245, 249)', borderColor: 'rgb(148, 163, 184)' }}
+                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600"
+                            whileHover={{ scale: 1.02 }}
                             transition={{ type: "spring", stiffness: 300 }}
                           >
                             <Building2 size={18} className="mr-3 text-primary-600" />
                             <span className="font-medium">{experience.company}</span>
                           </motion.div>
                           <motion.div 
-                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-dark-700 border border-secondary-200 dark:border-dark-600"
-                            whileHover={{ scale: 1.02, backgroundColor: 'rgb(241, 245, 249)', borderColor: 'rgb(148, 163, 184)' }}
+                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600"
+                            whileHover={{ scale: 1.02 }}
                             transition={{ type: "spring", stiffness: 300 }}
                           >
                             <MapPin size={18} className="mr-3 text-primary-600" />
                             <span className="font-medium">{experience.location}</span>
                           </motion.div>
                           <motion.div 
-                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-dark-700 border border-secondary-200 dark:border-dark-600"
-                            whileHover={{ scale: 1.02, backgroundColor: 'rgb(241, 245, 249)', borderColor: 'rgb(148, 163, 184)' }}
+                            className="flex items-center text-secondary-700 dark:text-secondary-300 p-3 rounded-lg bg-secondary-50 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600"
+                            whileHover={{ scale: 1.02 }}
                             transition={{ type: "spring", stiffness: 300 }}
                           >
                             <Clock size={18} className="mr-3 text-primary-600" />
@@ -215,21 +216,21 @@ export function ExperiencePage() {
                     </motion.div>
 
                     {experience.technologies && experience.technologies.length > 0 && (
-                      <div className="border-t border-white/20 pt-4">
-                                                 <h4 className="text-sm font-medium text-secondary-700 mb-3 flex items-center">
-                           <Award className="w-4 h-4 mr-2 text-primary-500" />
-                           Technologies & Skills
-                         </h4>
+                      <div className="border-t border-secondary-200 dark:border-secondary-700 pt-4">
+                        <h4 className="text-sm font-medium text-secondary-700 dark:text-secondary-300 mb-3 flex items-center">
+                          <Award className="w-4 h-4 mr-2 text-primary-500" />
+                          Technologies & Skills
+                        </h4>
                         <div className="flex flex-wrap gap-2">
                           {experience.technologies.map((tech) => (
-                                                         <motion.span
-                               key={tech}
-                               className="px-3 py-1 rounded-full text-sm font-medium bg-white/20 backdrop-blur-sm text-secondary-700 border border-white/20 hover:bg-primary-500/20 hover:text-primary-600 transition-all duration-300"
-                               whileHover={{ scale: 1.05 }}
-                               whileTap={{ scale: 0.95 }}
-                             >
-                               {tech}
-                             </motion.span>
+                            <motion.span
+                              key={tech}
+                              className="px-3 py-1 rounded-full text-sm font-medium bg-secondary-100 dark:bg-secondary-700 text-secondary-700 dark:text-secondary-100 border border-secondary-200 dark:border-secondary-600"
+                              whileHover={{ scale: 1.05 }}
+                              whileTap={{ scale: 0.95 }}
+                            >
+                              {tech}
+                            </motion.span>
                           ))}
                         </div>
                       </div>
