@@ -2,7 +2,6 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { Award, ExternalLink, Eye } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { SectionHeader } from '../../components/ui/section-header';
 import { Modal } from '../../components/ui/modal';
 import type { Database } from '../../types/database.types';
 

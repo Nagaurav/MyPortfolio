@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { ArrowRight, Github, ExternalLink, Mail, Linkedin, Send, Code, Zap, Palette, Target, Download, Code2, Server, DatabaseIcon, Wrench } from 'lucide-react';
-import { motion, AnimatePresence, useScroll, useTransform, useInView } from 'framer-motion';
+import { ArrowRight, Github, ExternalLink, Mail, Linkedin, Send, Code, Zap, Palette, Target, Code2, Server, DatabaseIcon, Wrench } from 'lucide-react';
+import { motion, AnimatePresence, useScroll, useTransform } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { supabase } from '../../lib/supabase';
@@ -9,20 +9,17 @@ import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
 import { TiltCard } from '../../components/ui/3d-tilt-card';
-import { WordByWordText } from '../../components/ui/word-by-word-text';
-import { SkillLogo } from '../../components/ui/skill-logo';
 import { 
-  scrollAnimationVariants, 
   staggerContainerVariants, 
   fadeInUpVariants, 
   slideInLeftVariants, 
   slideInRightVariants,
   scaleInVariants,
-  skillCardVariants,
   projectCardVariants
 } from '../../lib/utils';
 import type { Database } from '../../types/database.types';
 import { Background3D } from '../../components/3d-background';
+
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
@@ -75,7 +72,6 @@ export function HomePage() {
     formState: { errors },
   } = useForm<ContactFormData>();
 
-  const parallaxY = useTransform(scrollYProgress, [0, 1], ['0%', '50%']);
   const opacity = useTransform(scrollYProgress, [0, 0.2], [1, 0]);
 
   useEffect(() => {
@@ -112,7 +108,7 @@ export function HomePage() {
         // Calculate experience years
         let totalExperienceYears = 0;
         if (experiencesResult.data) {
-          experiencesResult.data.forEach(exp => {
+          experiencesResult.data.forEach((exp: { start_date: string; end_date: string | null; current: boolean }) => {
             const startDate = new Date(exp.start_date);
             const endDate = exp.current ? new Date() : new Date(exp.end_date || '');
             const years = (endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24 * 365.25);
@@ -121,7 +117,7 @@ export function HomePage() {
         }
 
         // Calculate skill categories
-        const skillCategories = skillsResult.data?.reduce((acc, skill) => {
+        const skillCategories = skillsResult.data?.reduce((acc: Record<string, number>, skill: { category: string }) => {
           acc[skill.category] = (acc[skill.category] || 0) + 1;
           return acc;
         }, {} as Record<string, number>) || {};
@@ -184,10 +180,6 @@ export function HomePage() {
 
   const handleProjectsClick = () => {
     navigate('/projects');
-  };
-
-  const handleHeroAnimationComplete = () => {
-    setHeroAnimationComplete(true);
   };
 
   const socialIconVariants = {
@@ -313,7 +305,7 @@ export function HomePage() {
                     animate="visible"
                     className="flex flex-wrap justify-center gap-2 sm:gap-4 mb-8 px-4"
                   >
-                    {roles.map((role, i) => (
+                    {roles.map((role) => (
                       <motion.div
                         key={role.title}
                         variants={scaleInVariants}
@@ -350,7 +342,7 @@ export function HomePage() {
                   >
                     <Button 
                       variant="tech" 
-                      size="md"
+                      size="lg"
                       className="group w-full sm:w-auto"
                       onClick={handleProjectsClick}
                     >
@@ -360,7 +352,7 @@ export function HomePage() {
 
                     <Button 
                       variant="outline" 
-                      size="md"
+                      size="lg"
                       className="group w-full sm:w-auto"
                       onClick={handleContactClick}
                     >
@@ -384,7 +376,7 @@ export function HomePage() {
                       { icon: Github, href: profile?.github_url || '#', label: 'GitHub' },
                       { icon: Linkedin, href: profile?.linkedin_url || '#', label: 'LinkedIn' },
                       { icon: Mail, href: `mailto:${profile?.email || 'your@email.com'}`, label: 'Email' },
-                    ].map((social, index) => (
+                    ].map((social) => (
                       <motion.a
                         key={social.label}
                         href={social.href}
@@ -470,17 +462,9 @@ export function HomePage() {
                       initial="hidden"
                       whileInView="visible"
                       viewport={{ once: true }}
-                      className="grid grid-cols-3 gap-4"
+                      className="grid grid-cols-2 gap-4"
                     >
-                      <motion.div 
-                        variants={scaleInVariants}
-                        className="text-center p-4 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-600/10 border border-cyan-500/20"
-                      >
-                        <div className="text-2xl font-bold text-cyan-600">
-                          {loading ? '...' : `${stats.experienceYears}+`}
-                        </div>
-                        <div className="text-sm text-secondary-600">Years Experience</div>
-                      </motion.div>
+                      
                       <motion.div 
                         variants={scaleInVariants}
                         className="text-center p-4 rounded-lg bg-gradient-to-br from-purple-500/10 to-pink-600/10 border border-purple-500/20"
@@ -543,7 +527,7 @@ export function HomePage() {
                       ))
                     ) : Object.keys(stats.skillCategories).length > 0 ? (
                       // Real skill categories
-                      Object.entries(stats.skillCategories).slice(0, 4).map(([category, count], index) => (
+                      Object.entries(stats.skillCategories).slice(0, 4).map(([category, count]) => (
                         <motion.div
                           key={category}
                           variants={fadeInUpVariants}
@@ -569,7 +553,7 @@ export function HomePage() {
                         { name: 'Backend', icon: Server, color: 'from-blue-500 to-purple-600' },
                         { name: 'Database', icon: DatabaseIcon, color: 'from-purple-500 to-pink-600' },
                         { name: 'DevOps', icon: Wrench, color: 'from-pink-500 to-red-600' }
-                      ].map((skill, index) => (
+                      ].map((skill) => (
                         <motion.div
                           key={skill.name}
                           variants={fadeInUpVariants}
@@ -611,7 +595,7 @@ export function HomePage() {
             className="grid md:grid-cols-2 lg:grid-cols-3 gap-8"
           >
             {featuredProjects.length > 0 ? (
-              featuredProjects.map((project, index) => (
+              featuredProjects.map((project) => (
                 <motion.div
                   key={project.id}
                   variants={projectCardVariants}
@@ -626,7 +610,7 @@ export function HomePage() {
                     glarePosition="top"
                     className="h-full"
                   >
-                    <Card3D className="h-full overflow-hidden">
+                    <Card3D className="h-full overflow-hidden flex flex-col">
                       {/* Project Image */}
                       {project.image_url && (
                         <div className="relative h-48 overflow-hidden">
@@ -664,7 +648,7 @@ export function HomePage() {
                       )}
 
                       {/* Project Content */}
-                      <div className="p-6 space-y-4">
+                      <div className="p-6 space-y-4 flex-1 flex flex-col">
                         <div>
                           <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-100 mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
                             {project.title}
@@ -694,7 +678,7 @@ export function HomePage() {
                         )}
 
                         {/* View Project Link */}
-                        <div className="pt-4 border-t border-secondary-200 dark:border-secondary-700">
+                        <div className="mt-auto pt-4 border-t border-secondary-200 dark:border-secondary-700">
                           <Link
                             to={`/projects/${project.id}`}
                             className="flex items-center gap-2 text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors font-medium"
@@ -759,7 +743,7 @@ export function HomePage() {
             className="space-y-8"
           >
             {experiences.length > 0 ? (
-              experiences.map((experience, index) => (
+              experiences.map((experience) => (
                 <motion.div
                   key={experience.id}
                   variants={fadeInUpVariants}

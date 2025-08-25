@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
+import { FileUpload } from '../../components/ui/file-upload';
 import { SectionHeader } from '../../components/ui/section-header';
 
 import type { Database } from '../../types/database.types';
@@ -18,6 +19,7 @@ interface ProjectFormData {
   github_url: string;
   live_url: string;
   featured: boolean;
+  image_url?: string;
 }
 
 export function AdminProjectsPage() {
@@ -50,6 +52,7 @@ export function AdminProjectsPage() {
       setValue('github_url', editingProject.github_url || '');
       setValue('live_url', editingProject.live_url || '');
       setValue('featured', editingProject.featured);
+      setValue('image_url', editingProject.image_url || '');
     }
   }, [editingProject, setValue]);
   
@@ -145,6 +148,10 @@ export function AdminProjectsPage() {
         toast.error('Failed to save project. Please check the console for details.');
       }
     }
+  };
+
+  const handleImageUpload = (url: string) => {
+    setValue('image_url', url);
   };
   
   const handleDelete = async (id: string) => {
@@ -243,7 +250,18 @@ export function AdminProjectsPage() {
             </p>
           </div>
           
-
+          {/* Project Image Upload */}
+          <div>
+            <FileUpload
+              onUpload={handleImageUpload}
+              accept="image/jpeg,image/jpg,image/png"
+              bucket="projects"
+              folder="images"
+              currentFile={editingProject?.image_url || ''}
+              label="Project Image (JPG, JPEG, PNG)"
+            />
+            <input type="hidden" {...register('image_url')} />
+          </div>
           
           <div>
             <label htmlFor="github_url" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
