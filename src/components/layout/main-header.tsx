@@ -222,32 +222,45 @@ export function MainHeader() {
                 </motion.button>
               </div>
             </div>
-            <nav className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 flex flex-col space-y-1 py-8">
+            <nav className="w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16 flex flex-col py-8">
               {navItems.map((item, index) => (
                 <motion.div
                   key={item.to}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ delay: index * 0.1 }}
+                  className="mb-3"
                 >
                   <NavLink 
                     to={item.to} 
                     end={item.to === '/'}
-                    className={navLinkClasses} 
+                    className={({ isActive }) => {
+                      const baseClasses = 'block px-4 py-4 text-base font-medium transition-all duration-300 relative group rounded-lg';
+                      const activeClasses = isActive 
+                        ? 'text-cyan-500 dark:text-cyan-400 bg-cyan-50 dark:bg-cyan-900/20' 
+                        : 'text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white hover:bg-secondary-50 dark:hover:bg-secondary-800/50';
+                      
+                      return `${baseClasses} ${activeClasses}`;
+                    }}
                     onClick={toggleMenu}
                   >
                     {item.label}
-                    <motion.div
-                      className="absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-500 to-blue-600 rounded-full"
-                      initial={{ width: 0 }}
-                      animate={{ 
-                        width: (location.pathname === item.to || (item.to === '/' && location.pathname === '/')) ? '100%' : 0 
-                      }}
-                      transition={{ duration: 0.3 }}
-                    />
                   </NavLink>
                 </motion.div>
               ))}
+              
+              {/* Mobile Actions */}
+              <div className="mt-8 pt-6 border-t border-secondary-200/20 dark:border-secondary-700/20">
+                <Button
+                  variant="gradient"
+                  size="lg"
+                  className="w-full group"
+                  onClick={() => window.open('/resume.pdf', '_blank')}
+                >
+                  <Download size={18} className="mr-2 group-hover:animate-bounce" />
+                  Download Resume
+                </Button>
+              </div>
             </nav>
           </motion.div>
         )}
