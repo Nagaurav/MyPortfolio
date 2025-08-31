@@ -104,12 +104,12 @@ export function ContactPage() {
   return (
     <>
       {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
+      <section className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
         <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
           <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
         </div>
         <motion.div 
-          className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-br from-primary-300/30 to-accent-300/30 rounded-full mix-blend-multiply filter blur-xl"
+          className="absolute top-8 right-8 sm:top-20 sm:right-20 w-32 h-32 sm:w-48 sm:h-48 md:w-72 md:h-72 bg-gradient-to-br from-primary-300/30 to-accent-300/30 rounded-full mix-blend-multiply filter blur-xl"
           animate={{
             scale: [1, 1.1, 1],
             rotate: [0, 90, 180, 270, 360],
@@ -117,7 +117,7 @@ export function ContactPage() {
           transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
         />
         <motion.div 
-          className="absolute bottom-20 left-20 w-72 h-72 bg-gradient-to-br from-accent-300/30 to-primary-400/30 rounded-full mix-blend-multiply filter blur-xl"
+          className="absolute bottom-8 left-8 sm:bottom-20 sm:left-20 w-32 h-32 sm:w-48 sm:h-48 md:w-72 md:h-72 bg-gradient-to-br from-accent-300/30 to-primary-400/30 rounded-full mix-blend-multiply filter blur-xl"
           animate={{
             scale: [1, 1.1, 1],
             rotate: [360, 270, 180, 90, 0],
@@ -130,47 +130,47 @@ export function ContactPage() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto text-center"
+            className="max-w-3xl mx-auto text-center px-4"
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
               <span className="text-secondary-900">Let's </span>
               <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-600 animate-gradient bg-[length:200%_auto]">
                 Connect
               </span>
             </h1>
-            <p className="text-xl text-secondary-600">
+            <p className="text-lg sm:text-xl text-secondary-600">
               Have a question or want to work together? I'd love to hear from you
             </p>
           </motion.div>
         </div>
       </section>
 
-      <div className="responsive-container pb-20">
-        <div className="grid gap-8 md:grid-cols-2 max-w-5xl mx-auto">
+      <div className="responsive-container pb-12 sm:pb-16 md:pb-20">
+        <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto">
           {/* Contact Information */}
           <motion.div
             initial={{ opacity: 0, x: -20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6 }}
           >
-            <Card3D variant="tech" className="p-8 h-full">
+            <Card3D variant="tech" className="p-4 sm:p-6 md:p-8 h-full">
                              <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent">
                  Contact Information
                </h2>
-              <div className="space-y-6">
+              <div className="space-y-4 sm:space-y-6">
                 {profile?.email && (
                   <motion.div 
-                    className="flex items-start p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
+                    className="flex items-start p-3 sm:p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-500 to-accent-600 flex items-center justify-center shadow-lg">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-primary-500 to-accent-600 flex items-center justify-center shadow-lg flex-shrink-0">
                       <Mail className="w-6 h-6 text-white" />
                     </div>
-                    <div className="ml-4 flex-1">
+                    <div className="ml-3 sm:ml-4 flex-1 min-w-0">
                       <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Email</h3>
                       <div className="flex items-center mt-1">
-                        <p className="text-secondary-600 dark:text-secondary-300">{profile.email}</p>
+                        <p className="text-secondary-600 dark:text-secondary-300 text-sm sm:text-base break-all">{profile.email}</p>
                         <motion.button
                           onClick={copyEmail}
                           className="ml-2 text-secondary-400 hover:text-primary-500 transition-colors p-1 rounded-lg hover:bg-primary-500/10"
@@ -187,14 +187,14 @@ export function ContactPage() {
 
                 {profile?.phone && (
                   <motion.div 
-                    className="flex items-start p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
+                    className="flex items-start p-3 sm:p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-accent-500 to-primary-700 flex items-center justify-center shadow-lg">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-accent-500 to-primary-700 flex items-center justify-center shadow-lg flex-shrink-0">
                       <Phone className="w-6 h-6 text-white" />
                     </div>
-                    <div className="ml-4">
+                    <div className="ml-3 sm:ml-4">
                       <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Phone</h3>
                       <a
                         href={`tel:${profile.phone}`}
@@ -208,14 +208,14 @@ export function ContactPage() {
 
                 {profile?.location && (
                   <motion.div 
-                    className="flex items-start p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
+                    className="flex items-start p-3 sm:p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
                     whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
                     transition={{ type: "spring", stiffness: 300 }}
                   >
-                    <div className="w-12 h-12 rounded-xl bg-gradient-to-r from-primary-400 to-accent-500 flex items-center justify-center shadow-lg">
+                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-primary-400 to-accent-500 flex items-center justify-center shadow-lg flex-shrink-0">
                       <MapPin className="w-6 h-6 text-white" />
                     </div>
-                    <div className="ml-4">
+                    <div className="ml-3 sm:ml-4">
                       <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Location</h3>
                       <p className="text-secondary-600 dark:text-secondary-300">{profile.location}</p>
                     </div>
@@ -261,11 +261,11 @@ export function ContactPage() {
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.6, delay: 0.2 }}
           >
-            <Card3D variant="glass" className="p-8">
+            <Card3D variant="glass" className="p-4 sm:p-6 md:p-8">
                              <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent">
                  Send Message
                </h2>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
                 <div>
                   <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
                     <User className="w-4 h-4 inline mr-2" />
