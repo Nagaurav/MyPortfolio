@@ -3,21 +3,63 @@ export default {
   content: ['./index.html', './src/**/*.{js,ts,jsx,tsx}'],
   darkMode: 'class',
   theme: {
+    container: {
+      center: true,
+      padding: {
+        DEFAULT: '1rem',
+        sm: '1.5rem',
+        lg: '2rem',
+        xl: '3rem',
+      },
+      screens: {
+        '2xl': '1280px',
+      },
+    },
     extend: {
       colors: {
-        primary: {
-          50: '#fef7f2',
-          100: '#fdecd8',
-          200: '#fbd4b0',
-          300: '#f8b583',
-          400: '#f5935a',
-          500: '#f1d2b6',
-          600: '#d9aa90',
-          700: '#c18a6f',
-          800: '#a65e46',
-          900: '#8b4a3a',
-          950: '#6d3a2e',
+        // Brand: refined cyan/teal for primary actions and links
+        brand: {
+          50: '#ecfeff',
+          100: '#cffafe',
+          200: '#a5f3fc',
+          300: '#67e8f9',
+          400: '#22d3ee',
+          500: '#06b6d4',
+          600: '#0891b2',
+          700: '#0e7490',
+          800: '#155e75',
+          900: '#164e63',
+          950: '#083344',
         },
+        // Primary mapped to brand so existing className references keep working
+        primary: {
+          50: '#ecfeff',
+          100: '#cffafe',
+          200: '#a5f3fc',
+          300: '#67e8f9',
+          400: '#22d3ee',
+          500: '#06b6d4',
+          600: '#0891b2',
+          700: '#0e7490',
+          800: '#155e75',
+          900: '#164e63',
+          950: '#083344',
+        },
+        // Warm accent for highlights, badges, callouts
+        accent: {
+          50: '#fff7ed',
+          100: '#ffedd5',
+          200: '#fed7aa',
+          300: '#fdba74',
+          400: '#fb923c',
+          500: '#f97316',
+          600: '#ea580c',
+          700: '#c2410c',
+          800: '#9a3412',
+          900: '#7c2d12',
+          950: '#431407',
+        },
+        // Neutral base
         secondary: {
           50: '#f8fafc',
           100: '#f1f5f9',
@@ -31,20 +73,8 @@ export default {
           900: '#0f172a',
           950: '#020617',
         },
-        accent: {
-          50: '#fef7f2',
-          100: '#fdecd8',
-          200: '#fbd4b0',
-          300: '#f8b583',
-          400: '#f5935a',
-          500: '#d9aa90',
-          600: '#c18a6f',
-          700: '#a65e46',
-          800: '#8b4a3a',
-          900: '#6d3a2e',
-          950: '#5a2f26',
-        },
-        dark: {
+        // Deep dark used for page backgrounds
+        ink: {
           50: '#f8fafc',
           100: '#f1f5f9',
           200: '#e2e8f0',
@@ -53,36 +83,45 @@ export default {
           500: '#64748b',
           600: '#475569',
           700: '#334155',
-          800: '#042630',
-          900: '#041421',
-          950: '#020617',
-        },
-        teal: {
-          50: '#f0f7f8',
-          100: '#d9f0f2',
-          200: '#b3e1e5',
-          300: '#8cccd3',
-          400: '#66b7c1',
-          500: '#4c7273',
-          600: '#3d5b5c',
-          700: '#2e4445',
-          800: '#1f2d2e',
-          900: '#101617',
-          950: '#080b0c',
+          800: '#1e293b',
+          900: '#0b1220',
+          950: '#060a14',
         },
       },
       fontFamily: {
-        sans: ['Inter', 'sans-serif'],
+        sans: ['"Inter Tight"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        display: ['"Inter Tight"', 'Inter', 'ui-sans-serif', 'system-ui', 'sans-serif'],
+        mono: ['"JetBrains Mono"', 'ui-monospace', 'SFMono-Regular', 'Menlo', 'monospace'],
+      },
+      fontSize: {
+        '2xs': ['0.6875rem', { lineHeight: '1rem' }],
+      },
+      letterSpacing: {
+        tightest: '-0.04em',
+      },
+      boxShadow: {
+        'glow-brand': '0 0 0 1px rgb(6 182 212 / 0.15), 0 8px 32px -8px rgb(6 182 212 / 0.35)',
+        'glow-soft': '0 1px 0 0 rgb(255 255 255 / 0.06) inset, 0 8px 24px -12px rgb(0 0 0 / 0.4)',
+        'inner-border': 'inset 0 0 0 1px rgb(255 255 255 / 0.06)',
+      },
+      backgroundImage: {
+        'grid': 'linear-gradient(to right, rgb(148 163 184 / 0.08) 1px, transparent 1px), linear-gradient(to bottom, rgb(148 163 184 / 0.08) 1px, transparent 1px)',
+        'grid-dark': 'linear-gradient(to right, rgb(255 255 255 / 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgb(255 255 255 / 0.05) 1px, transparent 1px)',
+        'noise': "url(\"data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0 0.5 0 0 0 0.15 0'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='0.4'/%3E%3C/svg%3E\")",
+        'aurora': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgb(6 182 212 / 0.18), transparent 70%), radial-gradient(ellipse 60% 50% at 80% 50%, rgb(249 115 22 / 0.10), transparent 70%), radial-gradient(ellipse 60% 50% at 20% 80%, rgb(6 182 212 / 0.12), transparent 70%)',
+        'aurora-light': 'radial-gradient(ellipse 80% 50% at 50% -20%, rgb(6 182 212 / 0.12), transparent 70%), radial-gradient(ellipse 60% 50% at 80% 50%, rgb(249 115 22 / 0.08), transparent 70%), radial-gradient(ellipse 60% 50% at 20% 80%, rgb(6 182 212 / 0.10), transparent 70%)',
+      },
+      backgroundSize: {
+        'grid': '32px 32px',
       },
       animation: {
         'fade-in': 'fadeIn 0.5s ease-in-out',
         'slide-up': 'slideUp 0.5s ease-out',
-        'slide-down': 'slideDown 0.5s ease-out',
-        'scale-up': 'scaleUp 0.3s ease-out',
-        'bounce-slow': 'bounce 3s infinite',
         'gradient': 'gradient 8s linear infinite',
         'float': 'float 6s ease-in-out infinite',
-        'blob': 'blob 7s infinite',
+        'shimmer': 'shimmer 2.5s linear infinite',
+        'ping-slow': 'ping 3s cubic-bezier(0, 0, 0.2, 1) infinite',
+        'marquee': 'marquee 30s linear infinite',
       },
       keyframes: {
         fadeIn: {
@@ -93,45 +132,23 @@ export default {
           '0%': { transform: 'translateY(20px)', opacity: '0' },
           '100%': { transform: 'translateY(0)', opacity: '1' },
         },
-        slideDown: {
-          '0%': { transform: 'translateY(-20px)', opacity: '0' },
-          '100%': { transform: 'translateY(0)', opacity: '1' },
-        },
-        scaleUp: {
-          '0%': { transform: 'scale(0.95)', opacity: '0' },
-          '100%': { transform: 'scale(1)', opacity: '1' },
-        },
         float: {
           '0%, 100%': { transform: 'translateY(0)' },
-          '50%': { transform: 'translateY(-20px)' },
+          '50%': { transform: 'translateY(-12px)' },
         },
         gradient: {
           '0%': { backgroundPosition: '0% 50%' },
           '50%': { backgroundPosition: '100% 50%' },
           '100%': { backgroundPosition: '0% 50%' },
         },
-        blob: {
-          '0%': {
-            transform: 'translate(0px, 0px) scale(1)',
-          },
-          '33%': {
-            transform: 'translate(30px, -50px) scale(1.1)',
-          },
-          '66%': {
-            transform: 'translate(-20px, 20px) scale(0.9)',
-          },
-          '100%': {
-            transform: 'translate(0px, 0px) scale(1)',
-          },
+        shimmer: {
+          '0%': { backgroundPosition: '-200% 0' },
+          '100%': { backgroundPosition: '200% 0' },
         },
-      },
-      backgroundImage: {
-        'gradient-radial': 'radial-gradient(var(--tw-gradient-stops))',
-        'gradient-conic': 'conic-gradient(from 180deg at 50% 50%, var(--tw-gradient-stops))',
-        'grid': 'linear-gradient(to right, #80808012 1px, transparent 1px), linear-gradient(to bottom, #80808012 1px, transparent 1px)',
-      },
-      backgroundSize: {
-        'grid': '24px 24px',
+        marquee: {
+          '0%': { transform: 'translateX(0%)' },
+          '100%': { transform: 'translateX(-50%)' },
+        },
       },
     },
   },

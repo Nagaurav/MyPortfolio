@@ -1,248 +1,221 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Award, ExternalLink, Eye } from 'lucide-react';
+import { Award, ExternalLink, Eye, Calendar } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { PageHero } from '../../components/ui/page-hero';
 import { Modal } from '../../components/ui/modal';
-import type { Database } from '../../types/database.types';
 
-
-type Certificate = Database['public']['Tables']['certificates']['Row'];
+type Certificate = {
+  id: string;
+  title: string;
+  issuer: string;
+  issue_date: string;
+  expiry_date: string | null;
+  credential_url?: string | null;
+  certificate_url?: string | null;
+};
 
 export function CertificatesPage() {
   const [certificates, setCertificates] = useState<Certificate[]>([]);
   const [loading, setLoading] = useState(true);
-  const [selectedCertificate, setSelectedCertificate] = useState<Certificate | null>(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [selected, setSelected] = useState<Certificate | null>(null);
 
   useEffect(() => {
-    async function fetchCertificates() {
+    (async () => {
       try {
         const { data, error } = await supabase
           .from('certificates')
           .select('*')
           .order('issue_date', { ascending: false });
-
         if (error) throw error;
-        setCertificates(data || []);
-      } catch (error) {
-        console.error('Error fetching certificates:', error);
+        setCertificates((data || []) as Certificate[]);
+      } catch (e) {
+        console.error('certs fetch error', e);
       } finally {
         setLoading(false);
       }
-    }
-
-    fetchCertificates();
+    })();
   }, []);
-
-  const handleImageClick = (certificate: Certificate) => {
-    setSelectedCertificate(certificate);
-    setIsModalOpen(true);
-  };
-
-  const closeModal = () => {
-    setIsModalOpen(false);
-    setSelectedCertificate(null);
-  };
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
-          <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
-        </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-        
-        <div className="responsive-container relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-secondary-900 dark:text-secondary-50">Professional </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]">
-                Certifications
-              </span>
-            </h1>
-            <p className="text-xl text-secondary-600 dark:text-secondary-400">
-              Explore my professional certifications and achievements that demonstrate expertise and continuous learning
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Credentials"
+        title="Certifications &"
+        highlight="learning."
+        subtitle="A snapshot of the certifications I've earned and the courses I've completed along the way."
+        size="sm"
+      />
 
-      <div className="responsive-container pb-20">
-        <div className="grid gap-8 md:grid-cols-2 lg:grid-cols-3">
-          {loading ? (
-            Array(3).fill(null).map((_, index) => (
-              <div
-                key={index}
-                className="rounded-xl p-6 animate-pulse bg-white/80 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600"
-              >
-                <div className="h-48 rounded-lg mb-4 bg-secondary-200 dark:bg-secondary-700"></div>
-                <div className="h-6 rounded w-3/4 mb-2 bg-secondary-200 dark:bg-secondary-700"></div>
-                <div className="h-4 rounded w-1/2 bg-secondary-200 dark:bg-secondary-700"></div>
-              </div>
-            ))
-          ) : certificates.length > 0 ? (
-            certificates.map((certificate) => (
-              <motion.div
-                key={certificate.id}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                viewport={{ once: true }}
-                transition={{ duration: 0.6 }}
-                className="group rounded-xl overflow-hidden transition-all duration-300 bg-white/80 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600 hover:shadow-xl"
-              >
-                {certificate.certificate_url ? (
-                  <div className="relative h-48 cursor-pointer group">
-                    <img
-                      src={certificate.certificate_url}
-                      alt={certificate.title}
-                      className="w-full h-full object-cover transform transition-transform duration-500 group-hover:scale-110"
-                      onClick={() => handleImageClick(certificate)}
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/50 to-transparent"></div>
-                    
-                    {/* Click indicator overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <div className="bg-white/90 dark:bg-secondary-800/90 rounded-full p-3 shadow-lg">
-                        <Eye size={24} className="text-primary-600" />
-                      </div>
-                    </div>
-                    
-                    {/* Click hint text */}
-                    <div className="absolute bottom-3 left-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                      <span className="text-white text-sm font-medium bg-black/50 px-2 py-1 rounded">
-                        Click to preview
-                      </span>
-                    </div>
-                  </div>
-                ) : (
-                  <div className="h-48 bg-gradient-to-br from-primary-100 to-accent-100 dark:from-secondary-800 dark:to-secondary-700 flex items-center justify-center">
-                    <Award className="w-16 h-16 text-primary-600" />
-                  </div>
-                )}
-                <div className="p-6">
-                  <h3 className="text-xl font-semibold text-secondary-900 dark:text-secondary-100 mb-2">
-                    {certificate.title}
-                  </h3>
-                  <p className="text-secondary-600 dark:text-secondary-400 mb-4">
-                    Issued by {certificate.issuer}
-                  </p>
-                  <div className="text-sm text-secondary-500 dark:text-secondary-400 mb-4">
-                    <p>Issued: {new Date(certificate.issue_date).toLocaleDateString()}</p>
-                    {certificate.expiry_date && (
-                      <p>Expires: {new Date(certificate.expiry_date).toLocaleDateString()}</p>
-                    )}
-                  </div>
-                  
-                  {/* Action buttons */}
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    {certificate.credential_url && (
-                      <a
-                        href={certificate.credential_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
-                      >
-                        Verify Credential ↗
-                        <ExternalLink size={16} className="ml-2" />
-                      </a>
-                    )}
-                    
-                    {certificate.certificate_url && (
-                      <button
-                        onClick={() => handleImageClick(certificate)}
-                        className="inline-flex items-center justify-center px-4 py-2 bg-secondary-100 hover:bg-secondary-200 text-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 dark:text-secondary-100 font-medium rounded-lg transition-colors duration-200"
-                      >
-                        <Eye size={16} className="mr-2" />
-                        Preview
-                      </button>
-                    )}
-                  </div>
-                </div>
-              </motion.div>
-            ))
-          ) : (
-            <div className="col-span-full text-center py-12">
-              <Award className="w-16 h-16 text-secondary-400 mx-auto mb-4" />
-              <p className="text-secondary-600 dark:text-secondary-400">No certificates found.</p>
+      <div className="container-page pb-24">
+        {loading ? (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="surface h-80 animate-pulse" />
+            ))}
+          </div>
+        ) : certificates.length === 0 ? (
+          <div className="surface p-12 text-center">
+            <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-300 grid place-items-center">
+              <Award size={22} />
             </div>
-          )}
-        </div>
+            <h3 className="mt-4 text-lg font-semibold text-secondary-900 dark:text-white">
+              No certifications yet
+            </h3>
+            <p className="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              Earned certifications will appear here.
+            </p>
+          </div>
+        ) : (
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {certificates.map((c, i) => (
+              <motion.div
+                key={c.id}
+                initial={{ opacity: 0, y: 14 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.35, delay: Math.min(i * 0.04, 0.3) }}
+              >
+                <CertCard cert={c} onPreview={() => setSelected(c)} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
 
-      {/* Certificate Preview Modal */}
       <Modal
-        isOpen={isModalOpen}
-        onClose={closeModal}
-        title={selectedCertificate?.title}
+        isOpen={!!selected}
+        onClose={() => setSelected(null)}
+        title={selected?.title}
       >
-        {selectedCertificate && (
-          <div className="space-y-6">
-            {/* Certificate Image */}
-            {selectedCertificate.certificate_url && (
-              <div className="flex justify-center">
+        {selected && (
+          <div className="space-y-5">
+            {selected.certificate_url && (
+              <div className="overflow-hidden rounded-xl border border-secondary-200 dark:border-secondary-800">
                 <img
-                  src={selectedCertificate.certificate_url}
-                  alt={selectedCertificate.title}
-                  className="max-w-full max-h-[70vh] object-contain rounded-lg shadow-lg"
+                  src={selected.certificate_url}
+                  alt={selected.title}
+                  className="w-full max-h-[70vh] object-contain bg-secondary-50 dark:bg-secondary-900"
                 />
               </div>
             )}
-            
-            {/* Certificate Details */}
-            <div className="rounded-lg p-4 bg-secondary-50 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-secondary-700 dark:text-secondary-300">Issuer:</span>
-                  <p className="text-secondary-900 dark:text-secondary-100">{selectedCertificate.issuer}</p>
+            <div className="surface-muted p-4 grid sm:grid-cols-2 gap-3 text-sm">
+              <div>
+                <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                  Issuer
                 </div>
-                <div>
-                  <span className="font-medium text-secondary-700 dark:text-secondary-300">Issue Date:</span>
-                  <p className="text-secondary-900 dark:text-secondary-100">
-                    {new Date(selectedCertificate.issue_date).toLocaleDateString()}
-                  </p>
+                <div className="font-medium text-secondary-900 dark:text-secondary-100 mt-0.5">
+                  {selected.issuer}
                 </div>
-                {selectedCertificate.expiry_date && (
-                  <div>
-                    <span className="font-medium text-secondary-700 dark:text-secondary-300">Expiry Date:</span>
-                    <p className="text-secondary-900 dark:text-secondary-100">
-                      {new Date(selectedCertificate.expiry_date).toLocaleDateString()}
-                    </p>
-                  </div>
-                )}
               </div>
-            </div>
-            
-            {/* Action Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 justify-center">
-              {selectedCertificate.credential_url && (
-                <a
-                  href={selectedCertificate.credential_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center justify-center px-6 py-3 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors duration-200 shadow-md hover:shadow-lg"
-                >
-                  Verify Credential ↗
-                  <ExternalLink size={18} className="ml-2" />
-                </a>
+              <div>
+                <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                  Issued
+                </div>
+                <div className="font-medium text-secondary-900 dark:text-secondary-100 mt-0.5">
+                  {new Date(selected.issue_date).toLocaleDateString()}
+                </div>
+              </div>
+              {selected.expiry_date && (
+                <div>
+                  <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                    Expires
+                  </div>
+                  <div className="font-medium text-secondary-900 dark:text-secondary-100 mt-0.5">
+                    {new Date(selected.expiry_date).toLocaleDateString()}
+                  </div>
+                </div>
               )}
-              
-              <button
-                onClick={closeModal}
-                className="inline-flex items-center justify-center px-6 py-3 bg-secondary-200 hover:bg-secondary-300 text-secondary-700 dark:bg-secondary-700 dark:hover:bg-secondary-600 dark:text-secondary-100 font-medium rounded-lg transition-colors duration-200"
-              >
-                Close
-              </button>
             </div>
+            {selected.credential_url && (
+              <a
+                href={selected.credential_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center gap-2 w-full sm:w-auto px-5 h-11 rounded-lg bg-[linear-gradient(135deg,theme(colors.brand.500),theme(colors.brand.700))] text-white font-semibold text-sm shadow-md shadow-brand-500/20 hover:brightness-110"
+              >
+                Verify credential
+                <ExternalLink size={15} />
+              </a>
+            )}
           </div>
         )}
       </Modal>
     </>
+  );
+}
+
+function CertCard({ cert, onPreview }: { cert: Certificate; onPreview: () => void }) {
+  return (
+    <div className="surface overflow-hidden p-0 flex flex-col h-full">
+      <button
+        type="button"
+        onClick={onPreview}
+        className="group relative aspect-[5/3] overflow-hidden bg-secondary-100 dark:bg-secondary-900"
+      >
+        {cert.certificate_url ? (
+          <>
+            <img
+              src={cert.certificate_url}
+              alt={cert.title}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.05]"
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+            <div className="absolute inset-0 grid place-items-center opacity-0 group-hover:opacity-100 transition-opacity">
+              <span className="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-white/95 dark:bg-secondary-900/95 backdrop-blur text-sm font-semibold text-secondary-900 dark:text-white shadow-md">
+                <Eye size={14} /> Preview
+              </span>
+            </div>
+          </>
+        ) : (
+          <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-brand-500/15 to-accent-500/15">
+            <Award className="h-10 w-10 text-brand-500/70" />
+          </div>
+        )}
+      </button>
+
+      <div className="p-5 flex-1 flex flex-col">
+        <h3 className="text-base font-semibold text-secondary-900 dark:text-white line-clamp-2">
+          {cert.title}
+        </h3>
+        <div className="mt-1.5 text-sm text-secondary-600 dark:text-secondary-400">
+          Issued by <span className="text-secondary-900 dark:text-secondary-100 font-medium">{cert.issuer}</span>
+        </div>
+        <div className="mt-3 flex items-center gap-2 text-xs font-mono text-secondary-500 dark:text-secondary-400">
+          <Calendar size={12} />
+          {new Date(cert.issue_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+          {cert.expiry_date && (
+            <>
+              <span className="text-secondary-300 dark:text-secondary-700">→</span>
+              {new Date(cert.expiry_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
+            </>
+          )}
+        </div>
+
+        <div className="mt-auto pt-4 flex items-center gap-2">
+          {cert.credential_url && (
+            <a
+              href={cert.credential_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-200"
+            >
+              Verify
+              <ExternalLink size={13} />
+            </a>
+          )}
+          {cert.certificate_url && (
+            <button
+              type="button"
+              onClick={onPreview}
+              className="ml-auto inline-flex items-center gap-1.5 text-sm text-secondary-600 dark:text-secondary-300 hover:text-secondary-900 dark:hover:text-white"
+            >
+              <Eye size={13} /> Preview
+            </button>
+          )}
+        </div>
+      </div>
+    </div>
   );
 }

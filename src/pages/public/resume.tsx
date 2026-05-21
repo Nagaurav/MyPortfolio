@@ -1,121 +1,214 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { motion } from 'framer-motion';
-import { Download, FileText } from 'lucide-react';
+import { Download, FileText, Eye, Calendar, Sparkles, ArrowUpRight } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
-import type { Database } from '../../types/database.types';
+import { PageHero } from '../../components/ui/page-hero';
 
-
-type Resume = Database['public']['Tables']['resumes']['Row'];
+type Resume = {
+  id: string;
+  title: string;
+  version: string | number;
+  file_url: string;
+  is_active: boolean;
+  created_at: string;
+};
 
 export function ResumePage() {
-  const [activeResume, setActiveResume] = useState<Resume | null>(null);
+  const [resume, setResume] = useState<Resume | null>(null);
   const [loading, setLoading] = useState(true);
+  const [stats, setStats] = useState({ projects: 0, skills: 0, certs: 0 });
 
   useEffect(() => {
-    async function fetchActiveResume() {
+    (async () => {
       try {
-        const { data, error } = await supabase
-          .from('resumes')
-          .select('*')
-          .eq('is_active', true)
-          .maybeSingle();
-
-        if (error) throw error;
-        setActiveResume(data);
-      } catch (error) {
-        console.error('Error fetching resume:', error);
+        const [r, p, s, c] = await Promise.all([
+          supabase.from('resumes').select('*').eq('is_active', true).maybeSingle(),
+          supabase.from('projects').select('id', { count: 'exact', head: true }),
+          supabase.from('skills').select('id', { count: 'exact', head: true }),
+          supabase.from('certificates').select('id', { count: 'exact', head: true }),
+        ]);
+        setResume((r.data as Resume) || null);
+        setStats({
+          projects: p.count || 0,
+          skills: s.count || 0,
+          certs: c.count || 0,
+        });
+      } catch (e) {
+        console.error('resume fetch error', e);
       } finally {
         setLoading(false);
       }
-    }
-
-    fetchActiveResume();
+    })();
   }, []);
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative py-12 md:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
-          <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
-        </div>
-        <div className="absolute top-20 right-20 w-72 h-72 bg-primary-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob"></div>
-        <div className="absolute bottom-20 left-20 w-72 h-72 bg-accent-300/30 rounded-full mix-blend-multiply filter blur-xl animate-blob animation-delay-2000"></div>
-        
-        <div className="responsive-container relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto text-center"
-          >
-            <h1 className="text-3xl md:text-5xl font-bold mb-4 md:mb-6">
-              <span className="text-secondary-900 dark:text-secondary-50">My Professional </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-600 to-accent-500 animate-gradient bg-[length:200%_auto]">
-                Resume
-              </span>
-            </h1>
-            <p className="text-lg md:text-xl text-secondary-600 dark:text-secondary-400">
-              Download my resume to learn more about my experience, skills, and qualifications
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Resume"
+        title="The"
+        highlight="paperwork."
+        subtitle="Download the full PDF or skim the highlights below — whichever is faster for you."
+        size="sm"
+      />
 
-      <div className="responsive-container pb-12 md:pb-20">
-        <div className="max-w-3xl mx-auto">
-          {loading ? (
-            <div className="rounded-xl p-6 md:p-8 animate-pulse bg-white/80 dark:bg-secondary-800/50 border border-secondary-200 dark:border-secondary-600">
-              <div className="h-8 rounded w-1/2 mb-4 bg-secondary-200 dark:bg-secondary-700"></div>
-              <div className="h-4 rounded w-1/3 mb-6 bg-secondary-200 dark:bg-secondary-700"></div>
-              <div className="h-12 rounded w-48 bg-secondary-200 dark:bg-secondary-700"></div>
-            </div>
-          ) : activeResume ? (
+      <div className="container-page pb-24">
+        {loading ? (
+          <div className="surface h-64 animate-pulse" />
+        ) : resume ? (
+          <div className="grid lg:grid-cols-5 gap-6">
+            {/* Main resume card */}
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
+              initial={{ opacity: 0, y: 12 }}
               animate={{ opacity: 1, y: 0 }}
-              className="rounded-xl p-6 md:p-8 border bg-white/80 dark:bg-secondary-800/50 border-secondary-200 dark:border-secondary-600"
+              transition={{ duration: 0.4 }}
+              className="lg:col-span-3 surface p-6 sm:p-8"
             >
-              <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-6">
-                <div>
-                  <h2 className="text-xl md:text-2xl font-semibold text-secondary-900 dark:text-secondary-100">
-                    {activeResume.title}
-                  </h2>
-                  <p className="text-secondary-600 dark:text-secondary-400 mt-1">
-                    Version {activeResume.version}
-                  </p>
+              <div className="flex items-start justify-between gap-4 mb-6">
+                <div className="flex items-center gap-4 min-w-0">
+                  <div className="grid h-14 w-14 place-items-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20 flex-shrink-0">
+                    <FileText size={22} />
+                  </div>
+                  <div className="min-w-0">
+                    <h2 className="text-xl font-bold text-secondary-900 dark:text-white truncate">
+                      {resume.title}
+                    </h2>
+                    <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs font-mono text-secondary-500 dark:text-secondary-400">
+                      <span>v{resume.version}</span>
+                      <span className="text-secondary-300 dark:text-secondary-700">·</span>
+                      <span className="inline-flex items-center gap-1.5">
+                        <Calendar size={11} />
+                        Updated {new Date(resume.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
                 </div>
-                <div className="w-16 h-16 bg-primary-100 dark:bg-primary-900/30 rounded-xl flex items-center justify-center">
-                  <FileText className="w-8 h-8 text-primary-600" />
-                </div>
-              </div>
-              
-              <div className="mb-8">
-                <p className="text-secondary-600 dark:text-secondary-400">
-                  Last updated: {new Date(activeResume.created_at).toLocaleDateString()}
-                </p>
+                <span className="chip-brand whitespace-nowrap">Active</span>
               </div>
 
-              <Button
-                as="a"
-                href={activeResume.file_url}
-                target="_blank"
-                rel="noopener noreferrer"
-                size="lg"
-                className="w-full sm:w-auto"
-                leftIcon={<Download size={16} />}
-              >
-                Download Resume
-              </Button>
+              <p className="text-sm text-secondary-600 dark:text-secondary-400 leading-relaxed">
+                A concise, recruiter-friendly summary of my education, work experience, skills, and
+                selected projects. Latest version always reflects current availability.
+              </p>
+
+              <div className="mt-6 flex flex-wrap items-center gap-3">
+                <Button
+                  as="a"
+                  href={resume.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="gradient"
+                  size="lg"
+                  leftIcon={<Download size={16} />}
+                >
+                  Download PDF
+                </Button>
+                <Button
+                  as="a"
+                  href={resume.file_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  variant="outline"
+                  size="lg"
+                  leftIcon={<Eye size={16} />}
+                >
+                  Preview
+                </Button>
+              </div>
+
+              <div className="hairline my-8" />
+
+              <div className="grid grid-cols-3 gap-3">
+                {[
+                  { label: 'Projects', value: stats.projects, href: '/projects' },
+                  { label: 'Skills', value: stats.skills, href: '/skills' },
+                  { label: 'Certs', value: stats.certs, href: '/certificates' },
+                ].map((s) => (
+                  <Link
+                    key={s.label}
+                    to={s.href}
+                    className="group rounded-xl border border-secondary-200/70 dark:border-secondary-800/70 p-4 hover:border-brand-500/40 transition-colors"
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                        {s.label}
+                      </span>
+                      <ArrowUpRight
+                        size={13}
+                        className="text-secondary-400 group-hover:text-brand-500 transition-colors"
+                      />
+                    </div>
+                    <div className="mt-1 text-2xl font-black tracking-tight text-secondary-900 dark:text-white">
+                      {s.value}
+                    </div>
+                  </Link>
+                ))}
+              </div>
             </motion.div>
-          ) : (
-            <div className="text-center py-12">
-              <FileText className="w-16 h-16 text-secondary-400 mx-auto mb-4" />
-              <p className="text-secondary-600 dark:text-secondary-400">No resume available at the moment.</p>
+
+            {/* Side: quick links */}
+            <motion.aside
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.4, delay: 0.08 }}
+              className="lg:col-span-2 surface p-6 sm:p-8"
+            >
+              <div className="flex items-center gap-2 mb-1">
+                <Sparkles size={14} className="text-brand-500" />
+                <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                  Prefer to browse?
+                </div>
+              </div>
+              <h3 className="text-lg font-semibold text-secondary-900 dark:text-white">
+                Explore the live version
+              </h3>
+              <p className="mt-2 text-sm text-secondary-600 dark:text-secondary-400">
+                Everything in the PDF, but interactive — with project demos, repo links, and detail
+                pages.
+              </p>
+
+              <div className="mt-5 space-y-2">
+                {[
+                  { to: '/projects', label: 'Projects', desc: 'Featured work and case studies' },
+                  { to: '/skills', label: 'Skills', desc: 'Proficiency by category' },
+                  { to: '/experience', label: 'Experience', desc: 'Career timeline' },
+                  { to: '/certificates', label: 'Certificates', desc: 'Verified credentials' },
+                  { to: '/contact', label: 'Contact', desc: 'Get in touch' },
+                ].map((l) => (
+                  <Link
+                    key={l.to}
+                    to={l.to}
+                    className="group flex items-center justify-between rounded-lg border border-secondary-200/70 dark:border-secondary-800/70 px-3.5 py-3 hover:border-brand-500/40 transition-colors"
+                  >
+                    <div>
+                      <div className="text-sm font-semibold text-secondary-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-300">
+                        {l.label}
+                      </div>
+                      <div className="text-xs text-secondary-500 dark:text-secondary-400">{l.desc}</div>
+                    </div>
+                    <ArrowUpRight
+                      size={14}
+                      className="text-secondary-400 group-hover:text-brand-500 group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-all"
+                    />
+                  </Link>
+                ))}
+              </div>
+            </motion.aside>
+          </div>
+        ) : (
+          <div className="surface p-12 text-center">
+            <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-300 grid place-items-center">
+              <FileText size={22} />
             </div>
-          )}
-        </div>
+            <h3 className="mt-4 text-lg font-semibold text-secondary-900 dark:text-white">
+              No resume available
+            </h3>
+            <p className="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              An active resume hasn't been uploaded yet. Check back soon.
+            </p>
+          </div>
+        )}
       </div>
     </>
   );

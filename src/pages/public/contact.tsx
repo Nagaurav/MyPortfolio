@@ -2,11 +2,27 @@ import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Mail, Phone, MapPin, Send, Copy, Github, Linkedin, MessageSquare, User, AtSign } from 'lucide-react';
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Send,
+  Copy,
+  Check,
+  Github,
+  Linkedin,
+  MessageSquare,
+  User,
+  AtSign,
+} from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
-import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
-import { generateCSRFToken, storeCSRFToken, getStoredCSRFToken } from '../../lib/csrf';
+import { PageHero } from '../../components/ui/page-hero';
+import {
+  generateCSRFToken,
+  storeCSRFToken,
+  getStoredCSRFToken,
+} from '../../lib/csrf';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -20,32 +36,19 @@ interface ContactFormData {
 
 export function ContactPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [copiedEmail, setCopiedEmail] = useState(false);
+  const [copied, setCopied] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
-  
+
   useEffect(() => {
-    if (!getStoredCSRFToken()) {
-      const token = generateCSRFToken();
-      storeCSRFToken(token);
-    }
-
-    // Fetch profile data
-    async function fetchProfile() {
+    if (!getStoredCSRFToken()) storeCSRFToken(generateCSRFToken());
+    (async () => {
       try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .limit(1)
-          .single();
-
-        if (error) throw error;
-        setProfile(data);
-      } catch (error) {
-        console.error('Error fetching profile:', error);
+        const { data } = await supabase.from('profiles').select('*').limit(1).single();
+        if (data) setProfile(data as Profile);
+      } catch (e) {
+        console.error('profile fetch error', e);
       }
-    }
-
-    fetchProfile();
+    })();
   }, []);
 
   const {
@@ -59,30 +62,29 @@ export function ContactPage() {
     setIsSubmitting(true);
     try {
       const csrfToken = getStoredCSRFToken();
-      if (!csrfToken) {
-        throw new Error('CSRF token not found');
-      }
+      if (!csrfToken) throw new Error('CSRF token not found');
 
-      const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contact-form`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
-          'X-CSRF-Token': csrfToken
-        },
-        body: JSON.stringify(data)
-      });
-
+      const response = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contact-form`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            'X-CSRF-Token': csrfToken,
+          },
+          body: JSON.stringify(data),
+        }
+      );
       if (!response.ok) {
         const error = await response.json();
         throw new Error(error.error || 'Failed to send message');
       }
-
-      toast.success('Message sent successfully!');
+      toast.success('Message sent. I’ll get back to you soon.');
       reset();
-    } catch (error) {
-      console.error('Error sending message:', error);
-      toast.error(error instanceof Error ? error.message : 'Failed to send message');
+    } catch (e) {
+      console.error('contact error', e);
+      toast.error(e instanceof Error ? e.message : 'Failed to send message');
     } finally {
       setIsSubmitting(false);
     }
@@ -90,276 +92,270 @@ export function ContactPage() {
 
   const copyEmail = async () => {
     if (!profile?.email) return;
-    
     try {
       await navigator.clipboard.writeText(profile.email);
-      setCopiedEmail(true);
-      toast.success('Email copied to clipboard!');
-      setTimeout(() => setCopiedEmail(false), 2000);
-    } catch (err) {
-      toast.error('Failed to copy email');
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1800);
+      toast.success('Email copied');
+    } catch {
+      toast.error('Could not copy');
     }
   };
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative py-12 sm:py-16 md:py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
-          <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
-        </div>
-        <motion.div 
-          className="absolute top-8 right-8 sm:top-20 sm:right-20 w-32 h-32 sm:w-48 sm:h-48 md:w-72 md:h-72 bg-gradient-to-br from-primary-300/30 to-accent-300/30 rounded-full mix-blend-multiply filter blur-xl"
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, 90, 180, 270, 360],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div 
-          className="absolute bottom-8 left-8 sm:bottom-20 sm:left-20 w-32 h-32 sm:w-48 sm:h-48 md:w-72 md:h-72 bg-gradient-to-br from-accent-300/30 to-primary-400/30 rounded-full mix-blend-multiply filter blur-xl"
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [360, 270, 180, 90, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        />
-        
-        <div className="responsive-container relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto text-center px-4"
-          >
-            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4 sm:mb-6">
-              <span className="text-secondary-900">Let's </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-600 animate-gradient bg-[length:200%_auto]">
-                Connect
-              </span>
-            </h1>
-            <p className="text-lg sm:text-xl text-secondary-600">
-              Have a question or want to work together? I'd love to hear from you
-            </p>
-          </motion.div>
-        </div>
-      </section>
+      <PageHero
+        eyebrow="Contact"
+        title="Let's build"
+        highlight="something."
+        subtitle="Have a project, a question, or want to chat about an internship? My inbox is open."
+        size="sm"
+      />
 
-      <div className="responsive-container pb-12 sm:pb-16 md:pb-20">
-        <div className="grid gap-6 sm:gap-8 grid-cols-1 md:grid-cols-2 max-w-5xl mx-auto">
-          {/* Contact Information */}
-          <motion.div
-            initial={{ opacity: 0, x: -20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6 }}
+      <div className="container-page pb-24">
+        <div className="grid lg:grid-cols-5 gap-6">
+          {/* Left: contact info */}
+          <motion.aside
+            initial={{ opacity: 0, x: -10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-2 surface p-6 sm:p-8"
           >
-            <Card3D variant="tech" className="p-4 sm:p-6 md:p-8 h-full">
-                             <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent">
-                 Contact Information
-               </h2>
-              <div className="space-y-4 sm:space-y-6">
-                {profile?.email && (
-                  <motion.div 
-                    className="flex items-start p-3 sm:p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-primary-500 to-accent-600 flex items-center justify-center shadow-lg flex-shrink-0">
-                      <Mail className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="ml-3 sm:ml-4 flex-1 min-w-0">
-                      <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Email</h3>
-                      <div className="flex items-center mt-1">
-                        <p className="text-secondary-600 dark:text-secondary-300 text-sm sm:text-base break-all">{profile.email}</p>
-                        <motion.button
-                          onClick={copyEmail}
-                          className="ml-2 text-secondary-400 hover:text-primary-500 transition-colors p-1 rounded-lg hover:bg-primary-500/10"
-                          aria-label="Copy email"
-                          whileHover={{ scale: 1.1 }}
-                          whileTap={{ scale: 0.9 }}
-                        >
-                          <Copy size={16} />
-                        </motion.button>
+            <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-1">
+              Direct lines
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-secondary-900 dark:text-white">
+              Reach me directly
+            </h2>
+            <p className="mt-2 text-sm text-secondary-600 dark:text-secondary-400">
+              Prefer email? Want to send a DM? Pick whatever works.
+            </p>
+
+            <div className="mt-6 space-y-3">
+              {profile?.email && (
+                <div className="group flex items-center justify-between gap-3 rounded-xl border border-secondary-200/70 dark:border-secondary-800/70 p-3.5">
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className="grid h-10 w-10 place-items-center rounded-lg bg-brand-500/10 text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20">
+                      <Mail size={17} />
+                    </span>
+                    <div className="min-w-0">
+                      <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                        Email
+                      </div>
+                      <div className="text-sm font-medium text-secondary-900 dark:text-white truncate">
+                        {profile.email}
                       </div>
                     </div>
-                  </motion.div>
-                )}
-
-                {profile?.phone && (
-                  <motion.div 
-                    className="flex items-start p-3 sm:p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                    transition={{ type: "spring", stiffness: 300 }}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={copyEmail}
+                    className="grid h-9 w-9 place-items-center rounded-md text-secondary-600 dark:text-secondary-400 hover:text-brand-600 dark:hover:text-brand-300 hover:bg-brand-500/5"
+                    aria-label="Copy email"
                   >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-accent-500 to-primary-700 flex items-center justify-center shadow-lg flex-shrink-0">
-                      <Phone className="w-6 h-6 text-white" />
-                    </div>
-                    <div className="ml-3 sm:ml-4">
-                      <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Phone</h3>
-                      <a
-                        href={`tel:${profile.phone}`}
-                        className="text-secondary-600 dark:text-secondary-300 hover:text-primary-500 transition-colors"
-                      >
-                        {profile.phone}
-                      </a>
-                    </div>
-                  </motion.div>
-                )}
+                    {copied ? <Check size={15} className="text-emerald-500" /> : <Copy size={15} />}
+                  </button>
+                </div>
+              )}
 
-                {profile?.location && (
-                  <motion.div 
-                    className="flex items-start p-3 sm:p-4 rounded-lg bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600"
-                    whileHover={{ scale: 1.02, backgroundColor: 'rgba(241, 210, 182, 0.1)' }}
-                    transition={{ type: "spring", stiffness: 300 }}
-                  >
-                    <div className="w-10 h-10 sm:w-12 sm:h-12 rounded-xl bg-gradient-to-r from-primary-400 to-accent-500 flex items-center justify-center shadow-lg flex-shrink-0">
-                      <MapPin className="w-6 h-6 text-white" />
+              {profile?.phone && (
+                <a
+                  href={`tel:${profile.phone}`}
+                  className="flex items-center gap-3 rounded-xl border border-secondary-200/70 dark:border-secondary-800/70 p-3.5 hover:border-brand-500/40 transition-colors"
+                >
+                  <span className="grid h-10 w-10 place-items-center rounded-lg bg-accent-500/10 text-accent-600 dark:text-accent-300 ring-1 ring-inset ring-accent-500/20">
+                    <Phone size={17} />
+                  </span>
+                  <div>
+                    <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                      Phone
                     </div>
-                    <div className="ml-3 sm:ml-4">
-                      <h3 className="text-lg font-medium text-secondary-900 dark:text-white">Location</h3>
-                      <p className="text-secondary-600 dark:text-secondary-300">{profile.location}</p>
+                    <div className="text-sm font-medium text-secondary-900 dark:text-white">
+                      {profile.phone}
                     </div>
-                  </motion.div>
-                )}
+                  </div>
+                </a>
+              )}
 
-                <div className="pt-6 border-t border-white/20 dark:border-secondary-600">
-                  <h3 className="text-lg font-medium mb-4 text-secondary-900 dark:text-white">Connect with me</h3>
-                  <div className="flex space-x-4">
-                    {profile?.github_url && (
-                      <motion.a
-                        href={profile.github_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-12 h-12 rounded-xl bg-gradient-to-r from-gray-700 to-gray-900 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                        whileHover={{ scale: 1.1, y: -2 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <Github size={20} />
-                      </motion.a>
-                    )}
-                    {profile?.linkedin_url && (
-                      <motion.a
-                        href={profile.linkedin_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="w-12 h-12 rounded-xl bg-gradient-to-r from-blue-600 to-blue-700 flex items-center justify-center text-white shadow-lg hover:shadow-xl transition-all duration-300"
-                        whileHover={{ scale: 1.1, y: -2 }}
-                        whileTap={{ scale: 0.9 }}
-                      >
-                        <Linkedin size={20} />
-                      </motion.a>
-                    )}
+              {profile?.location && (
+                <div className="flex items-center gap-3 rounded-xl border border-secondary-200/70 dark:border-secondary-800/70 p-3.5">
+                  <span className="grid h-10 w-10 place-items-center rounded-lg bg-secondary-200/70 text-secondary-700 dark:bg-secondary-800 dark:text-secondary-300 ring-1 ring-inset ring-secondary-300/60 dark:ring-secondary-700">
+                    <MapPin size={17} />
+                  </span>
+                  <div>
+                    <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                      Location
+                    </div>
+                    <div className="text-sm font-medium text-secondary-900 dark:text-white">
+                      {profile.location}
+                    </div>
                   </div>
                 </div>
-              </div>
-            </Card3D>
-          </motion.div>
+              )}
+            </div>
 
-          {/* Contact Form */}
+            <div className="hairline my-6" />
+
+            <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-3">
+              Elsewhere
+            </div>
+            <div className="flex items-center gap-2">
+              {profile?.github_url && (
+                <a
+                  href={profile.github_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="grid h-11 w-11 place-items-center rounded-xl border border-secondary-200 dark:border-secondary-800 text-secondary-700 dark:text-secondary-300 hover:text-brand-600 dark:hover:text-brand-300 hover:border-brand-500/40 transition-colors"
+                  aria-label="GitHub"
+                >
+                  <Github size={18} />
+                </a>
+              )}
+              {profile?.linkedin_url && (
+                <a
+                  href={profile.linkedin_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="grid h-11 w-11 place-items-center rounded-xl border border-secondary-200 dark:border-secondary-800 text-secondary-700 dark:text-secondary-300 hover:text-brand-600 dark:hover:text-brand-300 hover:border-brand-500/40 transition-colors"
+                  aria-label="LinkedIn"
+                >
+                  <Linkedin size={18} />
+                </a>
+              )}
+            </div>
+
+            <div className="mt-8 rounded-xl bg-emerald-500/10 ring-1 ring-inset ring-emerald-500/20 p-3.5 text-sm">
+              <div className="flex items-center gap-2 font-medium text-emerald-700 dark:text-emerald-300">
+                <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
+                Currently accepting work
+              </div>
+              <p className="mt-1 text-emerald-700/80 dark:text-emerald-300/80">
+                Average response time: within 24 hours.
+              </p>
+            </div>
+          </motion.aside>
+
+          {/* Right: form */}
           <motion.div
-            initial={{ opacity: 0, x: 20 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.6, delay: 0.2 }}
+            initial={{ opacity: 0, x: 10 }}
+            whileInView={{ opacity: 1, x: 0 }}
+            viewport={{ once: true }}
+            transition={{ duration: 0.4 }}
+            className="lg:col-span-3 surface p-6 sm:p-8"
           >
-            <Card3D variant="glass" className="p-4 sm:p-6 md:p-8">
-                             <h2 className="text-2xl font-semibold mb-6 bg-gradient-to-r from-primary-500 to-accent-600 bg-clip-text text-transparent">
-                 Send Message
-               </h2>
-              <form onSubmit={handleSubmit(onSubmit)} className="space-y-4 sm:space-y-6">
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
-                    <User className="w-4 h-4 inline mr-2" />
-                    Name
-                  </label>
+            <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-1">
+              New message
+            </div>
+            <h2 className="text-2xl font-bold tracking-tight text-secondary-900 dark:text-white">
+              Send me a note
+            </h2>
+
+            <form onSubmit={handleSubmit(onSubmit)} className="mt-6 space-y-4">
+              <div className="grid sm:grid-cols-2 gap-4">
+                <Field
+                  label="Name"
+                  icon={<User size={13} />}
+                  error={errors.name?.message}
+                >
                   <input
-                    {...register('name', { required: 'Name is required' })}
-                    type="text"
-                    className="w-full px-4 py-3 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-secondary-500"
+                    {...register('name', { required: 'Required' })}
+                    className="input"
                     placeholder="Your name"
                   />
-                  {errors.name && (
-                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.name.message}</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
-                    <AtSign className="w-4 h-4 inline mr-2" />
-                    Email
-                  </label>
+                </Field>
+                <Field
+                  label="Email"
+                  icon={<AtSign size={13} />}
+                  error={errors.email?.message}
+                >
                   <input
-                    {...register('email', { 
-                      required: 'Email is required',
+                    {...register('email', {
+                      required: 'Required',
                       pattern: {
                         value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
-                        message: 'Invalid email address'
-                      }
+                        message: 'Invalid email',
+                      },
                     })}
                     type="email"
-                    className="w-full px-4 py-3 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-secondary-500"
-                    placeholder="your.email@example.com"
+                    className="input"
+                    placeholder="you@email.com"
                   />
-                  {errors.email && (
-                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.email.message}</p>
-                  )}
-                </div>
+                </Field>
+              </div>
 
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
-                    <MessageSquare className="w-4 h-4 inline mr-2" />
-                    Subject
-                  </label>
-                  <input
-                    {...register('subject', { required: 'Subject is required' })}
-                    type="text"
-                    className="w-full px-4 py-3 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-secondary-500"
-                    placeholder="What's this about?"
-                  />
-                  {errors.subject && (
-                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.subject.message}</p>
-                  )}
-                </div>
+              <Field
+                label="Subject"
+                icon={<MessageSquare size={13} />}
+                error={errors.subject?.message}
+              >
+                <input
+                  {...register('subject', { required: 'Required' })}
+                  className="input"
+                  placeholder="Project, role, or topic"
+                />
+              </Field>
 
-                <div>
-                  <label className="block text-sm font-medium text-secondary-700 dark:text-secondary-200 mb-2">
-                    <MessageSquare className="w-4 h-4 inline mr-2" />
-                    Message
-                  </label>
-                  <textarea
-                    {...register('message', { required: 'Message is required' })}
-                    rows={5}
-                    className="w-full px-4 py-3 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent text-secondary-900 dark:text-white placeholder-secondary-400 dark:placeholder-secondary-500 resize-none"
-                    placeholder="Tell me about your project or question..."
-                  />
-                  {errors.message && (
-                    <p className="mt-1 text-sm text-red-500 dark:text-red-400">{errors.message.message}</p>
-                  )}
-                </div>
+              <Field
+                label="Message"
+                icon={<MessageSquare size={13} />}
+                error={errors.message?.message}
+              >
+                <textarea
+                  {...register('message', { required: 'Required' })}
+                  rows={6}
+                  className="input"
+                  placeholder="Tell me a bit about what you're working on…"
+                />
+              </Field>
 
-                                 <motion.button
-                   type="submit"
-                   disabled={isSubmitting}
-                   className="w-full bg-gradient-to-r from-primary-500 to-accent-600 text-white py-3 px-6 rounded-lg font-medium shadow-lg hover:shadow-xl transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                   whileHover={{ scale: 1.02 }}
-                   whileTap={{ scale: 0.98 }}
-                 >
-                  {isSubmitting ? (
-                    <div className="flex items-center justify-center">
-                      <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin mr-2"></div>
-                      Sending...
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center">
-                      <Send className="w-5 h-5 mr-2" />
-                      Send Message
-                    </div>
-                  )}
-                </motion.button>
-              </form>
-            </Card3D>
+              <Button
+                type="submit"
+                variant="gradient"
+                size="lg"
+                loading={isSubmitting}
+                rightIcon={!isSubmitting ? <Send size={15} /> : undefined}
+                className="w-full sm:w-auto"
+              >
+                {isSubmitting ? 'Sending…' : 'Send message'}
+              </Button>
+
+              <p className="text-xs text-secondary-500 dark:text-secondary-500">
+                By submitting, you agree to be contacted at the email you provide.
+              </p>
+            </form>
           </motion.div>
         </div>
       </div>
     </>
+  );
+}
+
+function Field({
+  label,
+  icon,
+  error,
+  children,
+}: {
+  label: string;
+  icon?: React.ReactNode;
+  error?: string;
+  children: React.ReactNode;
+}) {
+  return (
+    <div>
+      <label className="flex items-center justify-between text-xs font-mono uppercase tracking-wider text-secondary-600 dark:text-secondary-400 mb-1.5">
+        <span className="inline-flex items-center gap-1.5">
+          {icon}
+          {label}
+        </span>
+        {error && (
+          <span className="text-red-500 dark:text-red-400 normal-case font-sans tracking-normal">
+            {error}
+          </span>
+        )}
+      </label>
+      {children}
+    </div>
   );
 }

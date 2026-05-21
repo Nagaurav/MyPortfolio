@@ -12,6 +12,7 @@ type Experience = Database['public']['Tables']['experiences']['Row'];
 
 interface ExperienceFormData {
   title: string;
+  position?: string;
   company: string;
   location: string;
   type: string;
@@ -20,6 +21,7 @@ interface ExperienceFormData {
   current: boolean;
   description: string;
   technologies: string;
+  key_achievements: string;
 }
 
 const EXPERIENCE_TYPES = [
@@ -53,6 +55,7 @@ export function AdminExperiencePage() {
   useEffect(() => {
     if (editingExperience) {
       setValue('title', editingExperience.title);
+      setValue('position', editingExperience.position || '');
       setValue('company', editingExperience.company);
       setValue('location', editingExperience.location);
       setValue('type', editingExperience.type);
@@ -61,6 +64,7 @@ export function AdminExperiencePage() {
       setValue('current', editingExperience.current);
       setValue('description', editingExperience.description);
       setValue('technologies', editingExperience.technologies?.join(', ') || '');
+      setValue('key_achievements', editingExperience.key_achievements?.join('\n') || '');
     }
   }, [editingExperience, setValue]);
 
@@ -85,7 +89,11 @@ export function AdminExperiencePage() {
     try {
       const experienceData = {
         ...data,
+        position: data.position?.trim() || null,
         technologies: data.technologies.split(',').map(tech => tech.trim()).filter(Boolean),
+        key_achievements: data.key_achievements
+          ? data.key_achievements.split('\n').map(a => a.trim()).filter(Boolean)
+          : [],
         end_date: data.current ? null : data.end_date,
       };
 
@@ -159,6 +167,22 @@ export function AdminExperiencePage() {
               {errors.title && (
                 <p className="mt-1 text-sm text-red-600">{errors.title.message}</p>
               )}
+            </div>
+
+            <div>
+              <label htmlFor="position" className="block text-sm font-medium text-secondary-700">
+                Position (optional)
+              </label>
+              <input
+                type="text"
+                id="position"
+                className="mt-1 input"
+                placeholder="e.g. Senior Engineer, Tech Lead"
+                {...register('position')}
+              />
+              <p className="mt-1 text-xs text-secondary-500">
+                Alternate label shown in place of Job Title on the public page if set.
+              </p>
             </div>
 
             <div>
@@ -271,6 +295,22 @@ export function AdminExperiencePage() {
             {errors.description && (
               <p className="mt-1 text-sm text-red-600">{errors.description.message}</p>
             )}
+          </div>
+
+          <div>
+            <label htmlFor="key_achievements" className="block text-sm font-medium text-secondary-700">
+              Key Achievements (one per line)
+            </label>
+            <textarea
+              id="key_achievements"
+              rows={4}
+              className="mt-1 input"
+              placeholder={'Reduced API latency by 40%\nLed migration to Kubernetes\nMentored 3 junior engineers'}
+              {...register('key_achievements')}
+            />
+            <p className="mt-1 text-xs text-secondary-500">
+              One achievement per line. Renders as a bulleted list on the public experience page.
+            </p>
           </div>
 
           <div>

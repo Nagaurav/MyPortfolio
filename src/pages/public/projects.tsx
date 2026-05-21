@@ -1,532 +1,360 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Grid, List, Github, ExternalLink, Search, ArrowRight, Filter, Sparkles } from 'lucide-react';
-import { motion, AnimatePresence, useInView } from 'framer-motion';
-import { useRef } from 'react';
+import { Github, ExternalLink, Search, ArrowUpRight, Sparkles, X, SlidersHorizontal } from 'lucide-react';
+import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
+import { PageHero } from '../../components/ui/page-hero';
 import { Button } from '../../components/ui/button';
-import { SectionHeader } from '../../components/ui/section-header';
-import { Card3D, TechCard, GlassCard } from '../../components/ui/3d-card';
-import { TiltCard } from '../../components/ui/3d-tilt-card';
-import { 
-  staggerContainerVariants, 
-  fadeInUpVariants, 
-  scaleInVariants,
-  projectCardVariants 
-} from '../../lib/utils';
-import type { Database } from '../../types/database.types';
+import { cn } from '../../lib/utils';
 
-type Project = Database['public']['Tables']['projects']['Row'];
-type ViewMode = 'grid' | 'list';
+type Project = any;
+
 type SortOption = 'date' | 'featured' | 'title';
 
 export function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
-  const [filterLoading, setFilterLoading] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('grid');
-  const [selectedTechStack, setSelectedTechStack] = useState<string[]>([]);
+  const [selectedTech, setSelectedTech] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('date');
-  const [allTechStack, setAllTechStack] = useState<string[]>([]);
-  const [allCategories, setAllCategories] = useState<string[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [searchLoading, setSearchLoading] = useState(false);
+  const [query, setQuery] = useState('');
+  const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
-    fetchProjects();
+    (async () => {
+      try {
+        let q = supabase.from('projects').select('*');
+        if (sortBy === 'featured') {
+          q = q.order('featured', { ascending: false }).order('created_at', { ascending: false });
+        } else if (sortBy === 'title') {
+          q = q.order('title', { ascending: true });
+        } else {
+          q = q.order('created_at', { ascending: false });
+        }
+        const { data, error } = await q;
+        if (error) throw error;
+        setProjects(data || []);
+      } catch (err) {
+        console.error('projects fetch error', err);
+      } finally {
+        setLoading(false);
+      }
+    })();
   }, [sortBy]);
 
-  async function fetchProjects() {
-    try {
-      let query = supabase.from('projects').select('*');
+  const allTech = useMemo(() => {
+    const set = new Set<string>();
+    projects.forEach((p) => (p.tech_stack || []).forEach((t: string) => set.add(t)));
+    return Array.from(set).sort();
+  }, [projects]);
 
-      switch (sortBy) {
-        case 'featured':
-          query = query.order('featured', { ascending: false }).order('created_at', { ascending: false });
-          break;
-        case 'title':
-          query = query.order('title', { ascending: true });
-          break;
-        default:
-          query = query.order('created_at', { ascending: false });
-      }
+  const allCategories = useMemo(() => {
+    const set = new Set<string>();
+    projects.forEach((p) => p.category && set.add(p.category));
+    return Array.from(set).sort();
+  }, [projects]);
 
-      const { data, error } = await query;
+  const filtered = useMemo(() => {
+    return projects.filter((p) => {
+      const techOk =
+        selectedTech.length === 0 || selectedTech.every((t) => (p.tech_stack || []).includes(t));
+      const catOk = !selectedCategory || p.category === selectedCategory;
+      const ql = query.toLowerCase().trim();
+      const qOk =
+        !ql ||
+        p.title?.toLowerCase().includes(ql) ||
+        p.description?.toLowerCase().includes(ql) ||
+        p.short_description?.toLowerCase().includes(ql) ||
+        (p.tech_stack || []).some((t: string) => t.toLowerCase().includes(ql));
+      return techOk && catOk && qOk;
+    });
+  }, [projects, selectedTech, selectedCategory, query]);
 
-      if (error) throw error;
+  const activeFilters = selectedTech.length + (selectedCategory ? 1 : 0) + (query ? 1 : 0);
 
-      setProjects(data || []);
-      
-      const techStack = data?.reduce((acc: string[], project) => {
-        project.tech_stack?.forEach(tech => {
-          if (!acc.includes(tech)) {
-            acc.push(tech);
-          }
-        });
-        return acc.sort();
-      }, []) || [];
-      
-      const categories = data?.reduce((acc: string[], project) => {
-        if (project.category && !acc.includes(project.category)) {
-          acc.push(project.category);
-        }
-        return acc.sort();
-      }, []) || [];
-      
-      setAllTechStack(techStack);
-      setAllCategories(categories);
-    } catch (error) {
-      console.error('Error fetching projects:', error);
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  const filteredProjects = projects.filter(project => {
-    const matchesTechStack = selectedTechStack.length === 0 || 
-      project.tech_stack?.some(tech => selectedTechStack.includes(tech));
-    
-    const matchesCategory = selectedCategory === null || 
-      project.category === selectedCategory;
-    
-    const matchesSearch = searchQuery === '' || 
-      project.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.short_description?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      project.tech_stack?.some(tech => tech.toLowerCase().includes(searchQuery.toLowerCase()));
-
-    return matchesTechStack && matchesCategory && matchesSearch;
-  });
-
-  const toggleTechStack = (tech: string) => {
-    setFilterLoading(true);
-    setSelectedTechStack(prev =>
-      prev.includes(tech)
-        ? prev.filter(t => t !== tech)
-        : [...prev, tech]
-    );
-    // Simulate loading for better UX
-    setTimeout(() => setFilterLoading(false), 300);
+  const clearAll = () => {
+    setSelectedTech([]);
+    setSelectedCategory(null);
+    setQuery('');
   };
-
-  const toggleCategory = (category: string) => {
-    setFilterLoading(true);
-    setSelectedCategory(prev => prev === category ? null : category);
-    // Simulate loading for better UX
-    setTimeout(() => setFilterLoading(false), 300);
-  };
-
-  const handleSearchChange = (query: string) => {
-    setSearchLoading(true);
-    setSearchQuery(query);
-    // Simulate loading for better UX
-    setTimeout(() => setSearchLoading(false), 300);
-  };
-
-  const ProjectCard = ({ project, index }: { project: Project; index: number }) => (
-    <motion.div
-      layout
-      variants={projectCardVariants}
-      initial="hidden"
-      whileInView="visible"
-      viewport={{ once: true, margin: "-50px" }}
-      transition={{ duration: 0.5, delay: index * 0.1 }}
-    >
-      <TiltCard
-        maxTilt={12}
-        scale={1.02}
-        speed={400}
-        glare={true}
-        glareColor="rgba(255, 255, 255, 0.3)"
-        glarePosition="top"
-        className="h-full"
-      >
-        <Card3D 
-          variant="tech" 
-          className={`group overflow-hidden h-full ${
-            viewMode === 'list' ? 'flex' : ''
-          }`}
-        >
-          {/* Project Image */}
-          <div className={`relative overflow-hidden ${
-            viewMode === 'list' ? 'w-1/3' : 'w-full'
-          }`}>
-            {project.image_url ? (
-              <img
-                src={project.image_url}
-                alt={project.title}
-                className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
-              />
-            ) : (
-              <div className="w-full h-48 bg-gradient-to-br from-cyan-500/20 to-blue-600/20 flex items-center justify-center">
-                <Sparkles className="w-12 h-12 text-cyan-500" />
-              </div>
-            )}
-            
-            {/* Featured Badge */}
-            {project.featured && (
-              <div className="absolute top-4 left-4 bg-gradient-to-r from-yellow-400 to-orange-500 text-white px-3 py-1 rounded-full text-sm font-semibold">
-                Featured
-              </div>
-            )}
-            
-            {/* Project Links */}
-            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              {project.github_url && (
-                <a
-                  href={project.github_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-colors"
-                >
-                  <Github className="w-4 h-4" />
-                </a>
-              )}
-              {project.live_url && (
-                <a
-                  href={project.live_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="p-2 bg-black/50 backdrop-blur-sm rounded-lg text-white hover:bg-black/70 transition-colors"
-                >
-                  <ExternalLink className="w-4 h-4" />
-                </a>
-              )}
-            </div>
-          </div>
-
-          {/* Project Content */}
-          <div className={`p-6 flex-1 ${
-            viewMode === 'list' ? 'w-2/3' : ''
-          }`}>
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-xl font-bold text-secondary-900 dark:text-secondary-100 mb-2 group-hover:text-cyan-600 dark:group-hover:text-cyan-400 transition-colors">
-                  {project.title}
-                </h3>
-                <p className="text-secondary-600 dark:text-secondary-400 line-clamp-3 mb-3">
-                  {project.short_description || project.description}
-                </p>
-                
-                {/* Problem Statement */}
-                {project.challenge && (
-                  <div className="mb-3">
-                    <h4 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-1">Challenge:</h4>
-                    <p className="text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
-                      {project.challenge}
-                    </p>
-                  </div>
-                )}
-
-                {/* Solution/Key Features */}
-                {project.key_features && project.key_features.length > 0 && (
-                  <div className="mb-3">
-                    <h4 className="text-sm font-semibold text-secondary-700 dark:text-secondary-300 mb-1">Key Features:</h4>
-                    <ul className="text-sm text-secondary-600 dark:text-secondary-400 space-y-1">
-                      {project.key_features.slice(0, 2).map((feature, index) => (
-                        <li key={index} className="flex items-start gap-2">
-                          <span className="w-1 h-1 rounded-full bg-cyan-500 mt-2 flex-shrink-0"></span>
-                          <span className="line-clamp-1">{feature}</span>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </div>
-
-              {/* Project Tech Stack */}
-              {project.tech_stack && project.tech_stack.length > 0 && (
-                <div className="flex flex-wrap gap-2">
-                  {project.tech_stack.slice(0, 4).map((tech) => (
-                    <span
-                      key={tech}
-                      className="px-3 py-1 bg-cyan-100 dark:bg-cyan-900/30 text-cyan-700 dark:text-cyan-300 text-sm rounded-full font-medium"
-                    >
-                      {tech}
-                    </span>
-                  ))}
-                  {project.tech_stack.length > 4 && (
-                    <span className="px-3 py-1 bg-secondary-100 dark:bg-secondary-800 text-secondary-600 dark:text-secondary-400 text-sm rounded-full">
-                      +{project.tech_stack.length - 4}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Project Actions */}
-              <div className="flex items-center justify-between pt-4 border-t border-secondary-200 dark:border-secondary-700">
-                <div className="flex items-center gap-3">
-                  {project.github_url && (
-                    <a
-                      href={project.github_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-sm text-secondary-600 dark:text-secondary-400 hover:text-secondary-900 dark:hover:text-secondary-100 transition-colors btn-lift"
-                    >
-                      <Github className="w-4 h-4" />
-                      Code
-                    </a>
-                  )}
-                  {project.live_url && (
-                    <a
-                      href={project.live_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="flex items-center gap-1 text-sm text-cyan-600 dark:text-cyan-400 hover:text-cyan-700 dark:hover:text-cyan-300 transition-colors btn-lift"
-                    >
-                      <ExternalLink className="w-4 h-4" />
-                      Live Demo
-                    </a>
-                  )}
-                </div>
-                <Link
-                  to={`/projects/${project.id}`}
-                  className="flex items-center gap-1 text-sm text-secondary-600 dark:text-secondary-400 hover:text-cyan-600 dark:hover:text-cyan-400 transition-colors btn-lift"
-                >
-                  Learn More
-                  <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
-                </Link>
-              </div>
-            </div>
-          </div>
-        </Card3D>
-      </TiltCard>
-    </motion.div>
-  );
 
   return (
     <>
-      {/* Hero Section */}
-      <section className="relative py-20 overflow-hidden">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary-50 to-accent-50">
-          <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.2]"></div>
-        </div>
-        <motion.div 
-          className="absolute top-20 right-20 w-72 h-72 bg-gradient-to-br from-primary-300/30 to-accent-300/30 rounded-full mix-blend-multiply filter blur-xl"
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [0, 90, 180, 270, 360],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        />
-        <motion.div 
-          className="absolute bottom-20 left-20 w-72 h-72 bg-gradient-to-br from-accent-300/30 to-primary-400/30 rounded-full mix-blend-multiply filter blur-xl"
-          animate={{
-            scale: [1, 1.1, 1],
-            rotate: [360, 270, 180, 90, 0],
-          }}
-          transition={{ duration: 20, repeat: Infinity, ease: "linear" }}
-        />
-        
-        <div className="responsive-container relative">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.6 }}
-            className="max-w-3xl mx-auto text-center"
+      <PageHero
+        eyebrow={`${projects.length || 0} projects`}
+        title="Things I've"
+        highlight="built."
+        subtitle="A collection of products, prototypes, and experiments — each one a small story about a problem I wanted to solve."
+        size="sm"
+      />
+
+      <div className="container-page pb-24">
+        {/* Search + sort bar */}
+        <div className="surface p-3 sm:p-4 mb-6 flex flex-wrap items-center gap-2">
+          <div className="relative flex-1 min-w-[200px]">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={16} />
+            <input
+              type="text"
+              placeholder="Search projects, tech, descriptions…"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              className="input pl-9"
+            />
+          </div>
+
+          <button
+            type="button"
+            onClick={() => setShowFilters((v) => !v)}
+            className={cn(
+              'inline-flex items-center gap-2 h-11 px-3.5 rounded-lg border text-sm font-medium transition-colors',
+              showFilters || activeFilters > 0
+                ? 'border-brand-500/40 bg-brand-500/10 text-brand-700 dark:text-brand-300'
+                : 'border-secondary-300 dark:border-secondary-700 text-secondary-700 dark:text-secondary-200 hover:bg-secondary-100/70 dark:hover:bg-secondary-800/60'
+            )}
           >
-            <h1 className="text-4xl md:text-5xl font-bold mb-6">
-              <span className="text-secondary-900">Explore My </span>
-              <span className="bg-clip-text text-transparent bg-gradient-to-r from-primary-500 to-accent-600 animate-gradient bg-[length:200%_auto]">
-                Projects
+            <SlidersHorizontal size={15} />
+            Filters
+            {activeFilters > 0 && (
+              <span className="ml-1 inline-grid h-5 min-w-5 px-1.5 place-items-center rounded-full bg-brand-500 text-white text-2xs font-bold">
+                {activeFilters}
               </span>
-            </h1>
-            <p className="text-xl text-secondary-600">
-              Discover my latest work and creative solutions across various technologies
-            </p>
-          </motion.div>
+            )}
+          </button>
 
-          {/* Search and Filter Controls */}
-          <motion.div 
-            variants={staggerContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className="flex flex-col lg:flex-row gap-6 mb-8"
+          <select
+            value={sortBy}
+            onChange={(e) => setSortBy(e.target.value as SortOption)}
+            className="input w-auto pl-3 pr-8"
           >
-            {/* Search Bar */}
-            <motion.div 
-              variants={fadeInUpVariants}
-              className="flex-1 relative"
-            >
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-5 h-5" />
-              <input
-                type="text"
-                placeholder="Search projects..."
-                value={searchQuery}
-                onChange={(e) => handleSearchChange(e.target.value)}
-                className="w-full pl-10 pr-4 py-3 bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl text-secondary-700 dark:text-secondary-300 placeholder-secondary-500 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50"
-              />
-              {searchLoading && (
-                <div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-                  <div className="w-4 h-4 border-2 border-cyan-500 border-t-transparent rounded-full animate-spin"></div>
-                </div>
-              )}
-            </motion.div>
-
-            {/* View Mode Toggle */}
-            <motion.div 
-              variants={fadeInUpVariants}
-              className="flex items-center gap-2"
-            >
-              <Button
-                variant={viewMode === 'grid' ? 'tech' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="flex items-center gap-2"
-              >
-                <Grid className="w-4 h-4" />
-                Grid
-              </Button>
-              <Button
-                variant={viewMode === 'list' ? 'tech' : 'outline'}
-                size="sm"
-                onClick={() => setViewMode('list')}
-                className="flex items-center gap-2"
-              >
-                <List className="w-4 h-4" />
-                List
-              </Button>
-            </motion.div>
-
-            {/* Sort Dropdown */}
-            <motion.div 
-              variants={fadeInUpVariants}
-              className="relative"
-            >
-              <select
-                value={sortBy}
-                onChange={(e) => setSortBy(e.target.value as SortOption)}
-                className="appearance-none bg-white/10 backdrop-blur-sm border border-white/20 rounded-xl px-4 py-3 text-secondary-700 dark:text-secondary-300 focus:outline-none focus:ring-2 focus:ring-cyan-500/50 focus:border-cyan-500/50 cursor-pointer"
-              >
-                <option value="date">Latest First</option>
-                <option value="featured">Featured First</option>
-                <option value="title">Alphabetical</option>
-              </select>
-              <Filter className="absolute right-3 top-1/2 transform -translate-y-1/2 text-secondary-400 w-4 h-4 pointer-events-none" />
-            </motion.div>
-          </motion.div>
-
-          {/* Category Filter */}
-          {allCategories.length > 0 && (
-            <motion.div 
-              variants={staggerContainerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              className="flex flex-wrap gap-2 mb-6"
-            >
-              <motion.button
-                variants={scaleInVariants}
-                onClick={() => toggleCategory(null)}
-                className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                  selectedCategory === null
-                    ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                    : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700'
-                }`}
-              >
-                All Categories
-              </motion.button>
-              {allCategories.map((category, index) => (
-                <motion.button
-                  key={category}
-                  variants={scaleInVariants}
-                  onClick={() => toggleCategory(category)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                    selectedCategory === category
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                      : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700'
-                  }`}
-                >
-                  {category}
-                </motion.button>
-              ))}
-            </motion.div>
-          )}
-
-          {/* Tech Stack Filter */}
-          {allTechStack.length > 0 && (
-            <motion.div 
-              variants={staggerContainerVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true, margin: "-100px" }}
-              className="flex flex-wrap gap-2 mb-8"
-            >
-              {allTechStack.map((tech, index) => (
-                <motion.button
-                  key={tech}
-                  variants={scaleInVariants}
-                  onClick={() => toggleTechStack(tech)}
-                  className={`px-4 py-2 rounded-full text-sm font-medium transition-all duration-300 ${
-                    selectedTechStack.includes(tech)
-                      ? 'bg-gradient-to-r from-cyan-500 to-blue-600 text-white shadow-lg'
-                      : 'bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 text-secondary-700 dark:text-secondary-300 hover:bg-white/20 dark:hover:bg-secondary-700'
-                  }`}
-                >
-                  {tech}
-                </motion.button>
-              ))}
-            </motion.div>
-          )}
+            <option value="date">Latest first</option>
+            <option value="featured">Featured first</option>
+            <option value="title">A — Z</option>
+          </select>
         </div>
-      </section>
 
-      {/* Content Section */}
-      <div className="responsive-container pb-20">
-        <div className="max-w-3xl mx-auto">
-          {/* Projects Grid */}
-          <motion.div 
-            variants={staggerContainerVariants}
-            initial="hidden"
-            whileInView="visible"
-            viewport={{ once: true, margin: "-100px" }}
-            className={`grid gap-6 ${
-              viewMode === 'list' 
-                ? 'grid-cols-1' 
-                : 'grid-cols-1 md:grid-cols-2 lg:grid-cols-3'
-            }`}
+        {/* Filter chips */}
+        {showFilters && (
+          <motion.div
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="surface p-4 sm:p-5 mb-6 space-y-4"
           >
-            {loading ? (
-              // Loading skeleton
-              Array.from({ length: 6 }).map((_, index) => (
-                <motion.div
-                  key={index}
-                  variants={projectCardVariants}
-                  className="h-80 bg-white/10 dark:bg-secondary-800/50 backdrop-blur-sm border border-white/20 dark:border-secondary-600 rounded-xl animate-pulse"
-                />
-              ))
-            ) : (
-              filteredProjects.map((project, index) => (
-                <ProjectCard key={project.id} project={project} index={index} />
-              ))
+            {allCategories.length > 0 && (
+              <div>
+                <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-2">
+                  Category
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {allCategories.map((c) => (
+                    <FilterChip
+                      key={c}
+                      active={selectedCategory === c}
+                      onClick={() => setSelectedCategory((cur) => (cur === c ? null : c))}
+                    >
+                      {c}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
+            )}
+            {allTech.length > 0 && (
+              <div>
+                <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-2">
+                  Tech stack
+                </div>
+                <div className="flex flex-wrap gap-1.5">
+                  {allTech.map((t) => (
+                    <FilterChip
+                      key={t}
+                      active={selectedTech.includes(t)}
+                      onClick={() =>
+                        setSelectedTech((cur) =>
+                          cur.includes(t) ? cur.filter((x) => x !== t) : [...cur, t]
+                        )
+                      }
+                    >
+                      {t}
+                    </FilterChip>
+                  ))}
+                </div>
+              </div>
+            )}
+            {activeFilters > 0 && (
+              <div className="flex items-center justify-between pt-2">
+                <div className="text-xs text-secondary-500 dark:text-secondary-400">
+                  {filtered.length} of {projects.length} match
+                </div>
+                <button
+                  type="button"
+                  onClick={clearAll}
+                  className="inline-flex items-center gap-1 text-sm text-secondary-600 dark:text-secondary-300 hover:text-red-600 dark:hover:text-red-400"
+                >
+                  <X size={14} /> Clear all
+                </button>
+              </div>
             )}
           </motion.div>
+        )}
 
-          {/* Empty State */}
-          {!loading && filteredProjects.length === 0 && (
-            <motion.div
-              variants={fadeInUpVariants}
-              initial="hidden"
-              whileInView="visible"
-              viewport={{ once: true }}
-              className="text-center py-12"
-            >
-              <div className="text-6xl mb-4">🚀</div>
-              <h3 className="text-xl font-semibold text-secondary-700 dark:text-secondary-300 mb-2">
-                No projects found
-              </h3>
-              <p className="text-secondary-600 dark:text-secondary-400">
-                {searchQuery || selectedTechStack.length > 0 || selectedCategory
-                  ? "Try adjusting your search criteria or filters."
-                  : "No projects have been added yet."
-                }
-              </p>
-            </motion.div>
-          )}
-        </div>
+        {/* Grid */}
+        {loading ? (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="surface h-96 animate-pulse" />
+            ))}
+          </div>
+        ) : filtered.length === 0 ? (
+          <div className="surface p-12 text-center">
+            <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-300 grid place-items-center">
+              <Sparkles size={22} />
+            </div>
+            <h3 className="mt-4 text-lg font-semibold text-secondary-900 dark:text-white">
+              No matching projects
+            </h3>
+            <p className="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
+              {activeFilters > 0
+                ? 'Try clearing some filters.'
+                : "I haven't added any projects yet."}
+            </p>
+            {activeFilters > 0 && (
+              <Button variant="outline" size="sm" onClick={clearAll} className="mt-5">
+                Clear filters
+              </Button>
+            )}
+          </div>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {filtered.map((p, i) => (
+              <motion.div
+                key={p.id}
+                initial={{ opacity: 0, y: 16 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true, margin: '-40px' }}
+                transition={{ duration: 0.35, delay: Math.min(i * 0.05, 0.3) }}
+              >
+                <ProjectCard project={p} />
+              </motion.div>
+            ))}
+          </div>
+        )}
       </div>
     </>
+  );
+}
+
+function FilterChip({
+  children,
+  active,
+  onClick,
+}: {
+  children: React.ReactNode;
+  active?: boolean;
+  onClick?: () => void;
+}) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      className={cn(
+        'inline-flex items-center px-3 py-1.5 rounded-md text-sm font-medium transition-colors border',
+        active
+          ? 'bg-brand-500 text-white border-brand-500 shadow-sm'
+          : 'bg-white text-secondary-700 border-secondary-200 hover:bg-secondary-100 dark:bg-secondary-900/60 dark:text-secondary-200 dark:border-secondary-700 dark:hover:bg-secondary-800/60'
+      )}
+    >
+      {children}
+    </button>
+  );
+}
+
+function ProjectCard({ project }: { project: any }) {
+  const tech: string[] = project.tech_stack || project.technologies || [];
+  return (
+    <Link
+      to={`/projects/${project.id}`}
+      className="group block surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
+    >
+      <div className="relative aspect-[16/10] overflow-hidden bg-secondary-100 dark:bg-secondary-900">
+        {project.image_url ? (
+          <img
+            src={project.image_url}
+            alt={project.title}
+            loading="lazy"
+            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
+          />
+        ) : (
+          <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-brand-500/10 to-accent-500/10">
+            <Sparkles className="h-10 w-10 text-brand-500/70" />
+          </div>
+        )}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
+          {project.featured && <span className="chip-accent">Featured</span>}
+          <div className="ml-auto flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+            {project.github_url && (
+              <a
+                href={project.github_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="grid h-8 w-8 place-items-center rounded-md bg-black/60 backdrop-blur text-white hover:bg-black/80"
+                aria-label="GitHub"
+              >
+                <Github size={14} />
+              </a>
+            )}
+            {project.live_url && (
+              <a
+                href={project.live_url}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="grid h-8 w-8 place-items-center rounded-md bg-black/60 backdrop-blur text-white hover:bg-black/80"
+                aria-label="Live"
+              >
+                <ExternalLink size={14} />
+              </a>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="p-5 flex flex-col gap-3">
+        <div>
+          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-1.5">
+            {project.category && <span>{project.category}</span>}
+          </div>
+          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors">
+            {project.title}
+          </h3>
+          <p className="mt-1.5 text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
+            {project.short_description || project.description}
+          </p>
+        </div>
+
+        {tech.length > 0 && (
+          <div className="flex flex-wrap gap-1.5">
+            {tech.slice(0, 4).map((t) => (
+              <span key={t} className="chip-brand">
+                {t}
+              </span>
+            ))}
+            {tech.length > 4 && <span className="chip">+{tech.length - 4}</span>}
+          </div>
+        )}
+
+        <div className="mt-1 pt-3 border-t border-secondary-200/70 dark:border-secondary-800/70 flex items-center justify-between">
+          <div className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300">
+            View details
+            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </div>
+          <div className="flex items-center gap-3 text-secondary-500 dark:text-secondary-400">
+            {project.github_url && <Github size={15} />}
+            {project.live_url && <ExternalLink size={15} />}
+          </div>
+        </div>
+      </div>
+    </Link>
   );
 }

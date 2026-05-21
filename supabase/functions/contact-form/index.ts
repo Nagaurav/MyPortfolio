@@ -1,12 +1,5 @@
 import { serve } from 'https://deno.land/std@0.168.0/http/server.ts';
 import { createClient } from 'npm:@supabase/supabase-js@2.38.4';
-import { rateLimit } from 'npm:lambda-rate-limiter@3.0.0';
-
-// Initialize rate limiter (10 requests per IP per minute)
-const limiter = rateLimit({
-  interval: 60000, // 1 minute
-  uniqueTokenPerInterval: 500
-});
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -32,26 +25,6 @@ serve(async (req: Request) => {
   }
 
   try {
-    // Get client IP
-    const clientIP = req.headers.get('x-forwarded-for') || 'unknown';
-    
-    // Check rate limit
-    try {
-      await limiter.check(10, clientIP); // 10 requests per interval
-    } catch {
-      return new Response(
-        JSON.stringify({ error: 'Too many requests' }),
-        {
-          status: 429,
-          headers: {
-            ...corsHeaders,
-            'Content-Type': 'application/json',
-            'Retry-After': '60'
-          }
-        }
-      );
-    }
-
     // Verify CSRF token
     const csrfToken = req.headers.get('X-CSRF-Token');
     if (!csrfToken || !validateCSRFToken(csrfToken)) {
@@ -118,7 +91,19 @@ serve(async (req: Request) => {
       .from('contacts')
       .insert([sanitizedData]);
 
-    if (insertError) throw insertError;
+    if (insertError) {
+      console.error('contacts insert error:', insertError);
+      return new Response(
+        JSON.stringify({ error: insertError.message }),
+        {
+          status: 500,
+          headers: {
+            ...corsHeaders,
+            'Content-Type': 'application/json'
+          }
+        }
+      );
+    }
 
     return new Response(
       JSON.stringify({ message: 'Message sent successfully' }),
@@ -131,6 +116,7 @@ serve(async (req: Request) => {
       }
     );
   } catch (error) {
+    console.error('contact-form error:', error);
     return new Response(
       JSON.stringify({ error: 'Internal server error' }),
       {

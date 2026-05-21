@@ -1,220 +1,134 @@
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, Linkedin, Mail, Heart, ExternalLink, Sparkles } from 'lucide-react';
-import { motion } from 'framer-motion';
+import { Github, Linkedin, Mail, ArrowUpRight } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
 
+const NAV = [
+  { to: '/projects', label: 'Projects' },
+  { to: '/skills', label: 'Skills' },
+  { to: '/experience', label: 'Experience' },
+  { to: '/certificates', label: 'Certificates' },
+  { to: '/resume', label: 'Resume' },
+  { to: '/contact', label: 'Contact' },
+];
+
 export function MainFooter() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const currentYear = new Date().getFullYear();
-  
-  useEffect(() => {
-    async function fetchProfile() {
-      try {
-        const { data, error } = await supabase
-          .from('profiles')
-          .select('*')
-          .limit(1);
+  const year = new Date().getFullYear();
 
-        if (error) throw error;
-        if (data && data.length > 0) {
-          setProfile(data[0]);
-        }
-      } catch (error) {
-        console.error('Error fetching profile:', error);
-      }
-    }
-    
-    fetchProfile();
+  useEffect(() => {
+    let active = true;
+    supabase
+      .from('profiles')
+      .select('*')
+      .limit(1)
+      .then(({ data, error }) => {
+        if (active && !error && data && data.length > 0) setProfile(data[0]);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
-  const socialLinks = [
-    {
-      name: 'GitHub',
-      url: profile?.github_url || 'https://github.com',
-      icon: Github,
-      gradient: 'from-gray-700 to-gray-900'
-    },
-    {
-      name: 'LinkedIn',
-      url: profile?.linkedin_url || 'https://linkedin.com',
-      icon: Linkedin,
-      gradient: 'from-blue-600 to-blue-700'
-    },
-    {
-      name: 'Email',
-      url: `mailto:${profile?.email || 'contact@example.com'}`,
-      icon: Mail,
-      gradient: 'from-red-500 to-red-600'
-    }
-  ];
-  
+  const socials = [
+    profile?.github_url && { href: profile.github_url, label: 'GitHub', icon: Github },
+    profile?.linkedin_url && { href: profile.linkedin_url, label: 'LinkedIn', icon: Linkedin },
+    profile?.email && { href: `mailto:${profile.email}`, label: 'Email', icon: Mail },
+  ].filter(Boolean) as { href: string; label: string; icon: typeof Github }[];
+
   return (
-    <footer className="relative bg-gradient-to-br from-dark-900 via-dark-950 to-dark-900 text-white py-12 sm:py-16 overflow-hidden">
-      {/* Background Effects */}
-      <div className="absolute inset-0 bg-grid bg-[size:30px_30px] opacity-[0.1]"></div>
-      <motion.div 
-        className="absolute top-0 left-1/4 w-96 h-96 bg-gradient-to-br from-primary-500/10 to-accent-600/10 rounded-full mix-blend-multiply filter blur-3xl"
-        animate={{
-          scale: [1, 1.1, 1],
-          rotate: [0, 90, 180, 270, 360],
-        }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
+    <footer className="relative mt-24 border-t border-secondary-200/70 dark:border-secondary-800/70 bg-white dark:bg-ink-900">
+      <div
+        aria-hidden
+        className="pointer-events-none absolute inset-x-0 top-0 h-px bg-gradient-to-r from-transparent via-brand-500/60 to-transparent"
       />
-      <motion.div 
-        className="absolute bottom-0 right-1/4 w-96 h-96 bg-gradient-to-br from-accent-500/10 to-primary-700/10 rounded-full mix-blend-multiply filter blur-3xl"
-        animate={{
-          scale: [1, 1.1, 1],
-          rotate: [360, 270, 180, 90, 0],
-        }}
-        transition={{ duration: 30, repeat: Infinity, ease: "linear" }}
-      />
-      
-      <div className="relative w-full max-w-[1440px] mx-auto px-4 sm:px-6 lg:px-8 xl:px-16">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
-          {/* Brand and Bio */}
-          <div className="md:col-span-1 lg:col-span-1">
-            <Link to="/" className="inline-block mb-4 group">
-              <motion.div 
-                className="relative"
-                whileHover={{ scale: 1.05 }}
-                whileTap={{ scale: 0.95 }}
-              >
-                <span className="text-xl sm:text-2xl font-black tracking-tighter bg-gradient-to-r from-primary-400 to-accent-400 bg-clip-text text-transparent group-hover:from-primary-300 group-hover:to-accent-300 transition-all duration-300">
-                  GN
-                </span>
-                <motion.div
-                  className="absolute -inset-1 bg-gradient-to-r from-primary-500 to-accent-500 rounded-lg opacity-0 group-hover:opacity-20 blur transition-opacity duration-300"
-                  animate={{
-                    scale: [1, 1.1, 1],
-                  }}
-                  transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-                />
-              </motion.div>
+
+      <div className="container-page py-14 sm:py-20">
+        <div className="grid gap-10 md:grid-cols-12">
+          {/* Brand */}
+          <div className="md:col-span-5">
+            <Link to="/" className="inline-flex items-center gap-3 group">
+              <span className="grid h-10 w-10 place-items-center rounded-lg bg-[linear-gradient(135deg,theme(colors.brand.500),theme(colors.brand.700))] text-white text-sm font-black">
+                GN
+              </span>
+              <span className="text-lg font-semibold tracking-tight text-secondary-900 dark:text-white">
+                {profile?.name || 'Gaurav Naik'}
+              </span>
             </Link>
-            <p className="text-secondary-300 mb-6 leading-relaxed text-sm sm:text-base">
-              {profile?.bio || 'Showcasing my work, skills, and professional journey in web development and digital solutions.'}
+            <p className="mt-4 max-w-md text-sm text-secondary-600 dark:text-secondary-400 leading-relaxed">
+              {profile?.bio ||
+                'Full-stack developer building modern, performant web apps and exploring the edges of AI.'}
             </p>
-            <div className="flex space-x-3">
-              {socialLinks.map((social, index) => {
-                const Icon = social.icon;
-                return (
-                  <motion.a 
-                    key={social.name}
-                    href={social.url}
-                    target={social.name === 'Email' ? undefined : '_blank'}
-                    rel={social.name === 'Email' ? undefined : 'noopener noreferrer'}
-                    className={`p-3 rounded-xl bg-gradient-to-r ${social.gradient} text-white shadow-lg hover:shadow-xl transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:ring-offset-2 focus:ring-offset-dark-900`}
-                    aria-label={`Visit ${social.name} profile`}
-                    whileHover={{ scale: 1.1, y: -2 }}
-                    whileTap={{ scale: 0.95 }}
-                    title={`Visit ${social.name}`}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                  >
-                    <Icon size={18} className="sm:w-5 sm:h-5" />
-                  </motion.a>
-                );
-              })}
+
+            <div className="mt-6 flex items-center gap-2">
+              {socials.map((s) => (
+                <a
+                  key={s.label}
+                  href={s.href}
+                  target={s.href.startsWith('mailto:') ? undefined : '_blank'}
+                  rel="noopener noreferrer"
+                  aria-label={s.label}
+                  className="grid h-10 w-10 place-items-center rounded-lg border border-secondary-200 bg-white text-secondary-600 hover:text-brand-600 hover:border-brand-500/40 hover:bg-brand-500/5 transition-colors dark:border-secondary-800 dark:bg-secondary-900/50 dark:text-secondary-400 dark:hover:text-brand-300"
+                >
+                  <s.icon size={17} />
+                </a>
+              ))}
             </div>
           </div>
-          
-          {/* Navigation */}
-          <div className="md:col-span-1 lg:col-span-1">
-            <h4 className="text-base sm:text-lg font-semibold mb-4 text-white flex items-center">
-              <Sparkles className="w-4 h-4 mr-2 text-primary-400" />
-              Navigation
-            </h4>
-            <ul className="space-y-2 sm:space-y-3">
-              {[
-                { to: '/', label: 'Home' },
-                { to: '/projects', label: 'Projects' },
-                { to: '/skills', label: 'Skills' },
-                { to: '/experience', label: 'Experience' },
-                { to: '/certificates', label: 'Certificates' },
-                { to: '/resume', label: 'Resume' },
-                { to: '/contact', label: 'Contact' },
-              ].map((item, index) => (
-                <motion.li 
-                  key={item.to}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                >
-                  <Link 
-                    to={item.to} 
-                    className="text-secondary-300 hover:text-primary-400 transition-all duration-300 hover:translate-x-1 inline-block text-sm sm:text-base group"
+
+          {/* Nav */}
+          <div className="md:col-span-3">
+            <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-4">
+              Sitemap
+            </div>
+            <ul className="space-y-2.5">
+              {NAV.map((item) => (
+                <li key={item.to}>
+                  <Link
+                    to={item.to}
+                    className="inline-flex items-center gap-1 text-sm text-secondary-700 dark:text-secondary-300 hover:text-brand-600 dark:hover:text-brand-300 transition-colors group"
                   >
-                    <span className="relative">
-                      {item.label}
-                                             <motion.span
-                         className="absolute -bottom-1 left-0 w-0 h-0.5 bg-gradient-to-r from-primary-400 to-accent-400 group-hover:w-full transition-all duration-300"
-                         whileHover={{ width: '100%' }}
-                       />
-                    </span>
+                    {item.label}
+                    <ArrowUpRight
+                      size={12}
+                      className="opacity-0 -translate-x-1 group-hover:opacity-100 group-hover:translate-x-0 transition-all"
+                    />
                   </Link>
-                </motion.li>
+                </li>
               ))}
             </ul>
           </div>
-          
-          {/* Get in Touch */}
-          <div className="md:col-span-2 lg:col-span-2">
-            <h4 className="text-base sm:text-lg font-semibold mb-4 text-white flex items-center">
-              <Sparkles className="w-4 h-4 mr-2 text-primary-400" />
-              Get in Touch
-            </h4>
-            <p className="text-secondary-300 mb-6 leading-relaxed text-sm sm:text-base">
-              {profile?.contact_message || 'Interested in working together or have a question? Feel free to reach out! I\'m always open to discussing new opportunities and collaborations.'}
+
+          {/* CTA */}
+          <div className="md:col-span-4">
+            <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-4">
+              Available for work
+            </div>
+            <p className="text-sm text-secondary-600 dark:text-secondary-400 mb-4">
+              Open to freelance projects and internship opportunities. Let's build something great.
             </p>
-            <motion.div
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+            <Link
+              to="/contact"
+              className="inline-flex items-center gap-1.5 text-sm font-semibold text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-200 transition-colors group"
             >
-              <Link 
-                to="/contact" 
-                className="inline-flex items-center bg-gradient-to-r from-primary-500 to-accent-600 text-white px-6 py-3 rounded-xl shadow-lg hover:shadow-xl transition-all duration-300 group text-sm sm:text-base font-medium"
-              >
-                Contact me 
-                <motion.span 
-                  className="ml-2 group-hover:translate-x-1 transition-transform duration-300"
-                  initial={{ x: 0 }}
-                  whileHover={{ x: 5 }}
-                >
-                  →
-                </motion.span>
-              </Link>
-            </motion.div>
+              Get in touch
+              <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+            </Link>
           </div>
         </div>
-        
-        {/* Copyright */}
-        <motion.div 
-          className="mt-12 pt-8 border-t border-white/10 flex flex-col sm:flex-row sm:justify-between items-center space-y-4 sm:space-y-0"
-          initial={{ opacity: 0, y: 20 }}
-          whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true }}
-          transition={{ delay: 0.3 }}
-        >
-          <p className="text-secondary-400 text-xs sm:text-sm text-center sm:text-left">
-            © {currentYear} {profile?.name || 'GN'}. All rights reserved.
-          </p>
-          <p className="text-secondary-400 text-xs sm:text-sm flex items-center justify-center sm:justify-end">
-            Made with 
-            <motion.span
-              className="mx-1"
-              animate={{ scale: [1, 1.2, 1] }}
-              transition={{ duration: 1, repeat: Infinity }}
-            >
-              <Heart size={12} className="sm:w-3.5 sm:h-3.5 text-primary-500" />
-            </motion.span> 
-            using React & Tailwind CSS
-          </p>
-        </motion.div>
+
+        <div className="hairline mt-12" />
+
+        <div className="mt-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 text-xs text-secondary-500 dark:text-secondary-500">
+          <div>© {year} {profile?.name || 'Gaurav Naik'}. All rights reserved.</div>
+          <div className="font-mono">
+            <span className="inline-block h-1.5 w-1.5 rounded-full bg-emerald-500 mr-1.5 align-middle" />
+            Built with React · Tailwind · Supabase
+          </div>
+        </div>
       </div>
     </footer>
   );

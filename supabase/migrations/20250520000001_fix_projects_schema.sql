@@ -79,9 +79,8 @@ DO $$
 BEGIN
   RAISE NOTICE 'Projects table structure:';
   RAISE NOTICE 'Columns: %', (
-    SELECT string_agg(column_name || ' ' || data_type, ', ')
-    FROM information_schema.columns 
+    SELECT string_agg(column_name || ' ' || data_type, ', ' ORDER BY ordinal_position)
+    FROM information_schema.columns
     WHERE table_name = 'projects'
-    ORDER BY ordinal_position
   );
 END $$;

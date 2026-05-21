@@ -91,7 +91,7 @@ BEGIN
     ('Mentoring', 'Soft Skills', 6, 'mentoring');
 
 EXCEPTION
-  WHEN duplicate_key_violation THEN
+  WHEN unique_violation THEN
     -- Skills already exist, skip insertion
     NULL;
 END $$;

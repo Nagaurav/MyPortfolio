@@ -13,10 +13,12 @@ export interface Database {
         Row: {
           id: string
           created_at: string
+          updated_at: string
           title: string
           description: string
           short_description: string | null
-          tags: string[] | null
+          category: string | null
+          tech_stack: string[] | null
           image_url: string | null
           github_url: string | null
           live_url: string | null
@@ -26,10 +28,12 @@ export interface Database {
         Insert: {
           id?: string
           created_at?: string
+          updated_at?: string
           title: string
           description: string
           short_description?: string | null
-          tags?: string[] | null
+          category?: string | null
+          tech_stack?: string[] | null
           image_url?: string | null
           github_url?: string | null
           live_url?: string | null
@@ -39,10 +43,12 @@ export interface Database {
         Update: {
           id?: string
           created_at?: string
+          updated_at?: string
           title?: string
           description?: string
           short_description?: string | null
-          tags?: string[] | null
+          category?: string | null
+          tech_stack?: string[] | null
           image_url?: string | null
           github_url?: string | null
           live_url?: string | null
@@ -55,6 +61,7 @@ export interface Database {
           id: string
           user_id: string
           title: string
+          position: string | null
           company: string
           location: string
           type: string
@@ -63,6 +70,7 @@ export interface Database {
           current: boolean
           description: string
           technologies: string[]
+          key_achievements: string[] | null
           created_at: string
           updated_at: string
         }
@@ -70,6 +78,7 @@ export interface Database {
           id?: string
           user_id: string
           title: string
+          position?: string | null
           company: string
           location: string
           type: string
@@ -78,6 +87,7 @@ export interface Database {
           current?: boolean
           description: string
           technologies?: string[]
+          key_achievements?: string[] | null
           created_at?: string
           updated_at?: string
         }
@@ -85,6 +95,7 @@ export interface Database {
           id?: string
           user_id?: string
           title?: string
+          position?: string | null
           company?: string
           location?: string
           type?: string
@@ -93,6 +104,7 @@ export interface Database {
           current?: boolean
           description?: string
           technologies?: string[]
+          key_achievements?: string[] | null
           created_at?: string
           updated_at?: string
         }

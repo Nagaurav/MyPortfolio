@@ -15,6 +15,7 @@ interface ProjectFormData {
   title: string;
   description: string;
   short_description: string;
+  category: string;
   tech_stack: string;
   github_url: string;
   live_url: string;
@@ -47,6 +48,7 @@ export function AdminProjectsPage() {
       setValue('title', editingProject.title);
       setValue('description', editingProject.description);
       setValue('short_description', editingProject.short_description || '');
+      setValue('category', editingProject.category || '');
       setValue('tech_stack', editingProject.tech_stack?.join(', ') || '');
 
       setValue('github_url', editingProject.github_url || '');
@@ -235,6 +237,22 @@ export function AdminProjectsPage() {
           </div>
           
           <div>
+            <label htmlFor="category" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              Category
+            </label>
+            <input
+              type="text"
+              id="category"
+              className="mt-1 input"
+              placeholder="e.g. Web App, Mobile, AI/ML"
+              {...register('category')}
+            />
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Optional: groups projects under a heading on the public projects page.
+            </p>
+          </div>
+
+          <div>
             <label htmlFor="tech_stack" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Tech Stack (comma-separated)
             </label>
@@ -354,6 +372,11 @@ export function AdminProjectsPage() {
                           </span>
                         )}
                       </h4>
+                      {project.category && (
+                        <p className="mt-1 text-xs font-mono uppercase tracking-wider text-secondary-500">
+                          {project.category}
+                        </p>
+                      )}
                       <p className="mt-1 text-sm text-secondary-500">
                         {project.short_description}
                       </p>

@@ -1,0 +1,27 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(rm -f check_projects_schema.sql COMPLETE_PROJECTS_FIX.sql fix_profiles_rls.sql fix_projects_schema.sql fix_skills_quick.sql fix_skills_user_id.sql quick_fix_projects.sql TEST_PROJECT_CREATION.sql DEBUG_SKILLS.md FIX_AUTH_ISSUE.md FIX_PROJECTS_SCHEMA.md PROJECT_400_ERROR_DEBUG.md SKILLS_FIX_COMPLETE.md STEP_BY_STEP_FIX_GUIDE.md TECH_STACK_MIGRATION_SUMMARY.md EXPERIENCE_CONTENT_GUIDE.md)",
+      "Bash(rm -rf .bolt)",
+      "Bash(grep -E '\\\\.\\(md|sql\\)$|\\\\.bolt')",
+      "Bash(npx tsc *)",
+      "Bash(echo \"EXIT: $?\")",
+      "Bash(npm run *)",
+      "Bash(supabase --version)",
+      "Bash(supabase status *)",
+      "Bash(curl *)",
+      "Bash(supabase projects *)",
+      "PowerShell(supabase *)",
+      "PowerShell(npx --yes supabase --version 2>&1 | Select-Object -First 5)",
+      "PowerShell(npx --yes supabase migration new add_missing_code_fields 2>&1)",
+      "PowerShell(npx --yes supabase db push --include-all 2>&1)",
+      "PowerShell(npx --yes supabase db query $sql 2>&1)",
+      "PowerShell($sql = \"select table_name, column_name, data_type from information_schema.columns where table_schema = 'public' and \\(\\(table_name='projects' and column_name='category'\\) or \\(table_name='experiences' and column_name in \\('key_achievements','position'\\)\\)\\) order by table_name, column_name;\")",
+      "PowerShell(npx --yes supabase migration list --linked 2>&1 | Select-Object -Last 20)",
+      "PowerShell(npx --yes tsc --noEmit -p tsconfig.app.json 2>&1 | Select-Object -First 60)",
+      "PowerShell(npx --yes supabase db dump --linked --schema public --data-only -f /tmp/data-snapshot.sql 2>&1 | Select-Object -Last 10)",
+      "PowerShell(npx --yes supabase db dump --linked --schema public --data-only -f data-snapshot.sql 2>&1 | Select-Object -Last 10)",
+      "PowerShell(npx --yes supabase migration new remove_mock_data 2>&1 | Select-Object -First 5)"
+    ]
+  }
+}

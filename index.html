@@ -37,19 +37,20 @@
     <meta name="twitter:site" content="@gauravnaik">
 
     <!-- Additional SEO Meta Tags -->
-    <meta name="theme-color" content="#6366f1">
-    <meta name="msapplication-TileColor" content="#6366f1">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1220">
+    <meta name="msapplication-TileColor" content="#0b1220">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gaurav Naik Portfolio">
-    
+
     <!-- Preconnect to external domains for performance -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link rel="preconnect" href="https://supabase.co">
-    
-    <!-- Google Fonts - Inter with better font loading -->
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;900&display=swap" rel="stylesheet">
+
+    <!-- Inter Tight (display + body) and JetBrains Mono (code, eyebrows) -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter+Tight:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 
     <!-- JSON-LD Structured Data -->
     <script type="application/ld+json">
@@ -109,7 +110,7 @@
       }
     </script>
   </head>
-  <body class="bg-secondary-50 text-secondary-900 font-inter">
+  <body class="bg-white text-secondary-900 dark:bg-ink-900 dark:text-secondary-100 font-sans">
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
   </body>
