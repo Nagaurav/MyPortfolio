@@ -2,15 +2,11 @@ import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { User, Mail, Github, Linkedin, Twitter, Briefcase, MapPin, Phone } from 'lucide-react';
-import { supabase, supabaseAdmin } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { FileUpload } from '../../components/ui/file-upload';
 import { useAuth } from '../../context/auth-context';
-import type { Database } from '../../types/database.types';
-
-type Profile = Database['public']['Tables']['profiles']['Row'];
-
 interface ProfileFormData {
   name: string;
   title: string | null;
@@ -57,7 +53,21 @@ export function AdminSettingsPage() {
         if (selectError) throw selectError;
 
         if (profile) {
-          reset(profile);
+          // Every profile column is nullable in the schema, but the form fields
+          // are controlled inputs -- feeding them null makes React warn and flip
+          // them to uncontrolled, so coalesce to empty strings.
+          reset({
+            name: profile.name ?? '',
+            title: profile.title,
+            location: profile.location,
+            phone: profile.phone,
+            email: profile.email ?? '',
+            bio: profile.bio ?? '',
+            github_url: profile.github_url ?? '',
+            linkedin_url: profile.linkedin_url ?? '',
+            twitter_url: profile.twitter_url ?? '',
+            avatar_url: profile.avatar_url ?? '',
+          });
         } else {
           // Create initial profile
           const { error: insertError } = await supabase

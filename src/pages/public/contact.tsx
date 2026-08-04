@@ -15,7 +15,7 @@ import {
   User,
   AtSign,
 } from 'lucide-react';
-import { supabase } from '../../lib/supabase';
+import { supabase, supabaseUrl, supabaseAnonKey } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { PageHero } from '../../components/ui/page-hero';
 import {
@@ -65,12 +65,12 @@ export function ContactPage() {
       if (!csrfToken) throw new Error('CSRF token not found');
 
       const response = await fetch(
-        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/contact-form`,
+        `${supabaseUrl}/functions/v1/contact-form`,
         {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            Authorization: `Bearer ${import.meta.env.VITE_SUPABASE_ANON_KEY}`,
+            Authorization: `Bearer ${supabaseAnonKey}`,
             'X-CSRF-Token': csrfToken,
           },
           body: JSON.stringify(data),

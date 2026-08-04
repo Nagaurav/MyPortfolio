@@ -48,7 +48,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
       },
       cancel: {
         label: 'Cancel',
-        onClick: onCancel,
+        onClick: onCancel ?? (() => {}),
       },
       duration: Infinity,
     });

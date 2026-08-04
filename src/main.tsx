@@ -6,7 +6,7 @@ import App from './App.tsx';
 import { AuthProvider } from './context/auth-context.tsx';
 import { ThemeProvider } from './context/theme-context.tsx';
 import { ToastProvider } from './context/toast-context.tsx';
-import { ErrorBoundary } from './components/performance/error-boundary.tsx';
+import { ErrorBoundary } from './components/error-boundary.tsx';
 import './index.css';
 
 createRoot(document.getElementById('root')!).render(

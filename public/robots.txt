@@ -1,0 +1,7 @@
+User-agent: *
+Allow: /
+
+# The admin panel is authenticated and has no public value in search results.
+Disallow: /admin
+
+Sitemap: https://gauravnaik.dev/sitemap.xml

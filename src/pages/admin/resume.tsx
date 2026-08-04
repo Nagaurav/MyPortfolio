@@ -21,8 +21,7 @@ export function AdminResumePage() {
   const [resumes, setResumes] = useState<Resume[]>([]);
   const [editingResume, setEditingResume] = useState<Resume | null>(null);
   const [loading, setLoading] = useState(true);
-  const [uploading, setUploading] = useState(false);
-  
+
   const {
     register,
     handleSubmit,
@@ -41,21 +40,14 @@ export function AdminResumePage() {
   useEffect(() => {
     if (editingResume) {
       setValue('title', editingResume.title);
-      setValue('version', editingResume.version);
+      setValue('version', editingResume.version || '');
       setValue('file_url', editingResume.file_url || '');
-      setValue('is_active', editingResume.is_active);
+      setValue('is_active', editingResume.is_active ?? false);
     }
   }, [editingResume, setValue]);
   
   async function fetchResumes() {
     try {
-      // Check if Supabase is configured
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        setError('Supabase not configured. Please check your environment variables.');
-        setLoading(false);
-        return;
-      }
-
       const { data, error } = await supabase
         .from('resumes')
         .select('*')
@@ -74,12 +66,6 @@ export function AdminResumePage() {
   
   const onSubmit = async (data: ResumeFormData) => {
     try {
-      // Check if Supabase is configured
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        toast.error('Supabase not configured. Please check your environment variables.');
-        return;
-      }
-
       if (editingResume) {
         const { error } = await supabase
           .from('resumes')
@@ -91,9 +77,14 @@ export function AdminResumePage() {
         toast.success('Resume updated successfully');
       } else {
         const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user?.id) {
+          toast.error('User not authenticated');
+          return;
+        }
+
         const { error } = await supabase
           .from('resumes')
-          .insert([{ ...data, user_id: userData.user?.id }]);
+          .insert([{ ...data, user_id: userData.user.id }]);
         
         if (error) throw error;
         
@@ -113,12 +104,6 @@ export function AdminResumePage() {
     if (!window.confirm('Are you sure you want to delete this resume?')) return;
     
     try {
-      // Check if Supabase is configured
-      if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-        toast.error('Supabase not configured. Please check your environment variables.');
-        return;
-      }
-
       const { error } = await supabase
         .from('resumes')
         .delete()
@@ -202,7 +187,7 @@ export function AdminResumePage() {
           <div className="flex flex-col sm:flex-row gap-4">
             <Button
               type="submit"
-              loading={isSubmitting || uploading}
+              loading={isSubmitting}
               leftIcon={editingResume ? <Pencil size={16} /> : <Plus size={16} />}
               className="w-full sm:w-auto"
             >
@@ -252,7 +237,7 @@ export function AdminResumePage() {
                         Version: {resume.version}
                       </p>
                       <p className="mt-1 text-sm text-secondary-500 dark:text-secondary-400">
-                        Added: {new Date(resume.created_at).toLocaleDateString()}
+                        Added: {resume.created_at ? new Date(resume.created_at).toLocaleDateString() : '—'}
                       </p>
                     </div>
                     <div className="flex items-center gap-2 sm:gap-4">

@@ -22,6 +22,8 @@ import { cn } from '../../lib/utils';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
+type Project = Database['public']['Tables']['projects']['Row'];
+type Experience = Database['public']['Tables']['experiences']['Row'];
 
 interface Stats {
   projectCount: number;
@@ -35,8 +37,8 @@ const ROLES = ['Full-stack Developer', 'AI Enthusiast', 'UI Engineer', 'Problem 
 
 export function HomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [featuredProjects, setFeaturedProjects] = useState<any[]>([]);
-  const [experiences, setExperiences] = useState<any[]>([]);
+  const [featuredProjects, setFeaturedProjects] = useState<Project[]>([]);
+  const [experiences, setExperiences] = useState<Experience[]>([]);
   const [loading, setLoading] = useState(true);
   const [stats, setStats] = useState<Stats>({
     projectCount: 0,
@@ -81,16 +83,35 @@ export function HomePage() {
         setFeaturedProjects(featuredRes.data || []);
         setExperiences(expRes.data || []);
 
-        let years = 0;
-        (expAll.data || []).forEach(
-          (e: { start_date: string; end_date: string | null; current: boolean }) => {
-            const start = new Date(e.start_date);
-            const end = e.current ? new Date() : new Date(e.end_date || start);
-            years += Math.max(0, (end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24 * 365.25));
-          }
-        );
+        // Build [start, end] intervals, then merge overlaps so concurrent roles
+        // don't get double-counted. Total experience = union of time worked.
+        const now = Date.now();
+        const intervals = (expAll.data || [])
+          .map(e => {
+            const start = new Date(e.start_date).getTime();
+            const end = e.current ? now : new Date(e.end_date || e.start_date).getTime();
+            return [start, Math.max(start, end)] as [number, number];
+          })
+          .sort((a: [number, number], b: [number, number]) => a[0] - b[0]);
 
-        const categories = (skillsRes.data || []).reduce<Record<string, number>>((acc, s: any) => {
+        let totalMs = 0;
+        let cursorStart = -Infinity;
+        let cursorEnd = -Infinity;
+        for (const [start, end] of intervals) {
+          if (start > cursorEnd) {
+            if (cursorEnd > cursorStart) totalMs += cursorEnd - cursorStart;
+            cursorStart = start;
+            cursorEnd = end;
+          } else {
+            cursorEnd = Math.max(cursorEnd, end);
+          }
+        }
+        if (cursorEnd > cursorStart) totalMs += cursorEnd - cursorStart;
+
+        const years = totalMs / (1000 * 60 * 60 * 24 * 365.25);
+
+        const skillRows = (skillsRes.data || []) as { category: string }[];
+        const categories = skillRows.reduce<Record<string, number>>((acc, s) => {
           acc[s.category] = (acc[s.category] || 0) + 1;
           return acc;
         }, {});
@@ -214,34 +235,6 @@ export function HomePage() {
                   GitHub
                   <ArrowUpRight size={14} />
                 </a>
-              </motion.div>
-
-              {/* Tech stack marquee */}
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                transition={{ duration: 0.6, delay: 0.4 }}
-                className="mt-10"
-              >
-                <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-500 mb-3">
-                  Working with
-                </div>
-                <div className="flex flex-wrap gap-2">
-                  {[
-                    'React',
-                    'TypeScript',
-                    'Node.js',
-                    'Python',
-                    'PostgreSQL',
-                    'Supabase',
-                    'Tailwind',
-                    'Three.js',
-                  ].map((t) => (
-                    <span key={t} className="chip-brand">
-                      {t}
-                    </span>
-                  ))}
-                </div>
               </motion.div>
             </div>
 
@@ -579,7 +572,8 @@ export function HomePage() {
   );
 }
 
-function ProjectCard({ project }: { project: any }) {
+function ProjectCard({ project }: { project: Project }) {
+  const tech = project.tech_stack ?? [];
   return (
     <Link
       to={`/projects/${project.id}`}
@@ -638,18 +632,14 @@ function ProjectCard({ project }: { project: any }) {
         <p className="mt-1.5 text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
           {project.short_description || project.description}
         </p>
-        {(project.tech_stack || project.technologies)?.length > 0 && (
+        {tech.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
-            {(project.tech_stack || project.technologies)
-              .slice(0, 4)
-              .map((t: string) => (
-                <span key={t} className="chip-brand">
-                  {t}
-                </span>
-              ))}
-            {(project.tech_stack || project.technologies).length > 4 && (
-              <span className="chip">+{(project.tech_stack || project.technologies).length - 4}</span>
-            )}
+            {tech.slice(0, 4).map((t) => (
+              <span key={t} className="chip-brand">
+                {t}
+              </span>
+            ))}
+            {tech.length > 4 && <span className="chip">+{tech.length - 4}</span>}
           </div>
         )}
 
@@ -662,7 +652,7 @@ function ProjectCard({ project }: { project: any }) {
   );
 }
 
-function ExperienceRow({ exp }: { exp: any }) {
+function ExperienceRow({ exp }: { exp: Experience }) {
   const start = new Date(exp.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   const end = exp.current
     ? 'Present'
@@ -688,9 +678,9 @@ function ExperienceRow({ exp }: { exp: any }) {
           {exp.description && (
             <p className="mt-2 text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">{exp.description}</p>
           )}
-          {(exp.technologies?.length || 0) > 0 && (
+          {(exp.technologies?.length ?? 0) > 0 && (
             <div className="mt-3 flex flex-wrap gap-1.5">
-              {exp.technologies.slice(0, 5).map((t: string) => (
+              {(exp.technologies ?? []).slice(0, 5).map((t) => (
                 <span key={t} className="chip">
                   {t}
                 </span>

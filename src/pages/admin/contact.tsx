@@ -1,20 +1,12 @@
 import { useState, useEffect } from 'react';
-import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Pencil, Trash2, Mail, Check } from 'lucide-react';
+import { Trash2, Mail, Check } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import type { Database } from '../../types/database.types';
 
 type Contact = Database['public']['Tables']['contacts']['Row'];
-
-interface ContactFormData {
-  name: string;
-  email: string;
-  subject: string;
-  message: string;
-}
 
 export function AdminContactPage() {
   const [contacts, setContacts] = useState<Contact[]>([]);
@@ -124,7 +116,7 @@ export function AdminContactPage() {
                         {contact.message}
                       </p>
                       <p className="mt-2 text-xs text-secondary-400">
-                        Received: {new Date(contact.created_at).toLocaleString()}
+                        Received: {contact.created_at ? new Date(contact.created_at).toLocaleString() : '—'}
                       </p>
                     </div>
                     <div className="flex items-center space-x-4">

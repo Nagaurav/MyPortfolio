@@ -1,0 +1,130 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+
+      body {
+        width: 1200px;
+        height: 630px;
+        display: flex;
+        align-items: center;
+        font-family: 'Segoe UI', 'Inter', system-ui, -apple-system, sans-serif;
+        background: linear-gradient(135deg, #0f1b27 0%, #1a2a3a 55%, #0f1b27 100%);
+        color: #fff;
+        overflow: hidden;
+        position: relative;
+      }
+
+      /* Soft brand glow, echoing the cyan/blue accent used across the site */
+      .glow {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+      }
+      .glow-a { width: 520px; height: 520px; top: -180px; right: -120px; background: rgba(6, 182, 212, 0.28); }
+      .glow-b { width: 420px; height: 420px; bottom: -200px; left: -100px; background: rgba(37, 99, 235, 0.24); }
+
+      /* Faint grid, keeps the flat background from looking empty */
+      .grid {
+        position: absolute;
+        inset: 0;
+        background-image:
+          linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px);
+        background-size: 56px 56px;
+        mask-image: radial-gradient(ellipse 80% 70% at 50% 50%, #000 40%, transparent 100%);
+      }
+
+      .content { position: relative; padding: 0 88px; width: 100%; }
+
+      .mark {
+        width: 92px;
+        height: 92px;
+        border-radius: 24px;
+        background: linear-gradient(135deg, #06b6d4, #2563eb);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 38px;
+        font-weight: 800;
+        letter-spacing: 1px;
+        box-shadow: 0 20px 60px rgba(6, 182, 212, 0.4);
+        margin-bottom: 40px;
+      }
+
+      h1 {
+        font-size: 82px;
+        font-weight: 800;
+        letter-spacing: -2.5px;
+        line-height: 1.02;
+      }
+
+      .role {
+        margin-top: 20px;
+        font-size: 37px;
+        font-weight: 600;
+        letter-spacing: -0.5px;
+        background: linear-gradient(90deg, #22d3ee, #3b82f6);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+      }
+
+      .tags {
+        margin-top: 44px;
+        display: flex;
+        gap: 14px;
+      }
+      .tag {
+        padding: 11px 22px;
+        border-radius: 999px;
+        font-size: 21px;
+        font-weight: 500;
+        color: #cbd5e1;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        background: rgba(255, 255, 255, 0.045);
+      }
+
+      .url {
+        position: absolute;
+        bottom: 54px;
+        left: 88px;
+        font-size: 23px;
+        font-weight: 500;
+        color: #64748b;
+        letter-spacing: 0.4px;
+      }
+
+      .rule {
+        position: absolute;
+        right: 0;
+        top: 0;
+        bottom: 0;
+        width: 6px;
+        background: linear-gradient(180deg, #06b6d4, #2563eb);
+      }
+    </style>
+  </head>
+  <body>
+    <div class="glow glow-a"></div>
+    <div class="glow glow-b"></div>
+    <div class="grid"></div>
+    <div class="rule"></div>
+
+    <div class="content">
+      <div class="mark">GN</div>
+      <h1>Gaurav Naik</h1>
+      <div class="role">Full Stack Developer &amp; AI Enthusiast</div>
+      <div class="tags">
+        <div class="tag">React</div>
+        <div class="tag">TypeScript</div>
+        <div class="tag">Node.js</div>
+        <div class="tag">Supabase</div>
+      </div>
+    </div>
+
+    <div class="url">gauravnaik.dev</div>
+  </body>
+</html>

@@ -1,6 +1,7 @@
 import { useState, useEffect, useMemo } from 'react';
 import { motion } from 'framer-motion';
 import { Code2, Database as DatabaseIcon, Server, Smartphone, Wrench, Brain, Sparkles } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PageHero } from '../../components/ui/page-hero';
 import { SkillLogo } from '../../components/ui/skill-logo';
@@ -13,7 +14,7 @@ type Skill = {
   proficiency: number;
 };
 
-const CATEGORY_META: Record<string, { icon: any; label: string; hint: string }> = {
+const CATEGORY_META: Record<string, { icon: LucideIcon; label: string; hint: string }> = {
   'Frontend Development': { icon: Code2, label: 'Frontend', hint: 'UI, design systems, motion' },
   Frontend: { icon: Code2, label: 'Frontend', hint: 'UI, design systems, motion' },
   'Backend Development': { icon: Server, label: 'Backend', hint: 'APIs, services, business logic' },

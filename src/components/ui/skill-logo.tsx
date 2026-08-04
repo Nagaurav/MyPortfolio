@@ -1,5 +1,3 @@
-import React from 'react';
-
 interface SkillLogoProps {
   skill: string;
   className?: string;

@@ -21,7 +21,15 @@
       "PowerShell(npx --yes tsc --noEmit -p tsconfig.app.json 2>&1 | Select-Object -First 60)",
       "PowerShell(npx --yes supabase db dump --linked --schema public --data-only -f /tmp/data-snapshot.sql 2>&1 | Select-Object -Last 10)",
       "PowerShell(npx --yes supabase db dump --linked --schema public --data-only -f data-snapshot.sql 2>&1 | Select-Object -Last 10)",
-      "PowerShell(npx --yes supabase migration new remove_mock_data 2>&1 | Select-Object -First 5)"
+      "PowerShell(npx --yes supabase migration new remove_mock_data 2>&1 | Select-Object -First 5)",
+      "PowerShell(Get-Command *)",
+      "PowerShell(npx tsc --noEmit -p C:\\\\Projects\\\\MyPortfolio\\\\tsconfig.json 2>&1 | Select-Object -First 30; \"exit: $LASTEXITCODE\")",
+      "PowerShell($r = Invoke-RestMethod -Uri \"https://api.github.com/repos/supabase/cli/releases/latest\" -Headers @{ \"User-Agent\" = \"claude\" }; \"tag: $\\($r.tag_name\\)\"; $r.assets | Where-Object { $_.name -match \"windows\" } | ForEach-Object { $_.name })",
+      "PowerShell($env:PROCESSOR_ARCHITECTURE)",
+      "PowerShell(supabase migration *)",
+      "PowerShell(& \"$env:USERPROFILE\\\\.supabase-cli\\\\supabase.exe\" migration list --linked 2>&1 | Select-Object -First 40; \"exit: $LASTEXITCODE\")",
+      "PowerShell(& \"$env:USERPROFILE\\\\.supabase-cli\\\\supabase.exe\" db push --linked --include-all 2>&1 | Select-Object -First 60; \"exit: $LASTEXITCODE\")",
+      "PowerShell(npx tsc --noEmit -p C:\\\\Projects\\\\MyPortfolio\\\\tsconfig.json 2>&1 | Select-Object -First 20; \"exit: $LASTEXITCODE\")"
     ]
   }
 }

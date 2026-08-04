@@ -1,37 +1,26 @@
 import { createClient } from '@supabase/supabase-js';
 import type { Database } from '../types/database.types';
 
+// Single source of truth for the Supabase credentials. Nothing else in the app
+// should read import.meta.env directly -- call sites that did drifted out of
+// sync when the key was renamed, and silently sent `Bearer undefined`.
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
-const supabaseServiceKey = import.meta.env.VITE_SUPABASE_SERVICE_ROLE_KEY;
-
-// Initialize supabase client
-let supabase: any;
-let supabaseAdmin: any;
+// Supabase renamed "anon" keys to "publishable" keys; accept either name.
+const supabaseAnonKey =
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ?? import.meta.env.VITE_SUPABASE_ANON_KEY;
 
 if (!supabaseUrl || !supabaseAnonKey) {
   throw new Error('Supabase credentials not found. Please check your environment variables.');
 }
 
-// Log the URL (but not the key for security)
-console.log('Connecting to Supabase URL:', supabaseUrl);
-supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+// NOTE: never add a service-role client here. Anything read via import.meta.env
+// is inlined into the browser bundle, and a service-role key bypasses RLS.
+// Privileged operations belong in a Supabase Edge Function.
+const supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
   auth: {
     persistSession: true,
     autoRefreshToken: true,
   },
 });
 
-// Create admin client with service role key for development operations
-if (supabaseServiceKey) {
-  supabaseAdmin = createClient<Database>(supabaseUrl, supabaseServiceKey, {
-    auth: {
-      persistSession: false,
-      autoRefreshToken: false,
-    },
-  });
-} else {
-  supabaseAdmin = supabase; // Fallback to regular client
-}
-
-export { supabase, supabaseAdmin };
+export { supabase, supabaseUrl, supabaseAnonKey };

@@ -4,7 +4,7 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
-import { FileUpload } from '../../components/ui/file-upload';
+import { MultiImageUpload } from '../../components/ui/multi-image-upload';
 import { SectionHeader } from '../../components/ui/section-header';
 
 import type { Database } from '../../types/database.types';
@@ -20,20 +20,22 @@ interface ProjectFormData {
   github_url: string;
   live_url: string;
   featured: boolean;
-  image_url?: string;
 }
 
 export function AdminProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [editingProject, setEditingProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
-  
+  // The gallery lives outside react-hook-form: it is an array the uploader
+  // mutates, not a plain input value. image_urls[0] is mirrored into image_url
+  // on save so existing project cards keep working unchanged.
+  const [imageUrls, setImageUrls] = useState<string[]>([]);
+
   const {
     register,
     handleSubmit,
     reset,
     setValue,
-    watch,
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormData>();
 
@@ -46,15 +48,23 @@ export function AdminProjectsPage() {
   useEffect(() => {
     if (editingProject) {
       setValue('title', editingProject.title);
-      setValue('description', editingProject.description);
+      setValue('description', editingProject.description || '');
       setValue('short_description', editingProject.short_description || '');
       setValue('category', editingProject.category || '');
       setValue('tech_stack', editingProject.tech_stack?.join(', ') || '');
 
       setValue('github_url', editingProject.github_url || '');
       setValue('live_url', editingProject.live_url || '');
-      setValue('featured', editingProject.featured);
-      setValue('image_url', editingProject.image_url || '');
+      setValue('featured', editingProject.featured ?? false);
+      setImageUrls(
+        editingProject.image_urls?.length
+          ? editingProject.image_urls
+          : editingProject.image_url
+            ? [editingProject.image_url]
+            : []
+      );
+    } else {
+      setImageUrls([]);
     }
   }, [editingProject, setValue]);
   
@@ -89,6 +99,10 @@ export function AdminProjectsPage() {
       const projectData = {
         ...data,
         tech_stack: data.tech_stack ? data.tech_stack.split(',').map(tech => tech.trim()).filter(Boolean) : [],
+        image_urls: imageUrls,
+        // Cover image: keeps the project cards (which read image_url) in sync
+        // with whichever image the gallery has first.
+        image_url: imageUrls[0] ?? null,
       };
 
       console.log('Processed project data:', projectData);
@@ -134,28 +148,27 @@ export function AdminProjectsPage() {
       reset();
       setEditingProject(null);
       fetchProjects();
-    } catch (error: any) {
+    } catch (error) {
       console.error('Error saving project:', error);
-      
+
+      // Postgres surfaces constraint violations as a `code`; narrow before use.
+      const { code, message } = (error ?? {}) as { code?: string; message?: string };
+
       // Provide more specific error messages
-      if (error.code === '23505') {
+      if (code === '23505') {
         toast.error('A project with this title already exists');
-      } else if (error.code === '23502') {
+      } else if (code === '23502') {
         toast.error('Missing required fields. Please check your input.');
-      } else if (error.code === '23503') {
+      } else if (code === '23503') {
         toast.error('Invalid user reference. Please try logging in again.');
-      } else if (error.message) {
-        toast.error(`Error: ${error.message}`);
+      } else if (message) {
+        toast.error(`Error: ${message}`);
       } else {
         toast.error('Failed to save project. Please check the console for details.');
       }
     }
   };
 
-  const handleImageUpload = (url: string) => {
-    setValue('image_url', url);
-  };
-  
   const handleDelete = async (id: string) => {
     if (!window.confirm('Are you sure you want to delete this project?')) return;
     
@@ -268,17 +281,15 @@ export function AdminProjectsPage() {
             </p>
           </div>
           
-          {/* Project Image Upload */}
+          {/* Project images -- ordered gallery, first entry is the cover */}
           <div>
-            <FileUpload
-              onUpload={handleImageUpload}
-              accept="image/jpeg,image/jpg,image/png"
+            <MultiImageUpload
+              value={imageUrls}
+              onChange={setImageUrls}
               bucket="projects"
               folder="images"
-              currentFile={editingProject?.image_url || ''}
-              label="Project Image (JPG, JPEG, PNG)"
+              label="Project Images"
             />
-            <input type="hidden" {...register('image_url')} />
           </div>
           
           <div>

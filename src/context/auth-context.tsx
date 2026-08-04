@@ -1,7 +1,7 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from 'react';
+import { createContext, useContext, useEffect, useRef, useState, ReactNode } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { supabase } from '../lib/supabase';
-import type { User, Session } from '@supabase/supabase-js';
+import type { AuthChangeEvent, User, Session } from '@supabase/supabase-js';
 
 type AuthContextType = {
   session: Session | null;
@@ -26,6 +26,16 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const navigate = useNavigate();
   const location = useLocation();
 
+  // The auth subscription below must be set up exactly once. Reading navigate and
+  // the current pathname through refs keeps them out of the effect's deps —
+  // otherwise every route change tore down the subscription and re-ran getSession().
+  const navigateRef = useRef(navigate);
+  const pathnameRef = useRef(location.pathname);
+  useEffect(() => {
+    navigateRef.current = navigate;
+    pathnameRef.current = location.pathname;
+  });
+
   useEffect(() => {
 
     // Get initial session from Supabase
@@ -45,21 +55,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      async (event, session) => {
-        console.log('Auth state changed:', event, session?.user?.id);
+      async (event: AuthChangeEvent, session: Session | null) => {
         setSession(session);
         setUser(session?.user ?? null);
         
         // Only redirect if we're on admin pages and not authenticated
-        if (event === 'SIGNED_OUT' && location.pathname.startsWith('/admin')) {
-          navigate('/admin/login');
+        if (event === 'SIGNED_OUT' && pathnameRef.current.startsWith('/admin')) {
+          navigateRef.current('/admin/login');
         }
         // Don't automatically redirect on sign in - let the login page handle it
       }
     );
 
     return () => subscription.unsubscribe();
-  }, [navigate, location.pathname]);
+  }, []);
 
   const signIn = async (email: string, password: string) => {
     try {

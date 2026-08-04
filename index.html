@@ -4,7 +4,25 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    
+
+    <!--
+      Apply the theme before first paint. Without this the <html> element has no
+      theme class until React mounts, which shows a white flash on every load.
+      Must stay inline and synchronous -- deferring it reintroduces the flash.
+      Keep the default ('dark') in sync with ThemeProvider in src/context/theme-context.tsx.
+    -->
+    <script>
+      (function () {
+        try {
+          var saved = localStorage.getItem('theme');
+          var theme = saved === 'light' || saved === 'dark' ? saved : 'dark';
+          document.documentElement.classList.add(theme);
+        } catch (e) {
+          document.documentElement.classList.add('dark');
+        }
+      })();
+    </script>
+
     <!-- Primary Meta Tags -->
     <title>Gaurav Naik - Full Stack Developer & AI Enthusiast | Portfolio</title>
     <meta name="title" content="Gaurav Naik - Full Stack Developer & AI Enthusiast | Portfolio">
@@ -37,9 +55,12 @@
     <meta name="twitter:site" content="@gauravnaik">
 
     <!-- Additional SEO Meta Tags -->
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#0b1220">
+    <!-- Single tag with no media query: ThemeProvider rewrites its content on
+         theme change. With media-scoped variants the override silently no-ops,
+         because the browser picks by system preference instead. -->
+    <meta name="theme-color" content="#041421">
     <meta name="msapplication-TileColor" content="#0b1220">
+    <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Gaurav Naik Portfolio">

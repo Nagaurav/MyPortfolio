@@ -1,7 +1,8 @@
 import { Outlet, useLocation } from 'react-router-dom';
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { MainHeader } from './main-header';
 import { MainFooter } from './main-footer';
+import { PageFallback } from '../ui/page-fallback';
 
 export function MainLayout() {
   const location = useLocation();
@@ -39,7 +40,9 @@ export function MainLayout() {
         role="main"
         aria-label="Main content"
       >
-        <Outlet />
+        <Suspense fallback={<PageFallback />}>
+          <Outlet />
+        </Suspense>
       </main>
 
       {/* Footer */}

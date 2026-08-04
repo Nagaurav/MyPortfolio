@@ -1,7 +1,9 @@
+import { Suspense } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
 import { Outlet, useLocation } from 'react-router-dom';
 import { AdminSidebar } from './admin-sidebar';
 import { AdminHeader } from './admin-header';
+import { PageFallback } from '../ui/page-fallback';
 
 export function AdminLayout() {
   const location = useLocation();
@@ -12,7 +14,7 @@ export function AdminLayout() {
       <div className="flex flex-col flex-1 overflow-hidden">
         <AdminHeader />
         <AnimatePresence mode="wait">
-          <motion.main 
+          <motion.main
             key={location.pathname}
             className="flex-1 overflow-y-auto p-6"
             initial={{ opacity: 0, x: 20 }}
@@ -20,7 +22,9 @@ export function AdminLayout() {
             exit={{ opacity: 0, x: -20 }}
             transition={{ duration: 0.3 }}
           >
-            <Outlet />
+            <Suspense fallback={<PageFallback />}>
+              <Outlet />
+            </Suspense>
           </motion.main>
         </AnimatePresence>
       </div>

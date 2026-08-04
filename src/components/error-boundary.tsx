@@ -1,6 +1,6 @@
 import { Component, ErrorInfo, ReactNode } from 'react';
 import { AlertTriangle } from 'lucide-react';
-import { Button } from '../ui/button';
+import { Button } from './ui/button';
 
 interface Props {
   children: ReactNode;
@@ -42,7 +42,7 @@ export class ErrorBoundary extends Component<Props, State> {
             <div className="space-y-4">
               <Button
                 onClick={() => window.location.reload()}
-                fullWidth
+                className="w-full"
               >
                 Refresh Page
               </Button>
@@ -50,7 +50,7 @@ export class ErrorBoundary extends Component<Props, State> {
                 as="a"
                 href="/"
                 variant="outline"
-                fullWidth
+                className="w-full"
               >
                 Go to Homepage
               </Button>

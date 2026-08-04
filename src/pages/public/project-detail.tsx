@@ -12,9 +12,22 @@ export function ProjectDetailPage() {
   const { id } = useParams();
   const [project, setProject] = useState<Project | null>(null);
   const [loading, setLoading] = useState(true);
+  const [activeImage, setActiveImage] = useState(0);
+
+  // Prefer the gallery; fall back to the single cover for rows predating it.
+  const gallery = project?.image_urls?.length
+    ? project.image_urls
+    : project?.image_url
+      ? [project.image_url]
+      : [];
 
   useEffect(() => {
     async function fetchProject() {
+      if (!id) {
+        setLoading(false);
+        return;
+      }
+
       try {
         const { data, error } = await supabase
           .from('projects')
@@ -127,13 +140,47 @@ export function ProjectDetailPage() {
         </div>
       </div>
 
-      {project.image_url && (
-        <div className="mb-12 rounded-lg overflow-hidden shadow-lg">
-          <img
-            src={project.image_url}
-            alt={project.title}
-            className="w-full h-[400px] object-cover"
-          />
+      {gallery.length > 0 && (
+        <div className="mb-12 space-y-4">
+          <div className="rounded-lg overflow-hidden shadow-lg">
+            <img
+              src={gallery[activeImage] ?? gallery[0]}
+              alt={
+                gallery.length > 1
+                  ? `${project.title} — image ${activeImage + 1} of ${gallery.length}`
+                  : project.title
+              }
+              className="w-full h-[400px] object-cover"
+            />
+          </div>
+
+          {gallery.length > 1 && (
+            <ul className="flex flex-wrap gap-3">
+              {gallery.map((url, index) => (
+                <li key={url}>
+                  <button
+                    type="button"
+                    onClick={() => setActiveImage(index)}
+                    aria-label={`Show image ${index + 1} of ${gallery.length}`}
+                    aria-current={index === activeImage}
+                    className={
+                      'block rounded-md overflow-hidden border-2 transition-colors ' +
+                      (index === activeImage
+                        ? 'border-brand-500'
+                        : 'border-transparent hover:border-secondary-300 dark:hover:border-secondary-600')
+                    }
+                  >
+                    <img
+                      src={url}
+                      alt=""
+                      className="h-20 w-28 object-cover"
+                      loading="lazy"
+                    />
+                  </button>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -180,7 +227,7 @@ export function ProjectDetailPage() {
               <div>
                 <dt className="text-sm font-medium text-secondary-500">Created</dt>
                 <dd className="mt-1 text-sm text-secondary-900">
-                  {new Date(project.created_at).toLocaleDateString()}
+                  {project.created_at ? new Date(project.created_at).toLocaleDateString() : '—'}
                 </dd>
               </div>
               {project.github_url && (

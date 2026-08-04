@@ -65,10 +65,15 @@ function ButtonInner<E extends ElementType = 'button'>(
 ) {
   const Component = (as || 'button') as ElementType;
   const isNative = typeof Component === 'string';
-  const disabled = (props as any).disabled || loading;
+  // `props` is a union across every possible element type, so `disabled` is only
+  // present on some members. There is no sound narrowing here without knowing E
+  // at runtime, which is the standard escape hatch for polymorphic components.
+  const disabled = (props as { disabled?: boolean }).disabled || loading;
 
   return (
     <Component
+      // Same reason: the ref type depends on E, which isn't resolvable here.
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       ref={ref as any}
       className={cn(buttonVariants({ variant, size, className }))}
       aria-disabled={disabled || undefined}

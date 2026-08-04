@@ -92,7 +92,6 @@ export function FileUpload({
   };
 
   const isImage = accept.includes('image');
-  const isJPEG = accept.includes('jpeg') || accept.includes('jpg') || accept.includes('image');
   const isPDF = accept.includes('pdf');
   const isDoc = accept.includes('doc') || accept.includes('docx');
 
@@ -160,6 +159,7 @@ export function FileUpload({
             variant="ghost"
             size="sm"
             className="absolute top-2 right-2 bg-white/80 hover:bg-white dark:bg-secondary-800/80 dark:hover:bg-secondary-700"
+            type="button"
             onClick={handleRemove}
           >
             <X size={16} />
@@ -176,6 +176,7 @@ export function FileUpload({
           <Button
             variant="ghost"
             size="sm"
+            type="button"
             onClick={handleRemove}
           >
             <X size={16} />

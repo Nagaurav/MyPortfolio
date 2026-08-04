@@ -13,14 +13,14 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [theme, setThemeState] = useState<Theme>(() => {
-    // Check for saved theme preference or default to light
-    const savedTheme = localStorage.getItem('theme') as Theme;
-    if (savedTheme) {
+    // An explicit choice always wins, so returning visitors keep what they picked.
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    if (savedTheme === 'light' || savedTheme === 'dark') {
       return savedTheme;
     }
-    
-    // Always default to light mode, ignore system preferences
-    return 'light';
+
+    // Otherwise default to dark, regardless of system preference.
+    return 'dark';
   });
 
   const setTheme = (newTheme: Theme) => {
@@ -64,8 +64,8 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
             setTheme(data.theme as Theme);
           }
         }
-      } catch (error) {
-        console.log('No user preferences found, using default light theme');
+      } catch {
+        // No stored preference (or not signed in) — fall back to the default theme.
       }
     };
 

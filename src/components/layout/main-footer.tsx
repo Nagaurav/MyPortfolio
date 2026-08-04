@@ -25,7 +25,7 @@ export function MainFooter() {
       .from('profiles')
       .select('*')
       .limit(1)
-      .then(({ data, error }) => {
+      .then(({ data, error }: { data: Profile[] | null; error: unknown }) => {
         if (active && !error && data && data.length > 0) setProfile(data[0]);
       });
     return () => {

@@ -46,7 +46,7 @@ export function AdminSkillsPage() {
     if (editingSkill) {
       setValue('name', editingSkill.name);
       setValue('category', editingSkill.category);
-      setValue('proficiency', editingSkill.proficiency);
+      setValue('proficiency', editingSkill.proficiency ?? 0);
     }
   }, [editingSkill, setValue]);
   
@@ -81,9 +81,15 @@ export function AdminSkillsPage() {
         
         toast.success('Skill updated successfully');
       } else {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user?.id) {
+          toast.error('User not authenticated');
+          return;
+        }
+
         const { error } = await supabase
           .from('skills')
-          .insert([{ ...data, user_id: (await supabase.auth.getUser()).data.user?.id }]);
+          .insert([{ ...data, user_id: userData.user.id }]);
         
         if (error) throw error;
         
@@ -187,7 +193,7 @@ export function AdminSkillsPage() {
           <div className="flex gap-4">
             <Button
               type="submit"
-              isLoading={isSubmitting}
+              loading={isSubmitting}
               leftIcon={editingSkill ? <Pencil size={16} /> : <Plus size={16} />}
             >
               {editingSkill ? 'Update Skill' : 'Add Skill'}
@@ -234,12 +240,12 @@ export function AdminSkillsPage() {
                       <div className="mt-2">
                         <div className="flex justify-between text-sm text-secondary-600 dark:text-secondary-300 mb-1">
                           <span>Proficiency</span>
-                          <span>{Math.round((skill.proficiency / 5) * 100)}%</span>
+                          <span>{Math.round(((skill.proficiency ?? 0) / 5) * 100)}%</span>
                         </div>
                         <div className="w-full bg-secondary-200 dark:bg-secondary-700 rounded-full h-2">
                           <div
                             className="bg-primary-600 h-2 rounded-full"
-                            style={{ width: `${(skill.proficiency / 5) * 100}%` }}
+                            style={{ width: `${((skill.proficiency ?? 0) / 5) * 100}%` }}
                           ></div>
                         </div>
                       </div>

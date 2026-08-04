@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { Plus, Pencil, Trash2, Briefcase } from 'lucide-react';
+import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
@@ -61,7 +61,7 @@ export function AdminExperiencePage() {
       setValue('type', editingExperience.type);
       setValue('start_date', editingExperience.start_date);
       setValue('end_date', editingExperience.end_date || '');
-      setValue('current', editingExperience.current);
+      setValue('current', editingExperience.current ?? false);
       setValue('description', editingExperience.description);
       setValue('technologies', editingExperience.technologies?.join(', ') || '');
       setValue('key_achievements', editingExperience.key_achievements?.join('\n') || '');
@@ -106,11 +106,17 @@ export function AdminExperiencePage() {
         if (error) throw error;
         toast.success('Experience updated successfully');
       } else {
+        const { data: userData } = await supabase.auth.getUser();
+        if (!userData.user?.id) {
+          toast.error('User not authenticated');
+          return;
+        }
+
         const { error } = await supabase
           .from('experiences')
           .insert([{
             ...experienceData,
-            user_id: (await supabase.auth.getUser()).data.user?.id,
+            user_id: userData.user.id,
           }]);
 
         if (error) throw error;
@@ -329,7 +335,7 @@ export function AdminExperiencePage() {
           <div className="flex gap-4">
             <Button
               type="submit"
-              isLoading={isSubmitting}
+              loading={isSubmitting}
               leftIcon={editingExperience ? <Pencil size={16} /> : <Plus size={16} />}
             >
               {editingExperience ? 'Update Experience' : 'Add Experience'}

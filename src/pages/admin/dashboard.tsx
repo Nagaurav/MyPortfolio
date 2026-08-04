@@ -10,6 +10,7 @@ interface DashboardCounts {
   certificates: number;
   resumes: number;
   unreadMessages: number;
+  totalMessages: number;
 }
 
 export function AdminDashboardPage() {
@@ -19,6 +20,7 @@ export function AdminDashboardPage() {
     certificates: 0,
     resumes: 0,
     unreadMessages: 0,
+    totalMessages: 0,
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -27,13 +29,6 @@ export function AdminDashboardPage() {
     async function fetchCounts() {
       try {
         setError(null);
-        
-        // Check if Supabase is properly configured
-        if (!import.meta.env.VITE_SUPABASE_URL || !import.meta.env.VITE_SUPABASE_ANON_KEY) {
-          setError('Supabase not configured. Please check your environment variables.');
-          setLoading(false);
-          return;
-        }
 
         const [
           { count: projectsCount },
@@ -41,20 +36,23 @@ export function AdminDashboardPage() {
           { count: certificatesCount },
           { count: resumesCount },
           { count: unreadMessagesCount },
+          { count: totalMessagesCount },
         ] = await Promise.all([
           supabase.from('projects').select('*', { count: 'exact', head: true }),
           supabase.from('skills').select('*', { count: 'exact', head: true }),
           supabase.from('certificates').select('*', { count: 'exact', head: true }),
           supabase.from('resumes').select('*', { count: 'exact', head: true }),
           supabase.from('contacts').select('*', { count: 'exact', head: true }).eq('read', false),
+          supabase.from('contacts').select('*', { count: 'exact', head: true }),
         ]);
-  
+
         setCounts({
           projects: projectsCount || 0,
           skills: skillsCount || 0,
           certificates: certificatesCount || 0,
           resumes: resumesCount || 0,
           unreadMessages: unreadMessagesCount || 0,
+          totalMessages: totalMessagesCount || 0,
         });
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
@@ -228,16 +226,20 @@ export function AdminDashboardPage() {
           </div>
           <div className="space-y-4">
             <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
-              <span className="text-sm text-secondary-600 dark:text-secondary-300">Portfolio Views</span>
-              <span className="text-lg font-semibold text-secondary-900 dark:text-white">1,234</span>
-            </div>
-            <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
               <span className="text-sm text-secondary-600 dark:text-secondary-300">Contact Submissions</span>
-              <span className="text-lg font-semibold text-secondary-900 dark:text-white">56</span>
+              <span className="text-lg font-semibold text-secondary-900 dark:text-white">{counts.totalMessages.toLocaleString()}</span>
             </div>
             <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
-              <span className="text-sm text-secondary-600 dark:text-secondary-300">Download Rate</span>
-              <span className="text-lg font-semibold text-secondary-900 dark:text-white">23%</span>
+              <span className="text-sm text-secondary-600 dark:text-secondary-300">Unread Messages</span>
+              <span className="text-lg font-semibold text-secondary-900 dark:text-white">{counts.unreadMessages.toLocaleString()}</span>
+            </div>
+            <div className="flex items-center justify-between p-3 bg-secondary-50 dark:bg-secondary-700/50 rounded-lg">
+              <span className="text-sm text-secondary-600 dark:text-secondary-300">Read Rate</span>
+              <span className="text-lg font-semibold text-secondary-900 dark:text-white">
+                {counts.totalMessages > 0
+                  ? `${Math.round(((counts.totalMessages - counts.unreadMessages) / counts.totalMessages) * 100)}%`
+                  : '—'}
+              </span>
             </div>
           </div>
         </div>

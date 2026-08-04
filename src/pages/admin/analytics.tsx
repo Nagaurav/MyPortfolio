@@ -73,17 +73,17 @@ export function AdminAnalyticsPage() {
           ...(recentProjectsData?.map(p => ({
             action: 'Project Added',
             description: p.title,
-            timestamp: p.created_at,
+            timestamp: p.created_at ?? '',
           })) || []),
           ...(recentContactsData?.map(c => ({
             action: 'New Contact',
             description: `From: ${c.name} - ${c.subject}`,
-            timestamp: c.created_at,
+            timestamp: c.created_at ?? '',
           })) || []),
           ...(recentCertificatesData?.map(c => ({
             action: 'Certificate Added',
             description: c.title,
-            timestamp: c.created_at,
+            timestamp: c.created_at ?? '',
           })) || []),
         ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
          .slice(0, 5);
@@ -93,7 +93,7 @@ export function AdminAnalyticsPage() {
           totalSkills: skillsCount || 0,
           totalCertificates: certificatesCount || 0,
           totalContacts: contactsCount || 0,
-          recentProjects: recentProjectsData?.map(p => ({
+          recentProjects: recentProjectsData?.map((p: { title: string }) => ({
             title: p.title,
             views: 0, // Views would need a separate tracking system
             type: 'Project',

@@ -6,8 +6,9 @@ import { supabase } from '../../lib/supabase';
 import { PageHero } from '../../components/ui/page-hero';
 import { Button } from '../../components/ui/button';
 import { cn } from '../../lib/utils';
+import type { Database } from '../../types/database.types';
 
-type Project = any;
+type Project = Database['public']['Tables']['projects']['Row'];
 
 type SortOption = 'date' | 'featured' | 'title';
 
@@ -268,8 +269,8 @@ function FilterChip({
   );
 }
 
-function ProjectCard({ project }: { project: any }) {
-  const tech: string[] = project.tech_stack || project.technologies || [];
+function ProjectCard({ project }: { project: Project }) {
+  const tech: string[] = project.tech_stack ?? [];
   return (
     <Link
       to={`/projects/${project.id}`}
