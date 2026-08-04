@@ -173,7 +173,7 @@ export function HomePage() {
                 transition={{ duration: 0.55, delay: 0.05 }}
                 className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tightest leading-[0.95] text-balance"
               >
-                <span className="block text-secondary-900 dark:text-white">Hi, I'm</span>
+                <span className="block text-secondary-900 dark:text-white">Hello, I'm</span>
                 <span className="block heading-gradient">{profile?.name || 'Gaurav Naik'}.</span>
               </motion.h1>
 
