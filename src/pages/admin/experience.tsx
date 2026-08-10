@@ -4,6 +4,7 @@ import { toast } from 'sonner';
 import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
+import { splitList } from '../../lib/text';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import type { Database } from '../../types/database.types';
@@ -90,7 +91,7 @@ export function AdminExperiencePage() {
       const experienceData = {
         ...data,
         position: data.position?.trim() || null,
-        technologies: data.technologies.split(',').map(tech => tech.trim()).filter(Boolean),
+        technologies: splitList(data.technologies),
         key_achievements: data.key_achievements
           ? data.key_achievements.split('\n').map(a => a.trim()).filter(Boolean)
           : [],

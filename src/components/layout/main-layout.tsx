@@ -33,9 +33,16 @@ export function MainLayout() {
       <MainHeader />
 
       {/* Main content area */}
-      <main 
-        id="main-content" 
-        className="flex-1"
+      {/* flex-1 alone let short pages (empty Skills, 404) end well above the
+          fold, leaving a large gap before the footer. A min-height keeps the
+          footer at or below the viewport edge instead. */}
+      <main
+        id="main-content"
+        // Focus moves here on every route change so assistive tech announces the
+        // new page. The global :focus-visible ring then drew a brand-cyan ring
+        // around the whole region -- its top edge read as a stray rule under the
+        // header. Focus still moves; only the ring on this container is dropped.
+        className="flex-1 min-h-[70vh] outline-none focus:outline-none focus-visible:ring-0 focus-visible:ring-offset-0"
         tabIndex={-1}
         role="main"
         aria-label="Main content"

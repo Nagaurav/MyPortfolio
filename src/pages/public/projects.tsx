@@ -6,6 +6,7 @@ import { supabase } from '../../lib/supabase';
 import { PageHero } from '../../components/ui/page-hero';
 import { Button } from '../../components/ui/button';
 import { cn } from '../../lib/utils';
+import { normalizeList } from '../../lib/text';
 import type { Database } from '../../types/database.types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -45,7 +46,7 @@ export function ProjectsPage() {
 
   const allTech = useMemo(() => {
     const set = new Set<string>();
-    projects.forEach((p) => (p.tech_stack || []).forEach((t: string) => set.add(t)));
+    projects.forEach((p) => normalizeList(p.tech_stack).forEach((t) => set.add(t)));
     return Array.from(set).sort();
   }, [projects]);
 
@@ -58,7 +59,7 @@ export function ProjectsPage() {
   const filtered = useMemo(() => {
     return projects.filter((p) => {
       const techOk =
-        selectedTech.length === 0 || selectedTech.every((t) => (p.tech_stack || []).includes(t));
+        selectedTech.length === 0 || selectedTech.every((t) => normalizeList(p.tech_stack).includes(t));
       const catOk = !selectedCategory || p.category === selectedCategory;
       const ql = query.toLowerCase().trim();
       const qOk =
@@ -66,7 +67,7 @@ export function ProjectsPage() {
         p.title?.toLowerCase().includes(ql) ||
         p.description?.toLowerCase().includes(ql) ||
         p.short_description?.toLowerCase().includes(ql) ||
-        (p.tech_stack || []).some((t: string) => t.toLowerCase().includes(ql));
+        normalizeList(p.tech_stack).some((t) => t.toLowerCase().includes(ql));
       return techOk && catOk && qOk;
     });
   }, [projects, selectedTech, selectedCategory, query]);
@@ -225,7 +226,17 @@ export function ProjectsPage() {
             )}
           </div>
         ) : (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+          // A 3-column grid holding one card leaves two thirds of the row empty,
+          // which reads as a failed load. Below three items, narrow and centre
+          // the grid so the collection looks deliberate at any size.
+          <div
+            className={cn(
+              'grid gap-5',
+              filtered.length === 1 && 'max-w-md mx-auto',
+              filtered.length === 2 && 'sm:grid-cols-2 max-w-3xl mx-auto',
+              filtered.length > 2 && 'sm:grid-cols-2 lg:grid-cols-3'
+            )}
+          >
             {filtered.map((p, i) => (
               <motion.div
                 key={p.id}
@@ -270,7 +281,7 @@ function FilterChip({
 }
 
 function ProjectCard({ project }: { project: Project }) {
-  const tech: string[] = project.tech_stack ?? [];
+  const tech: string[] = normalizeList(project.tech_stack);
   return (
     <Link
       to={`/projects/${project.id}`}
@@ -278,12 +289,21 @@ function ProjectCard({ project }: { project: Project }) {
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-secondary-100 dark:bg-secondary-900">
         {project.image_url ? (
-          <img
-            src={project.image_url}
-            alt={project.title}
-            loading="lazy"
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-          />
+          <>
+            {/* Blurred copy fills the frame so tall UI screenshots letterbox into
+                a matching backdrop instead of being hard-cropped by object-cover. */}
+            <div
+              aria-hidden
+              className="absolute inset-0 scale-110 bg-cover bg-center blur-xl opacity-40 dark:opacity-25"
+              style={{ backgroundImage: `url(${project.image_url})` }}
+            />
+            <img
+              src={project.image_url}
+              alt={project.title}
+              loading="lazy"
+              className="absolute inset-0 h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+            />
+          </>
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-brand-500/10 to-accent-500/10">
             <Sparkles className="h-10 w-10 text-brand-500/70" />

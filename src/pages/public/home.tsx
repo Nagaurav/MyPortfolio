@@ -19,6 +19,7 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { cn } from '../../lib/utils';
+import { leadSentences, normalizeList, stripSelfIntro } from '../../lib/text';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -52,6 +53,13 @@ export function HomePage() {
   const { scrollYProgress } = useScroll();
   const heroY = useTransform(scrollYProgress, [0, 0.2], [0, -40]);
   const heroOpacity = useTransform(scrollYProgress, [0, 0.2], [1, 0.4]);
+
+  const FALLBACK_BIO =
+    'I design and ship modern, performant web apps — turning fuzzy ideas into clean, accessible products you can actually use.';
+  const fullBio = profile?.bio || FALLBACK_BIO;
+  // Drop any "Hi, I'm <name>" opener (the headline already says it) and keep the
+  // hero to a couple of sentences; the full text lives in the About section.
+  const heroLead = leadSentences(stripSelfIntro(fullBio), 2);
 
   useEffect(() => {
     let cancelled = false;
@@ -142,7 +150,10 @@ export function HomePage() {
   return (
     <div className="relative">
       {/* HERO */}
-      <section className="relative overflow-hidden pt-8 sm:pt-12 lg:pt-16 pb-16 lg:pb-24">
+      {/* The header is transparent until scrolled, so the hero sits underneath it.
+          Top padding must therefore clear the 64px header -- pt-8 did not, which
+          hid the availability badge behind the header on small screens. */}
+      <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-28 pb-16 lg:pb-24">
         {/* Backdrop */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-aurora-light dark:bg-aurora" />
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid dark:bg-grid-dark bg-grid mask-fade-bottom opacity-60" />
@@ -197,10 +208,9 @@ export function HomePage() {
                     </motion.span>
                   </span>
                 </span>
-                <p className="mt-1">
-                  {profile?.bio ||
-                    'I design and ship modern, performant web apps — turning fuzzy ideas into clean, accessible products you can actually use.'}
-                </p>
+                {/* Short lead only: the headline above already greets the reader,
+                    and the full bio is rendered in the About section below. */}
+                <p className="mt-1">{heroLead}</p>
               </motion.div>
 
               <motion.div
@@ -369,9 +379,9 @@ export function HomePage() {
               <h3 className="text-xl font-bold text-secondary-900 dark:text-white">
                 {profile?.title || 'Full-stack developer & AI enthusiast'}
               </h3>
-              <p className="mt-3 text-secondary-600 dark:text-secondary-300 leading-relaxed">
-                {profile?.bio ||
-                  "I'm a full-stack developer focused on the seam between great product design and reliable engineering. Lately I've been working with React, TypeScript, Supabase, and exploring AI-augmented tooling."}
+              {/* Full bio lives here; the hero shows only its opening sentences. */}
+              <p className="mt-3 text-secondary-600 dark:text-secondary-300 leading-relaxed whitespace-pre-line">
+                {stripSelfIntro(fullBio)}
               </p>
 
               <div className="mt-6 grid sm:grid-cols-2 gap-3">
@@ -573,7 +583,7 @@ export function HomePage() {
 }
 
 function ProjectCard({ project }: { project: Project }) {
-  const tech = project.tech_stack ?? [];
+  const tech = normalizeList(project.tech_stack);
   return (
     <Link
       to={`/projects/${project.id}`}
@@ -581,12 +591,20 @@ function ProjectCard({ project }: { project: Project }) {
     >
       <div className="relative aspect-[16/10] overflow-hidden bg-secondary-100 dark:bg-secondary-900">
         {project.image_url ? (
-          <img
-            src={project.image_url}
-            alt={project.title}
-            className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
-            loading="lazy"
-          />
+          <>
+            {/* Blurred backdrop so screenshots letterbox rather than hard-crop. */}
+            <div
+              aria-hidden
+              className="absolute inset-0 scale-110 bg-cover bg-center blur-xl opacity-40 dark:opacity-25"
+              style={{ backgroundImage: `url(${project.image_url})` }}
+            />
+            <img
+              src={project.image_url}
+              alt={project.title}
+              className="absolute inset-0 h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+              loading="lazy"
+            />
+          </>
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-brand-500/10 to-accent-500/10">
             <Sparkles className="h-10 w-10 text-brand-500/70" />

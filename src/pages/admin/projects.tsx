@@ -3,6 +3,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
+import { splitList } from '../../lib/text';
 import { Button } from '../../components/ui/button';
 import { MultiImageUpload } from '../../components/ui/multi-image-upload';
 import { SectionHeader } from '../../components/ui/section-header';
@@ -98,7 +99,7 @@ export function AdminProjectsPage() {
 
       const projectData = {
         ...data,
-        tech_stack: data.tech_stack ? data.tech_stack.split(',').map(tech => tech.trim()).filter(Boolean) : [],
+        tech_stack: splitList(data.tech_stack),
         image_urls: imageUrls,
         // Cover image: keeps the project cards (which read image_url) in sync
         // with whichever image the gallery has first.

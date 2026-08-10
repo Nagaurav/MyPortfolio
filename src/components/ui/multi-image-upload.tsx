@@ -184,13 +184,21 @@ export function MultiImageUpload({
             another image, or the arrows to reorder.
           </p>
 
-          <ul className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+          <ul className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
             {value.map((url, index) => (
               <li
                 key={url}
                 className="group relative rounded-lg overflow-hidden border border-secondary-200 dark:border-secondary-600"
               >
-                <img src={url} alt={`Project image ${index + 1}`} className="w-full h-28 object-cover" />
+                {/* object-contain, not cover: these are usually screenshots, and
+                    cropping them to a letterbox makes them unreadable. */}
+                <a href={url} target="_blank" rel="noopener noreferrer" title="Open full size">
+                  <img
+                    src={url}
+                    alt={`Project image ${index + 1}`}
+                    className="w-full aspect-video object-contain bg-secondary-100 dark:bg-secondary-900"
+                  />
+                </a>
 
                 {index === 0 && (
                   <span className="absolute top-1.5 left-1.5 inline-flex items-center gap-1 rounded bg-black/70 px-1.5 py-0.5 text-[10px] font-medium text-white">

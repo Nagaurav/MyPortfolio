@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Link, NavLink } from 'react-router-dom';
-import { Menu, X, Download } from 'lucide-react';
+import { Menu, X, Mail } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ThemeToggle } from '../ui/theme-toggle';
 import { Button } from '../ui/button';
@@ -89,16 +89,20 @@ export function MainHeader() {
           ))}
         </nav>
 
-        {/* Desktop actions */}
+        {/* Desktop actions.
+            This slot used to be a second "Resume" sitting beside the Resume nav
+            item, and it pointed at /resume.pdf, which does not exist. The one
+            action worth promoting here is contact. */}
         <div className="hidden lg:flex items-center gap-2">
           <ThemeToggle />
           <Button
+            as={Link}
+            to="/contact"
             variant="gradient"
             size="sm"
-            leftIcon={<Download size={15} />}
-            onClick={() => window.open('/resume.pdf', '_blank')}
+            leftIcon={<Mail size={15} />}
           >
-            Resume
+            Get in touch
           </Button>
         </div>
 
@@ -166,16 +170,15 @@ export function MainHeader() {
               ))}
               <div className="pt-3 pb-2">
                 <Button
+                  as={Link}
+                  to="/contact"
                   variant="gradient"
                   size="lg"
                   className="w-full"
-                  leftIcon={<Download size={16} />}
-                  onClick={() => {
-                    window.open('/resume.pdf', '_blank');
-                    close();
-                  }}
+                  leftIcon={<Mail size={16} />}
+                  onClick={close}
                 >
-                  Download Resume
+                  Get in touch
                 </Button>
               </div>
             </nav>

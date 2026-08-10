@@ -16,6 +16,7 @@ import {
   AtSign,
 } from 'lucide-react';
 import { supabase, supabaseUrl, supabaseAnonKey } from '../../lib/supabase';
+import { formatPhone } from '../../lib/text';
 import { Button } from '../../components/ui/button';
 import { PageHero } from '../../components/ui/page-hero';
 import {
@@ -172,7 +173,7 @@ export function ContactPage() {
                       Phone
                     </div>
                     <div className="text-sm font-medium text-secondary-900 dark:text-white">
-                      {profile.phone}
+                      {formatPhone(profile.phone)}
                     </div>
                   </div>
                 </a>

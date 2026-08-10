@@ -3,6 +3,7 @@ import { motion } from 'framer-motion';
 import { Briefcase, MapPin, Clock, ChevronRight, Building2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { supabase } from '../../lib/supabase';
+import { normalizeList } from '../../lib/text';
 import { PageHero } from '../../components/ui/page-hero';
 
 type Experience = {
@@ -167,7 +168,7 @@ function TimelineItem({ exp, index }: { exp: Experience; index: number }) {
               <Building2 size={12} /> Tech stack
             </div>
             <div className="flex flex-wrap gap-1.5">
-              {exp.technologies!.map((t) => (
+              {normalizeList(exp.technologies).map((t) => (
                 <span key={t} className="chip">
                   {t}
                 </span>

@@ -100,9 +100,16 @@
     @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
   }
 
-  /* Section title with refined gradient */
+  /* Section title gradient.
+     Stays within analogous hues (cyan -> sky -> indigo). The previous ramp ran
+     brand cyan -> accent orange, which are near-complementary: interpolating
+     them in sRGB passes through desaturated khaki, so the middle of every
+     headline turned muddy and low-contrast. Orange still carries the accent
+     role elsewhere (badges, chips, eyebrow highlights). */
   .heading-gradient {
-    @apply bg-clip-text text-transparent bg-gradient-to-r from-brand-600 via-brand-500 to-accent-500 dark:from-brand-300 dark:via-brand-200 dark:to-accent-300;
+    @apply bg-clip-text text-transparent bg-gradient-to-r;
+    @apply from-brand-600 via-sky-600 to-indigo-600;
+    @apply dark:from-brand-300 dark:via-sky-300 dark:to-indigo-300;
   }
 
   /* Eyebrow label above section titles */

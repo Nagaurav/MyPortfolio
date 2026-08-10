@@ -1,9 +1,11 @@
 import { useState, useEffect, useMemo } from 'react';
+import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
 import { Code2, Database as DatabaseIcon, Server, Smartphone, Wrench, Brain, Sparkles } from 'lucide-react';
 import type { LucideIcon } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PageHero } from '../../components/ui/page-hero';
+import { Button } from '../../components/ui/button';
 import { SkillLogo } from '../../components/ui/skill-logo';
 import { cn } from '../../lib/utils';
 
@@ -146,16 +148,27 @@ export function SkillsPage() {
             ))}
           </div>
         ) : skills.length === 0 ? (
-          <div className="surface p-12 text-center">
+          // Empty state points visitors somewhere useful rather than leaving a
+          // large blank card, and stays narrow so it does not read as a void.
+          <div className="surface mx-auto max-w-lg p-10 text-center">
             <div className="mx-auto h-14 w-14 rounded-2xl bg-brand-500/10 text-brand-600 dark:text-brand-300 grid place-items-center">
               <Wrench size={22} />
             </div>
             <h3 className="mt-4 text-lg font-semibold text-secondary-900 dark:text-white">
-              No skills added yet
+              Nothing listed here yet
             </h3>
             <p className="mt-1 text-sm text-secondary-600 dark:text-secondary-400">
-              Add skills from the admin to start populating this section.
+              This section is still being put together. In the meantime, the work
+              itself is the better place to look.
             </p>
+            <div className="mt-6 flex flex-wrap justify-center gap-3">
+              <Link to="/projects">
+                <Button variant="gradient" size="sm">See my projects</Button>
+              </Link>
+              <Link to="/experience">
+                <Button variant="outline" size="sm">View experience</Button>
+              </Link>
+            </div>
           </div>
         ) : (
           <div className="space-y-8">
