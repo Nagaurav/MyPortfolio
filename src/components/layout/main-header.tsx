@@ -63,7 +63,7 @@ export function MainHeader() {
               Gaurav Naik
             </span>
             <span className="text-2xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-              Full-stack · AI
+              Software Developer
             </span>
           </span>
         </Link>

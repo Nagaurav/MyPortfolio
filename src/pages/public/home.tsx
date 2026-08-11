@@ -6,7 +6,6 @@ import {
   Github,
   ExternalLink,
   Mail,
-  Linkedin,
   Sparkles,
   MapPin,
   Briefcase,
@@ -34,7 +33,7 @@ interface Stats {
   skillCategories: Record<string, number>;
 }
 
-const ROLES = ['Full-stack Developer', 'AI Enthusiast', 'UI Engineer', 'Problem Solver'];
+const ROLES = ['Software Developer', 'Full-stack Developer', 'AI Enthusiast', 'Problem Solver'];
 
 export function HomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -150,24 +149,25 @@ export function HomePage() {
   return (
     <div className="relative">
       {/* HERO */}
-      {/* The header is transparent until scrolled, so the hero sits underneath it.
-          Top padding must therefore clear the 64px header -- pt-8 did not, which
-          hid the availability badge behind the header on small screens. pt-20 is
-          the floor: it leaves 16px of breathing room below the header. */}
-      <section className="relative overflow-hidden pt-20 sm:pt-24 pb-16 lg:pb-24">
+      {/* The header is sticky, not fixed, so it already occupies its 64px of
+          layout and this section starts below it. Top padding here is pure
+          breathing room -- it does NOT need to clear the header. The old pt-24
+          was written as if the header overlapped, which pushed the hero 80px
+          down and ran the photo card off the bottom of a laptop screen. */}
+      <section className="relative overflow-hidden pt-4 sm:pt-6 pb-12 lg:pb-16">
         {/* Backdrop */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-aurora-light dark:bg-aurora" />
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid dark:bg-grid-dark bg-grid mask-fade-bottom opacity-60" />
 
         <div className="container-page relative">
-          <motion.div style={{ y: heroY, opacity: heroOpacity }} className="grid lg:grid-cols-12 gap-10 items-center">
+          <motion.div style={{ y: heroY, opacity: heroOpacity }} className="grid lg:grid-cols-12 gap-8 lg:gap-10 items-center">
             {/* Left: copy */}
             <div className="lg:col-span-7">
               <motion.div
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5 }}
-                className="mb-5 inline-flex items-center gap-2"
+                className="mb-4 inline-flex items-center gap-2"
               >
                 <span className="eyebrow">
                   <span className="eyebrow-dot" />
@@ -183,7 +183,7 @@ export function HomePage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.05 }}
-                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tightest leading-[0.95] text-balance"
+                className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tightest leading-[0.95] text-balance"
               >
                 <span className="block text-secondary-900 dark:text-white">Hello, I'm</span>
                 <span className="block heading-gradient">{profile?.name || 'Gaurav Naik'}.</span>
@@ -193,7 +193,7 @@ export function HomePage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.15 }}
-                className="mt-6 max-w-xl text-base sm:text-lg text-secondary-600 dark:text-secondary-300 text-pretty"
+                className="mt-5 max-w-xl text-base sm:text-lg text-secondary-600 dark:text-secondary-300 text-pretty"
               >
                 <span className="inline-flex items-center gap-2 font-mono text-sm text-secondary-500 dark:text-secondary-400 mb-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -218,7 +218,7 @@ export function HomePage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.25 }}
-                className="mt-8 flex flex-wrap items-center gap-3"
+                className="mt-6 flex flex-wrap items-center gap-3"
               >
                 <Button
                   variant="gradient"
@@ -272,25 +272,33 @@ export function HomePage() {
                     <img
                       src={profile.avatar_url}
                       alt={profile.name || 'Profile'}
-                      className="aspect-[4/5] w-full object-cover object-center"
+                      /* max-h caps the card on short viewports so the whole
+                         thing -- including the title overlay -- is visible on
+                         entry instead of running off the bottom of the screen.
+                         6.5rem = 4rem header + 1.5rem top padding + 1rem slack.
+                         On a normal laptop the natural 4:5 height is smaller
+                         than this, so the clamp does nothing. */
+                      className="aspect-[4/5] w-full object-cover object-center lg:max-h-[calc(100svh-6.5rem)]"
                     />
                   ) : (
-                    <div className="aspect-[4/5] w-full grid place-items-center bg-secondary-100 dark:bg-secondary-900">
+                    <div className="aspect-[4/5] w-full grid place-items-center bg-secondary-100 dark:bg-secondary-900 lg:max-h-[calc(100svh-6.5rem)]">
                       <div className="grid place-items-center h-24 w-24 rounded-full bg-brand-500/10 text-brand-600 dark:text-brand-300">
                         <Sparkles size={32} />
                       </div>
                     </div>
                   )}
 
-                  {/* Bottom card */}
-                  <div className="absolute inset-x-4 bottom-4 rounded-2xl bg-white/85 dark:bg-ink-900/85 backdrop-blur-md border border-white/60 dark:border-white/10 p-4">
+                  {/* Bottom card. Shrink-to-fit and centered on the photo: as a
+                      full-bleed bar (inset-x-4) the icon and text sat hard left
+                      with a wide empty gutter beside them. */}
+                  <div className="absolute inset-x-4 bottom-4 mx-auto w-fit max-w-[calc(100%-2rem)] rounded-2xl bg-white/85 dark:bg-ink-900/85 backdrop-blur-md border border-white/60 dark:border-white/10 px-5 py-3">
                     <div className="flex items-center gap-3">
                       <div className="grid h-9 w-9 place-items-center rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
                         <Sparkles size={16} />
                       </div>
                       <div className="min-w-0">
                         <div className="text-sm font-semibold text-secondary-900 dark:text-white truncate">
-                          {profile?.title || 'Full-stack Developer'}
+                          {profile?.title || 'Software Developer'}
                         </div>
                         <div className="text-xs text-secondary-600 dark:text-secondary-400 truncate inline-flex items-center gap-1">
                           {profile?.location && (
@@ -304,27 +312,10 @@ export function HomePage() {
                   </div>
                 </div>
 
-                {/* Floating social mini-cards */}
-                <div className="absolute -right-3 xl:-right-6 top-10 hidden lg:flex flex-col gap-2">
-                  {[
-                    { icon: Github, href: profile?.github_url, label: 'GitHub' },
-                    { icon: Linkedin, href: profile?.linkedin_url, label: 'LinkedIn' },
-                    { icon: Mail, href: profile?.email ? `mailto:${profile.email}` : undefined, label: 'Email' },
-                  ]
-                    .filter((s) => !!s.href)
-                    .map((s) => (
-                      <a
-                        key={s.label}
-                        href={s.href!}
-                        target={s.href!.startsWith('mailto:') ? undefined : '_blank'}
-                        rel="noopener noreferrer"
-                        aria-label={s.label}
-                        className="grid h-10 w-10 place-items-center rounded-xl bg-white/95 dark:bg-secondary-900/95 backdrop-blur border border-secondary-200/80 dark:border-secondary-800 text-secondary-700 dark:text-secondary-200 shadow-md hover:text-brand-600 dark:hover:text-brand-300 hover:border-brand-500/40 transition-colors"
-                      >
-                        <s.icon size={16} />
-                      </a>
-                    ))}
-                </div>
+                {/* The floating GitHub / LinkedIn / Email mini-cards that used to
+                    sit on the photo's right edge are gone: the hero button row
+                    already links GitHub and email, and the footer carries the
+                    full social set. */}
               </motion.div>
             </div>
           </motion.div>
@@ -382,7 +373,7 @@ export function HomePage() {
           <div className="grid lg:grid-cols-12 gap-6">
             <div className="lg:col-span-7 surface p-6 sm:p-8">
               <h3 className="text-xl font-bold text-secondary-900 dark:text-white">
-                {profile?.title || 'Full-stack developer & AI enthusiast'}
+                {profile?.title || 'Software Developer'}
               </h3>
               {/* Full bio lives here; the hero shows only its opening sentences. */}
               <p className="mt-3 text-secondary-600 dark:text-secondary-300 leading-relaxed whitespace-pre-line">
