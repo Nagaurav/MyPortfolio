@@ -152,8 +152,9 @@ export function HomePage() {
       {/* HERO */}
       {/* The header is transparent until scrolled, so the hero sits underneath it.
           Top padding must therefore clear the 64px header -- pt-8 did not, which
-          hid the availability badge behind the header on small screens. */}
-      <section className="relative overflow-hidden pt-24 sm:pt-28 lg:pt-28 pb-16 lg:pb-24">
+          hid the availability badge behind the header on small screens. pt-20 is
+          the floor: it leaves 16px of breathing room below the header. */}
+      <section className="relative overflow-hidden pt-20 sm:pt-24 pb-16 lg:pb-24">
         {/* Backdrop */}
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-aurora-light dark:bg-aurora" />
         <div aria-hidden className="pointer-events-none absolute inset-0 -z-10 bg-grid dark:bg-grid-dark bg-grid mask-fade-bottom opacity-60" />
@@ -182,7 +183,7 @@ export function HomePage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.05 }}
-                className="text-5xl sm:text-6xl lg:text-7xl xl:text-8xl font-black tracking-tightest leading-[0.95] text-balance"
+                className="text-4xl sm:text-5xl lg:text-6xl xl:text-7xl font-black tracking-tightest leading-[0.95] text-balance"
               >
                 <span className="block text-secondary-900 dark:text-white">Hello, I'm</span>
                 <span className="block heading-gradient">{profile?.name || 'Gaurav Naik'}.</span>
@@ -192,7 +193,7 @@ export function HomePage() {
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.55, delay: 0.15 }}
-                className="mt-6 max-w-xl text-lg sm:text-xl text-secondary-600 dark:text-secondary-300 text-pretty"
+                className="mt-6 max-w-xl text-base sm:text-lg text-secondary-600 dark:text-secondary-300 text-pretty"
               >
                 <span className="inline-flex items-center gap-2 font-mono text-sm text-secondary-500 dark:text-secondary-400 mb-2">
                   <span className="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -254,7 +255,11 @@ export function HomePage() {
                 initial={{ opacity: 0, scale: 0.96 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.6, delay: 0.1, ease: 'easeOut' }}
-                className="relative mx-auto max-w-md lg:max-w-none"
+                /* Capped on desktop too: lg:max-w-none let the card fill the
+                   whole 5/12 column (~490px wide, ~610px tall at 4/5), making
+                   the hero taller than the viewport and pushing the stats row
+                   out of sight. */
+                className="relative mx-auto max-w-sm lg:max-w-md"
               >
                 {/* Glow */}
                 <div
