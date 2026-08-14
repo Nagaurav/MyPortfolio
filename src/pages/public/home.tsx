@@ -19,6 +19,7 @@ import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { cn } from '../../lib/utils';
 import { leadSentences, normalizeList, stripSelfIntro } from '../../lib/text';
+import { categoryMeta, isTechCategory, sortCategories } from '../../lib/skill-categories';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -30,7 +31,8 @@ interface Stats {
   experienceYears: number;
   skillCount: number;
   certificateCount: number;
-  skillCategories: Record<string, number>;
+  /** Skill names grouped by their category, for the Skills section. */
+  skillsByCategory: Record<string, string[]>;
 }
 
 const ROLES = ['Software Developer', 'Full-stack Developer', 'AI Enthusiast', 'Problem Solver'];
@@ -45,7 +47,7 @@ export function HomePage() {
     experienceYears: 0,
     skillCount: 0,
     certificateCount: 0,
-    skillCategories: {},
+    skillsByCategory: {},
   });
   const [roleIdx, setRoleIdx] = useState(0);
   const navigate = useNavigate();
@@ -59,6 +61,12 @@ export function HomePage() {
   // Drop any "Hi, I'm <name>" opener (the headline already says it) and keep the
   // hero to a couple of sentences; the full text lives in the About section.
   const heroLead = leadSentences(stripSelfIntro(fullBio), 2);
+
+  // Tech categories only -- Core/Soft Skills live on the Skills page, since
+  // they don't belong under a "tech I've worked with" heading.
+  const skillCategories = sortCategories(Object.keys(stats.skillsByCategory)).filter(
+    isTechCategory
+  );
 
   useEffect(() => {
     let cancelled = false;
@@ -79,7 +87,13 @@ export function HomePage() {
               .order('start_date', { ascending: false })
               .limit(3),
             supabase.from('projects').select('id', { count: 'exact', head: true }),
-            supabase.from('skills').select('id, category'),
+            // Ordered by insertion, not proficiency: within a category the
+            // listed sequence is deliberate (React.js before Next.js), and
+            // sorting by skill level would shuffle it.
+            supabase
+              .from('skills')
+              .select('id, name, category, proficiency, created_at')
+              .order('created_at', { ascending: true }),
             supabase.from('certificates').select('id', { count: 'exact', head: true }),
             supabase.from('experiences').select('start_date, end_date, current'),
           ]);
@@ -117,9 +131,11 @@ export function HomePage() {
 
         const years = totalMs / (1000 * 60 * 60 * 24 * 365.25);
 
-        const skillRows = (skillsRes.data || []) as { category: string }[];
-        const categories = skillRows.reduce<Record<string, number>>((acc, s) => {
-          acc[s.category] = (acc[s.category] || 0) + 1;
+        // Grouped by category, strongest first (the query orders by
+        // proficiency), so each card leads with the skills worth showing.
+        const skillRows = (skillsRes.data || []) as { name: string; category: string }[];
+        const byCategory = skillRows.reduce<Record<string, string[]>>((acc, s) => {
+          (acc[s.category] ||= []).push(s.name);
           return acc;
         }, {});
 
@@ -128,7 +144,7 @@ export function HomePage() {
           experienceYears: Math.round(years * 10) / 10,
           skillCount: skillsRes.data?.length || 0,
           certificateCount: certCount.count || 0,
-          skillCategories: categories,
+          skillsByCategory: byCategory,
         });
       } catch (err) {
         console.error('home fetch error', err);
@@ -380,7 +396,16 @@ export function HomePage() {
                 {stripSelfIntro(fullBio)}
               </p>
 
-              <div className="mt-6 grid sm:grid-cols-2 gap-3">
+            </div>
+
+            {/* Contact facts moved out of the bio card into their own column.
+                This slot used to hold per-category skill counts, which the
+                Skills section below now covers in full. */}
+            <div className="lg:col-span-5 surface p-6 sm:p-8">
+              <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                Quick facts
+              </div>
+              <div className="mt-4 space-y-3">
                 {[
                   { label: 'Email', value: profile?.email, href: profile?.email ? `mailto:${profile.email}` : undefined },
                   { label: 'Location', value: profile?.location },
@@ -391,7 +416,7 @@ export function HomePage() {
                   .map((d) => (
                     <div
                       key={d.label}
-                      className="flex items-center justify-between rounded-lg border border-secondary-200/70 dark:border-secondary-800/70 px-3.5 py-2.5"
+                      className="flex items-center justify-between gap-3 rounded-lg border border-secondary-200/70 dark:border-secondary-800/70 px-3.5 py-2.5"
                     >
                       <span className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
                         {d.label}
@@ -401,12 +426,12 @@ export function HomePage() {
                           href={d.href}
                           target={d.href.startsWith('mailto:') ? undefined : '_blank'}
                           rel="noopener noreferrer"
-                          className="text-sm font-medium text-secondary-900 dark:text-secondary-100 hover:text-brand-600 dark:hover:text-brand-300 truncate max-w-[60%]"
+                          className="text-sm font-medium text-secondary-900 dark:text-secondary-100 hover:text-brand-600 dark:hover:text-brand-300 truncate max-w-[65%]"
                         >
                           {d.value}
                         </a>
                       ) : (
-                        <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate max-w-[60%]">
+                        <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate max-w-[65%]">
                           {d.value}
                         </span>
                       )}
@@ -414,39 +439,92 @@ export function HomePage() {
                   ))}
               </div>
             </div>
+          </div>
+        </div>
+      </section>
 
-            <div className="lg:col-span-5 grid grid-cols-2 gap-3">
-              {Object.keys(stats.skillCategories).length > 0
-                ? Object.entries(stats.skillCategories)
-                    .slice(0, 4)
-                    .map(([category, count], i) => (
-                      <motion.div
-                        key={category}
-                        initial={{ opacity: 0, y: 12 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.4, delay: i * 0.05 }}
-                        className="surface p-5"
-                      >
-                        <div className="text-2xl sm:text-3xl font-black tracking-tight heading-gradient">
-                          {count}
-                        </div>
-                        <div className="mt-1 text-sm font-semibold text-secondary-900 dark:text-secondary-100">
-                          {category}
-                        </div>
-                        <div className="mt-0.5 text-xs text-secondary-500 dark:text-secondary-400">
-                          {count > 1 ? 'skills' : 'skill'}
-                        </div>
-                      </motion.div>
-                    ))
-                : ['Frontend', 'Backend', 'Database', 'DevOps'].map((c) => (
-                    <div key={c} className="surface p-5">
-                      <div className="text-2xl sm:text-3xl font-black tracking-tight heading-gradient">—</div>
-                      <div className="mt-1 text-sm font-semibold text-secondary-900 dark:text-secondary-100">{c}</div>
-                      <div className="mt-0.5 text-xs text-secondary-500 dark:text-secondary-400">add skills</div>
-                    </div>
-                  ))}
+      {/* SKILLS -- grouped by category so the stack is legible at a glance
+          without a trip to the Skills page. */}
+      <section className="py-16 sm:py-24 border-t border-secondary-200/70 dark:border-secondary-800/70">
+        <div className="container-page">
+          <div className="flex items-end justify-between gap-4 mb-10">
+            <SectionHeader
+              eyebrow="Toolkit"
+              title="Tech I've"
+              highlight="worked with"
+              subtitle="The stack behind the work — front of the app through to the database."
+              variant="tech"
+              className="mb-0"
+            />
+            <Link
+              to="/skills"
+              className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-200"
+            >
+              All skills <ArrowUpRight size={14} />
+            </Link>
+          </div>
+
+          {loading ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="surface h-48 animate-pulse" />
+              ))}
             </div>
+          ) : skillCategories.length > 0 ? (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
+              {skillCategories.map((category, i) => {
+                const meta = categoryMeta(category);
+                const items = stats.skillsByCategory[category] ?? [];
+                const Icon = meta.icon;
+                return (
+                  <motion.div
+                    key={category}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-40px' }}
+                    transition={{ duration: 0.4, delay: Math.min(i * 0.06, 0.3) }}
+                    className="surface p-6"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20">
+                        <Icon size={20} />
+                      </div>
+                      {/* The category as typed, not the shortened label: these
+                          headings read as written ("Frontend Development"). */}
+                      <h3 className="min-w-0 font-bold tracking-tight text-secondary-900 dark:text-white">
+                        {category}
+                      </h3>
+                    </div>
+
+                    {/* One flowing line rather than chips. Separators are their
+                        own spans so they can be dimmed, and so a wrap never
+                        leaves a dot stranded at the start of a line. */}
+                    <p className="mt-4 text-sm leading-relaxed text-secondary-700 dark:text-secondary-300">
+                      {items.map((name, index) => (
+                        <span key={name}>
+                          {index > 0 && (
+                            <span className="mx-1.5 text-brand-500/70 dark:text-brand-400/70">
+                              ·
+                            </span>
+                          )}
+                          {name}
+                        </span>
+                      ))}
+                    </p>
+                  </motion.div>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="surface p-12 text-center text-secondary-600 dark:text-secondary-400">
+              Skills will appear here once they're added.
+            </div>
+          )}
+
+          <div className="sm:hidden mt-8 text-center">
+            <Button variant="outline" size="lg" rightIcon={<ArrowRight size={16} />} onClick={() => navigate('/skills')}>
+              All skills
+            </Button>
           </div>
         </div>
       </section>

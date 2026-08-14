@@ -4,6 +4,19 @@ import { afterEach } from 'vitest';
 import { setupServer } from 'msw/node';
 import { http, HttpResponse } from 'msw';
 
+// jsdom has no IntersectionObserver, and framer-motion's whileInView throws
+// without one. Any component using a motion viewport animation -- SectionHeader
+// among them -- fails to mount otherwise.
+class MockIntersectionObserver {
+  observe() {}
+  unobserve() {}
+  disconnect() {}
+  takeRecords() {
+    return [];
+  }
+}
+vi.stubGlobal('IntersectionObserver', MockIntersectionObserver);
+
 // Mock Supabase
 const mockSupabase = {
   auth: {

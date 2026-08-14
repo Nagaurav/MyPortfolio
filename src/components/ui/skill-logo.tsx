@@ -111,9 +111,52 @@ const skillLogos = {
   ),
 };
 
+/**
+ * Skill names are free text typed in the admin form, so an exact key match is
+ * too brittle: "React.js", "ReactJS" and "React" are the same logo, and
+ * "Git & GitHub" should still find Git. Compare on a punctuation-free,
+ * lowercased form, and map the common variants onto a canonical key.
+ */
+const normalizeSkill = (name: string) => name.toLowerCase().replace(/[^a-z0-9+#]/g, '');
+
+const SKILL_ALIASES: Record<string, keyof typeof skillLogos> = {
+  react: 'React',
+  reactjs: 'React',
+  reactnative: 'React',
+  html: 'HTML5',
+  html5: 'HTML5',
+  css: 'CSS3',
+  css3: 'CSS3',
+  js: 'JavaScript',
+  javascript: 'JavaScript',
+  ts: 'TypeScript',
+  typescript: 'TypeScript',
+  node: 'Node.js',
+  nodejs: 'Node.js',
+  express: 'Express.js',
+  expressjs: 'Express.js',
+  git: 'Git',
+  github: 'Git',
+  gitgithub: 'Git',
+  postgres: 'PostgreSQL',
+  postgresql: 'PostgreSQL',
+  mongo: 'MongoDB',
+  mongodb: 'MongoDB',
+  tailwind: 'Tailwind CSS',
+  tailwindcss: 'Tailwind CSS',
+  vue: 'Vue.js',
+  vuejs: 'Vue.js',
+  docker: 'Docker',
+  figma: 'Figma',
+  python: 'Python',
+  aws: 'AWS',
+  mysql: 'MySQL',
+};
+
 export function SkillLogo({ skill, className = "w-8 h-8" }: SkillLogoProps) {
-  const LogoComponent = skillLogos[skill as keyof typeof skillLogos];
-  
+  const canonical = SKILL_ALIASES[normalizeSkill(skill)] ?? (skill as keyof typeof skillLogos);
+  const LogoComponent = skillLogos[canonical];
+
   if (!LogoComponent) {
     // Fallback to first letter if no logo is available
     return (

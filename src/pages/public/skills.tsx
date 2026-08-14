@@ -1,32 +1,19 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
 import { motion } from 'framer-motion';
-import { Code2, Database as DatabaseIcon, Server, Smartphone, Wrench, Brain, Sparkles } from 'lucide-react';
-import type { LucideIcon } from 'lucide-react';
+import { Wrench, Sparkles } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
 import { PageHero } from '../../components/ui/page-hero';
 import { Button } from '../../components/ui/button';
 import { SkillLogo } from '../../components/ui/skill-logo';
 import { cn } from '../../lib/utils';
+import { categoryMeta, sortCategories } from '../../lib/skill-categories';
 
 type Skill = {
   id: string;
   name: string;
   category: string;
   proficiency: number;
-};
-
-const CATEGORY_META: Record<string, { icon: LucideIcon; label: string; hint: string }> = {
-  'Frontend Development': { icon: Code2, label: 'Frontend', hint: 'UI, design systems, motion' },
-  Frontend: { icon: Code2, label: 'Frontend', hint: 'UI, design systems, motion' },
-  'Backend Development': { icon: Server, label: 'Backend', hint: 'APIs, services, business logic' },
-  Backend: { icon: Server, label: 'Backend', hint: 'APIs, services, business logic' },
-  'Mobile Development': { icon: Smartphone, label: 'Mobile', hint: 'Cross-platform apps' },
-  Database: { icon: DatabaseIcon, label: 'Database', hint: 'Schema, queries, scale' },
-  DevOps: { icon: Wrench, label: 'DevOps', hint: 'Deploy, infra, CI/CD' },
-  'Tools & Technologies': { icon: Wrench, label: 'Tools', hint: 'Editor, version control, glue' },
-  'Tools & DevOps': { icon: Wrench, label: 'Tools & DevOps', hint: 'Tooling and deployment' },
-  'Soft Skills': { icon: Brain, label: 'Soft Skills', hint: 'How I work with people' },
 };
 
 export function SkillsPage() {
@@ -55,7 +42,7 @@ export function SkillsPage() {
   const categories = useMemo(() => {
     const set = new Set<string>();
     skills.forEach((s) => set.add(s.category));
-    return Array.from(set);
+    return sortCategories(Array.from(set));
   }, [skills]);
 
   const grouped = useMemo(() => {
@@ -133,7 +120,7 @@ export function SkillsPage() {
                 key={c}
                 active={activeCat === c}
                 onClick={() => setActiveCat(c)}
-                label={CATEGORY_META[c]?.label || c}
+                label={categoryMeta(c).label}
                 count={grouped[c]?.length || 0}
               />
             ))}
@@ -173,7 +160,7 @@ export function SkillsPage() {
         ) : (
           <div className="space-y-8">
             {visibleCategories.map((cat) => {
-              const meta = CATEGORY_META[cat] || { icon: Wrench, label: cat, hint: '' };
+              const meta = categoryMeta(cat);
               const Icon = meta.icon;
               const items = grouped[cat] || [];
               return (
