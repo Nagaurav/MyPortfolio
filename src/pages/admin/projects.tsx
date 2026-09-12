@@ -3,7 +3,7 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { splitList } from '../../lib/text';
+import { splitList, splitLines } from '../../lib/text';
 import { Button } from '../../components/ui/button';
 import { MultiImageUpload } from '../../components/ui/multi-image-upload';
 import { SectionHeader } from '../../components/ui/section-header';
@@ -16,6 +16,9 @@ interface ProjectFormData {
   title: string;
   description: string;
   short_description: string;
+  role: string;
+  /** One contribution per line; stored as a text[]. */
+  contributions: string;
   category: string;
   tech_stack: string;
   github_url: string;
@@ -51,6 +54,8 @@ export function AdminProjectsPage() {
       setValue('title', editingProject.title);
       setValue('description', editingProject.description || '');
       setValue('short_description', editingProject.short_description || '');
+      setValue('role', editingProject.role || '');
+      setValue('contributions', (editingProject.contributions || []).join('\n'));
       setValue('category', editingProject.category || '');
       setValue('tech_stack', editingProject.tech_stack?.join(', ') || '');
 
@@ -100,6 +105,7 @@ export function AdminProjectsPage() {
       const projectData = {
         ...data,
         tech_stack: splitList(data.tech_stack),
+        contributions: splitLines(data.contributions),
         image_urls: imageUrls,
         // Cover image: keeps the project cards (which read image_url) in sync
         // with whichever image the gallery has first.
@@ -250,6 +256,40 @@ export function AdminProjectsPage() {
             </p>
           </div>
           
+          <div>
+            <label htmlFor="role" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              My Role
+            </label>
+            <input
+              type="text"
+              id="role"
+              className="mt-1 input"
+              placeholder="e.g. Solo developer, Frontend lead, Backend developer"
+              {...register('role')}
+            />
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Optional: your part in the project. Worth filling in for team, client or freelance work.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="contributions" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              What I Built (one per line)
+            </label>
+            <textarea
+              id="contributions"
+              rows={6}
+              className="mt-1 input resize-y"
+              placeholder={`Designed the Postgres schema and row-level security policies
+Built the authenticated admin panel for every content type
+Wired image uploads through Supabase Storage`}
+              {...register('contributions')}
+            />
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Each line becomes a bullet on the project page. Say what you personally did, not what the project is.
+            </p>
+          </div>
+
           <div>
             <label htmlFor="category" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
               Category

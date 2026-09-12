@@ -12,13 +12,17 @@ import {
   Award,
   Code2,
   Wrench,
+  Layout,
+  Server,
+  Bot,
+  Gauge,
 } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { cn } from '../../lib/utils';
-import { leadSentences, normalizeList, stripSelfIntro } from '../../lib/text';
+import { leadSentences, linkHost, normalizeList, splitLines, stripSelfIntro } from '../../lib/text';
 import { categoryMeta, isTechCategory, sortCategories } from '../../lib/skill-categories';
 import type { Database } from '../../types/database.types';
 
@@ -35,7 +39,37 @@ interface Stats {
   skillsByCategory: Record<string, string[]>;
 }
 
-const ROLES = ['Software Developer', 'Full-stack Developer', 'AI Enthusiast', 'Problem Solver'];
+const ROLES = ['Full Stack & Mobile Developer', 'AI Enthusiast', 'Problem Solver'];
+
+/** What I offer, for the Services section. Static on purpose: positioning
+    changes far less often than projects or skills, so it doesn't earn a table
+    and an admin screen the way the other content types do. */
+const SERVICES = [
+  {
+    icon: Layout,
+    title: 'Web Application Development',
+    description:
+      'Responsive, accessible interfaces in React and TypeScript, built component-first so they stay maintainable as the product grows.',
+  },
+  {
+    icon: Server,
+    title: 'Full-stack & APIs',
+    description:
+      'Postgres schema design, authentication, row-level security, and the API layer that connects a front end to real data.',
+  },
+  {
+    icon: Bot,
+    title: 'AI Integration',
+    description:
+      'Adding LLM-backed features such as chat, summarisation and semantic search to existing products without rebuilding them.',
+  },
+  {
+    icon: Gauge,
+    title: 'Performance & Polish',
+    description:
+      'Bundle and Lighthouse audits, lazy-loaded routes, dark mode, and the accessibility pass most projects skip.',
+  },
+] as const;
 
 export function HomePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
@@ -79,8 +113,7 @@ export function HomePage() {
               .from('projects')
               .select('*')
               .eq('featured', true)
-              .order('created_at', { ascending: false })
-              .limit(3),
+              .order('created_at', { ascending: false }),
             supabase
               .from('experiences')
               .select('*')
@@ -314,7 +347,7 @@ export function HomePage() {
                       </div>
                       <div className="min-w-0">
                         <div className="text-sm font-semibold text-secondary-900 dark:text-white truncate">
-                          {profile?.title || 'Software Developer'}
+                          Full Stack & Mobile Developer
                         </div>
                         <div className="text-xs text-secondary-600 dark:text-secondary-400 truncate inline-flex items-center gap-1">
                           {profile?.location && (
@@ -374,71 +407,58 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* ABOUT */}
-      <section id="about" className="py-16 sm:py-24">
+      {/* FEATURED PROJECTS */}
+      <section className="py-16 sm:py-24 border-t border-secondary-200/70 dark:border-secondary-800/70">
         <div className="container-page">
-          <SectionHeader
-            eyebrow="About"
-            title="A developer who"
-            highlight="ships."
-            subtitle="I build clean, accessible, performant interfaces — and care just as much about the API behind them."
-            centered
-            variant="tech"
-          />
+          <div className="flex items-end justify-between gap-4 mb-10">
+            <SectionHeader
+              eyebrow="Selected work"
+              title="Featured"
+              highlight="projects"
+              subtitle="The work I'm most proud of. Each one taught me something."
+              variant="tech"
+              className="mb-0"
+            />
+            <Link
+              to="/projects"
+              className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-200"
+            >
+              All projects <ArrowUpRight size={14} />
+            </Link>
+          </div>
 
-          <div className="grid lg:grid-cols-12 gap-6">
-            <div className="lg:col-span-7 surface p-6 sm:p-8">
-              <h3 className="text-xl font-bold text-secondary-900 dark:text-white">
-                {profile?.title || 'Software Developer'}
-              </h3>
-              {/* Full bio lives here; the hero shows only its opening sentences. */}
-              <p className="mt-3 text-secondary-600 dark:text-secondary-300 leading-relaxed whitespace-pre-line">
-                {stripSelfIntro(fullBio)}
-              </p>
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+            {loading
+              ? Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="surface h-80 animate-pulse" />
+                ))
+              : featuredProjects.length > 0
+              ? featuredProjects.map((p, i) => (
+                  <motion.div
+                    key={p.id}
+                    initial={{ opacity: 0, y: 16 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true, margin: '-50px' }}
+                    transition={{ duration: 0.4, delay: Math.min(i * 0.06, 0.3) }}
+                  >
+                    <ProjectCard project={p} />
+                  </motion.div>
+                ))
+              : (
+                  <div className="col-span-full surface p-12 text-center text-secondary-600 dark:text-secondary-400">
+                    No featured projects yet. Check{' '}
+                    <Link to="/projects" className="text-brand-600 dark:text-brand-300 font-semibold">
+                      all projects
+                    </Link>
+                    .
+                  </div>
+                )}
+          </div>
 
-            </div>
-
-            {/* Contact facts moved out of the bio card into their own column.
-                This slot used to hold per-category skill counts, which the
-                Skills section below now covers in full. */}
-            <div className="lg:col-span-5 surface p-6 sm:p-8">
-              <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-                Quick facts
-              </div>
-              <div className="mt-4 space-y-3">
-                {[
-                  { label: 'Email', value: profile?.email, href: profile?.email ? `mailto:${profile.email}` : undefined },
-                  { label: 'Location', value: profile?.location },
-                  { label: 'GitHub', value: 'github.com', href: profile?.github_url },
-                  { label: 'LinkedIn', value: 'linkedin.com', href: profile?.linkedin_url },
-                ]
-                  .filter((d) => d.value)
-                  .map((d) => (
-                    <div
-                      key={d.label}
-                      className="flex items-center justify-between gap-3 rounded-lg border border-secondary-200/70 dark:border-secondary-800/70 px-3.5 py-2.5"
-                    >
-                      <span className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-                        {d.label}
-                      </span>
-                      {d.href ? (
-                        <a
-                          href={d.href}
-                          target={d.href.startsWith('mailto:') ? undefined : '_blank'}
-                          rel="noopener noreferrer"
-                          className="text-sm font-medium text-secondary-900 dark:text-secondary-100 hover:text-brand-600 dark:hover:text-brand-300 truncate max-w-[65%]"
-                        >
-                          {d.value}
-                        </a>
-                      ) : (
-                        <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate max-w-[65%]">
-                          {d.value}
-                        </span>
-                      )}
-                    </div>
-                  ))}
-              </div>
-            </div>
+          <div className="sm:hidden mt-8 text-center">
+            <Button variant="outline" size="lg" rightIcon={<ArrowRight size={16} />} onClick={() => navigate('/projects')}>
+              All projects
+            </Button>
           </div>
         </div>
       </section>
@@ -529,58 +549,112 @@ export function HomePage() {
         </div>
       </section>
 
-      {/* FEATURED PROJECTS */}
-      <section className="py-16 sm:py-24 border-t border-secondary-200/70 dark:border-secondary-800/70">
+      {/* SERVICES -- static positioning copy, deliberately not database-driven:
+          what I offer changes far less often than projects or skills do. */}
+      <section id="services" className="py-16 sm:py-24 border-t border-secondary-200/70 dark:border-secondary-800/70">
         <div className="container-page">
-          <div className="flex items-end justify-between gap-4 mb-10">
-            <SectionHeader
-              eyebrow="Selected work"
-              title="Featured"
-              highlight="projects"
-              subtitle="A few things I've built recently. Each one taught me something."
-              variant="tech"
-              className="mb-0"
-            />
-            <Link
-              to="/projects"
-              className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-200"
-            >
-              All projects <ArrowUpRight size={14} />
-            </Link>
-          </div>
+          <SectionHeader
+            eyebrow="Services"
+            title="How I can"
+            highlight="help"
+            subtitle="Available for freelance and contract work. Here's where I'm most useful."
+            centered
+            variant="tech"
+          />
 
-          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
-            {loading
-              ? Array.from({ length: 3 }).map((_, i) => (
-                  <div key={i} className="surface h-80 animate-pulse" />
-                ))
-              : featuredProjects.length > 0
-              ? featuredProjects.map((p, i) => (
-                  <motion.div
-                    key={p.id}
-                    initial={{ opacity: 0, y: 16 }}
-                    whileInView={{ opacity: 1, y: 0 }}
-                    viewport={{ once: true, margin: '-50px' }}
-                    transition={{ duration: 0.4, delay: i * 0.06 }}
-                  >
-                    <ProjectCard project={p} />
-                  </motion.div>
-                ))
-              : (
-                  <div className="col-span-full surface p-12 text-center text-secondary-600 dark:text-secondary-400">
-                    No featured projects yet. Check{' '}
-                    <Link to="/projects" className="text-brand-600 dark:text-brand-300 font-semibold">
-                      all projects
-                    </Link>
-                    .
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {SERVICES.map((service, i) => {
+              const Icon = service.icon;
+              return (
+                <motion.div
+                  key={service.title}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.4, delay: Math.min(i * 0.06, 0.3) }}
+                  className="surface p-6"
+                >
+                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20">
+                    <Icon size={20} />
                   </div>
-                )}
+                  <h3 className="mt-4 font-bold tracking-tight text-secondary-900 dark:text-white">
+                    {service.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-relaxed text-secondary-600 dark:text-secondary-300">
+                    {service.description}
+                  </p>
+                </motion.div>
+              );
+            })}
           </div>
+        </div>
+      </section>
 
-          <div className="sm:hidden mt-8 text-center">
-            <Button variant="outline" size="lg" rightIcon={<ArrowRight size={16} />} onClick={() => navigate('/projects')}>
-              All projects
-            </Button>
+      {/* ABOUT */}
+      <section id="about" className="py-16 sm:py-24 border-t border-secondary-200/70 dark:border-secondary-800/70">
+        <div className="container-page">
+          <SectionHeader
+            eyebrow="About"
+            title="A developer who"
+            highlight="ships."
+            subtitle="I build clean, accessible, performant interfaces — and care just as much about the API behind them."
+            centered
+            variant="tech"
+          />
+
+          <div className="grid lg:grid-cols-12 gap-6">
+            <div className="lg:col-span-7 surface p-6 sm:p-8">
+              <h3 className="text-xl font-bold text-secondary-900 dark:text-white">
+                Full Stack & Mobile Developer
+              </h3>
+              {/* Full bio lives here; the hero shows only its opening sentences. */}
+              <p className="mt-3 text-secondary-600 dark:text-secondary-300 leading-relaxed whitespace-pre-line">
+                {stripSelfIntro(fullBio)}
+              </p>
+
+            </div>
+
+            {/* Contact facts moved out of the bio card into their own column.
+                This slot used to hold per-category skill counts, which the
+                Skills section below now covers in full. */}
+            <div className="lg:col-span-5 surface p-6 sm:p-8">
+              <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                Quick facts
+              </div>
+              <div className="mt-4 space-y-3">
+                {[
+                  { label: 'Email', value: profile?.email, href: profile?.email ? `mailto:${profile.email}` : undefined },
+                  { label: 'Location', value: profile?.location },
+                  { label: 'GitHub', value: 'github.com', href: profile?.github_url },
+                  { label: 'LinkedIn', value: 'linkedin.com', href: profile?.linkedin_url },
+                ]
+                  .filter((d) => d.value)
+                  .map((d) => (
+                    <div
+                      key={d.label}
+                      className="flex items-center justify-between gap-3 rounded-lg border border-secondary-200/70 dark:border-secondary-800/70 px-3.5 py-2.5"
+                    >
+                      <span className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+                        {d.label}
+                      </span>
+                      {d.href ? (
+                        <a
+                          href={d.href}
+                          target={d.href.startsWith('mailto:') ? undefined : '_blank'}
+                          rel="noopener noreferrer"
+                          className="text-sm font-medium text-secondary-900 dark:text-secondary-100 hover:text-brand-600 dark:hover:text-brand-300 truncate max-w-[65%]"
+                        >
+                          {d.value}
+                        </a>
+                      ) : (
+                        <span className="text-sm font-medium text-secondary-900 dark:text-secondary-100 truncate max-w-[65%]">
+                          {d.value}
+                        </span>
+                      )}
+                    </div>
+                  ))}
+              </div>
+            </div>
           </div>
         </div>
       </section>
@@ -638,7 +712,8 @@ export function HomePage() {
                 <span className="heading-gradient">in mind?</span>
               </h2>
               <p className="mt-4 max-w-xl mx-auto text-lg text-secondary-600 dark:text-secondary-300">
-                Open to freelance projects, internship opportunities, and interesting collaborations.
+                Let's discuss what you're building. Open to freelance projects, internship
+                opportunities, and interesting collaborations.
               </p>
               <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                 <Button variant="gradient" size="lg" leftIcon={<Mail size={16} />} onClick={() => navigate('/contact')}>
@@ -658,12 +733,13 @@ export function HomePage() {
 
 function ProjectCard({ project }: { project: Project }) {
   const tech = normalizeList(project.tech_stack);
+  const contributions = (project.contributions ?? []).flatMap(splitLines);
   return (
     <Link
       to={`/projects/${project.id}`}
       className="group block surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-secondary-100 dark:bg-secondary-900">
+      <div className="relative m-3 aspect-[16/10] overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-900">
         {project.image_url ? (
           <>
             {/* Blurred backdrop so screenshots letterbox rather than hard-crop. */}
@@ -685,10 +761,17 @@ function ProjectCard({ project }: { project: Project }) {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        {/* Inset hairline so the letterboxed screenshot reads as a framed image
+            rather than bleeding into the card. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-secondary-900/20 dark:ring-white/20"
+        />
 
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
           {project.featured && <span className="chip-accent">Featured</span>}
-          <div className="ml-auto flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Visible by default on touch, where there is no hover to reveal them. */}
+          <div className="ml-auto flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             {project.github_url && (
               <a
                 href={project.github_url}
@@ -724,6 +807,36 @@ function ProjectCard({ project }: { project: Project }) {
         <p className="mt-1.5 text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
           {project.short_description || project.description}
         </p>
+        {(project.role || contributions.length > 0) && (
+          <div className="mt-3 rounded-lg border border-secondary-200/70 dark:border-secondary-800/70 bg-secondary-50/60 dark:bg-secondary-900/30 px-3 py-2.5">
+            <div className="text-2xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+              What I did
+            </div>
+            {project.role && (
+              <div className="mt-1 truncate text-sm font-semibold text-secondary-900 dark:text-white">
+                {project.role}
+              </div>
+            )}
+            {contributions.length > 0 && (
+              <ul className="mt-1.5 space-y-1">
+                {/* Two lines only: the card has to stay the same height as its
+                    neighbours in the grid. The rest are on the detail page. */}
+                {contributions.slice(0, 2).map(item => (
+                  <li key={item} className="flex gap-1.5 text-xs text-secondary-600 dark:text-secondary-400">
+                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand-500/70" />
+                    <span className="line-clamp-1">{item}</span>
+                  </li>
+                ))}
+                {contributions.length > 2 && (
+                  <li className="pl-3 text-xs text-secondary-500">
+                    +{contributions.length - 2} more
+                  </li>
+                )}
+              </ul>
+            )}
+          </div>
+        )}
+
         {tech.length > 0 && (
           <div className="mt-3 flex flex-wrap gap-1.5">
             {tech.slice(0, 4).map((t) => (
@@ -735,9 +848,27 @@ function ProjectCard({ project }: { project: Project }) {
           </div>
         )}
 
-        <div className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300">
-          View details
-          <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+        <div className="mt-4 flex items-center justify-between gap-3">
+          <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300">
+            View details
+            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+          </span>
+
+          {/* A live app is the strongest thing a card can offer, so it gets a
+              standing link here rather than only the hover icon over the image. */}
+          {project.live_url && (
+            <a
+              href={project.live_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="inline-flex max-w-[55%] items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+            >
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+              <span className="truncate">{linkHost(project.live_url)}</span>
+              <ExternalLink size={11} className="shrink-0" />
+            </a>
+          )}
         </div>
       </div>
     </Link>

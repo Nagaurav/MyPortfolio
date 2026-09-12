@@ -90,7 +90,7 @@ export function MainFooter() {
                   {profile?.name || 'Gaurav Naik'}
                 </span>
                 <span className="text-2xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-                  {profile?.title || 'Software Developer'}
+                  Full Stack & Mobile Developer
                 </span>
               </span>
             </Link>

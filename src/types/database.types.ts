@@ -240,6 +240,7 @@ export type Database = {
       projects: {
         Row: {
           category: string | null
+          contributions: string[]
           created_at: string | null
           description: string | null
           featured: boolean | null
@@ -248,6 +249,7 @@ export type Database = {
           image_url: string | null
           image_urls: string[]
           live_url: string | null
+          role: string | null
           short_description: string | null
           tech_stack: string[] | null
           title: string
@@ -256,6 +258,7 @@ export type Database = {
         }
         Insert: {
           category?: string | null
+          contributions?: string[]
           created_at?: string | null
           description?: string | null
           featured?: boolean | null
@@ -264,6 +267,7 @@ export type Database = {
           image_url?: string | null
           image_urls?: string[]
           live_url?: string | null
+          role?: string | null
           short_description?: string | null
           tech_stack?: string[] | null
           title: string
@@ -272,6 +276,7 @@ export type Database = {
         }
         Update: {
           category?: string | null
+          contributions?: string[]
           created_at?: string | null
           description?: string | null
           featured?: boolean | null
@@ -280,6 +285,7 @@ export type Database = {
           image_url?: string | null
           image_urls?: string[]
           live_url?: string | null
+          role?: string | null
           short_description?: string | null
           tech_stack?: string[] | null
           title?: string

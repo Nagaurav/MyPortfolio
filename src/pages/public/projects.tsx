@@ -287,7 +287,7 @@ function ProjectCard({ project }: { project: Project }) {
       to={`/projects/${project.id}`}
       className="group block surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
     >
-      <div className="relative aspect-[16/10] overflow-hidden bg-secondary-100 dark:bg-secondary-900">
+      <div className="relative m-3 aspect-[16/10] overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-900">
         {project.image_url ? (
           <>
             {/* Blurred copy fills the frame so tall UI screenshots letterbox into
@@ -310,6 +310,12 @@ function ProjectCard({ project }: { project: Project }) {
           </div>
         )}
         <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent" />
+        {/* Inset hairline so the letterboxed screenshot reads as a framed image
+            rather than bleeding into the card. */}
+        <div
+          aria-hidden
+          className="pointer-events-none absolute inset-0 rounded-xl ring-1 ring-inset ring-secondary-900/20 dark:ring-white/20"
+        />
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
           {project.featured && <span className="chip-accent">Featured</span>}
           <div className="ml-auto flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">

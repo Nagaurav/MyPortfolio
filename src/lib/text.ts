@@ -71,3 +71,33 @@ export function formatPhone(value: string | null | undefined): string {
   }
   return value;
 }
+
+/**
+ * Turns a URL into a short display label: "https://www.myapp.com/x" -> "myapp.com".
+ * Falls back to the raw value so a hand-typed URL still renders something rather
+ * than disappearing.
+ */
+export function linkHost(url: string | null | undefined): string {
+  if (!url) return '';
+  try {
+    return new URL(url).hostname.replace(/^www\./, '');
+  } catch {
+    return url.replace(/^https?:\/\//, '').replace(/^www\./, '').split('/')[0];
+  }
+}
+
+/**
+ * Splits an author-entered block into one entry per line.
+ *
+ * Unlike splitList this splits on newlines only: a contribution reads as a
+ * sentence ("Built the auth flow, including refresh-token rotation"), so
+ * splitting on commas or slashes would shred it into fragments. Leading bullet
+ * characters are stripped, since people type them out of habit.
+ */
+export function splitLines(value: string | null | undefined): string[] {
+  if (!value) return [];
+  return value
+    .split(/\r?\n/)
+    .map(line => line.replace(/^\s*[-*•]\s*/, '').trim())
+    .filter(Boolean);
+}
