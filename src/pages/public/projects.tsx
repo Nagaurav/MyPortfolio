@@ -283,10 +283,7 @@ function FilterChip({
 function ProjectCard({ project }: { project: Project }) {
   const tech: string[] = normalizeList(project.tech_stack);
   return (
-    <Link
-      to={`/projects/${project.id}`}
-      className="group block surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-    >
+    <div className="group relative surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
       <div className="relative m-3 aspect-[16/10] overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-900">
         {project.image_url ? (
           <>
@@ -318,7 +315,8 @@ function ProjectCard({ project }: { project: Project }) {
         />
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
           {project.featured && <span className="chip-accent">Featured</span>}
-          <div className="ml-auto flex items-center gap-1.5 opacity-0 group-hover:opacity-100 transition-opacity">
+          {/* Visible by default on touch, where there is no hover to reveal them. */}
+          <div className="ml-auto z-20 flex items-center gap-1.5 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             {project.github_url && (
               <a
                 href={project.github_url}
@@ -382,6 +380,16 @@ function ProjectCard({ project }: { project: Project }) {
           </div>
         </div>
       </div>
-    </Link>
+
+      {/* Stretched link rather than an <a> wrapping the whole card: the GitHub
+          and live-app links inside are real anchors, and nesting them in an
+          outer anchor is invalid HTML (React warns about it). This overlay
+          takes the card-wide click; the inner links sit above it on z-20. */}
+      <Link
+        to={`/projects/${project.id}`}
+        aria-label={`View ${project.title}`}
+        className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+      />
+    </div>
   );
 }

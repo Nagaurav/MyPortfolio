@@ -15,15 +15,10 @@ import {
   User,
   AtSign,
 } from 'lucide-react';
-import { supabase, supabaseUrl, supabaseAnonKey } from '../../lib/supabase';
+import { supabase } from '../../lib/supabase';
 import { formatPhone } from '../../lib/text';
 import { Button } from '../../components/ui/button';
 import { PageHero } from '../../components/ui/page-hero';
-import {
-  generateCSRFToken,
-  storeCSRFToken,
-  getStoredCSRFToken,
-} from '../../lib/csrf';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -41,7 +36,6 @@ export function ContactPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
 
   useEffect(() => {
-    if (!getStoredCSRFToken()) storeCSRFToken(generateCSRFToken());
     (async () => {
       try {
         const { data } = await supabase.from('profiles').select('*').limit(1).single();
@@ -62,25 +56,21 @@ export function ContactPage() {
   const onSubmit = async (data: ContactFormData) => {
     setIsSubmitting(true);
     try {
-      const csrfToken = getStoredCSRFToken();
-      if (!csrfToken) throw new Error('CSRF token not found');
-
-      const response = await fetch(
-        `${supabaseUrl}/functions/v1/contact-form`,
+      // Straight to the table rather than through an edge function: the
+      // `contacts` INSERT policy already grants `anon`, so this needs nothing
+      // deployed and cannot fail CORS. Values are trimmed, not escaped --
+      // React escapes on render, and escaping here would store &#x27; in the
+      // message body where a reader expects an apostrophe.
+      const { error } = await supabase.from('contacts').insert([
         {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${supabaseAnonKey}`,
-            'X-CSRF-Token': csrfToken,
-          },
-          body: JSON.stringify(data),
-        }
-      );
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.error || 'Failed to send message');
-      }
+          name: data.name.trim(),
+          email: data.email.trim(),
+          subject: data.subject.trim(),
+          message: data.message.trim(),
+        },
+      ]);
+
+      if (error) throw new Error(error.message || 'Failed to send message');
       toast.success('Message sent. I’ll get back to you soon.');
       reset();
     } catch (e) {

@@ -1,0 +1,13 @@
+# Edge function settings.
+#
+# The contact form is submitted by anonymous visitors. With JWT verification on
+# (the platform default) Supabase rejects the browser's CORS preflight before
+# the function runs: a preflight OPTIONS never carries an Authorization header,
+# so it came back 401 and the browser reported "preflight request doesn't pass
+# access control check". The function does its own validation and only inserts
+# into `contacts`, so it does not need a verified caller.
+#
+# Deploy with the matching flag: supabase functions deploy contact-form --no-verify-jwt
+
+[functions.contact-form]
+verify_jwt = false

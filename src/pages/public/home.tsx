@@ -735,10 +735,7 @@ function ProjectCard({ project }: { project: Project }) {
   const tech = normalizeList(project.tech_stack);
   const contributions = (project.contributions ?? []).flatMap(splitLines);
   return (
-    <Link
-      to={`/projects/${project.id}`}
-      className="group block surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5"
-    >
+    <div className="group relative surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
       <div className="relative m-3 aspect-[16/10] overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-900">
         {project.image_url ? (
           <>
@@ -771,7 +768,7 @@ function ProjectCard({ project }: { project: Project }) {
         <div className="absolute top-3 left-3 right-3 flex items-center justify-between">
           {project.featured && <span className="chip-accent">Featured</span>}
           {/* Visible by default on touch, where there is no hover to reveal them. */}
-          <div className="ml-auto flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
+          <div className="ml-auto z-20 flex items-center gap-2 opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity">
             {project.github_url && (
               <a
                 href={project.github_url}
@@ -862,7 +859,7 @@ function ProjectCard({ project }: { project: Project }) {
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="inline-flex max-w-[55%] items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+              className="relative z-20 inline-flex max-w-[55%] items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
             >
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
               <span className="truncate">{linkHost(project.live_url)}</span>
@@ -871,7 +868,17 @@ function ProjectCard({ project }: { project: Project }) {
           )}
         </div>
       </div>
-    </Link>
+
+      {/* Stretched link rather than an <a> wrapping the whole card: the GitHub
+          and live-app links inside are real anchors, and nesting them in an
+          outer anchor is invalid HTML (React warns about it). This overlay
+          takes the card-wide click; the inner links sit above it on z-20. */}
+      <Link
+        to={`/projects/${project.id}`}
+        aria-label={`View ${project.title}`}
+        className="absolute inset-0 z-10 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500"
+      />
+    </div>
   );
 }
 

@@ -54,11 +54,14 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
       try {
         const { data: { user } } = await supabase.auth.getUser();
         if (user) {
+          // maybeSingle, not single: PostgREST answers single() with a 406
+          // when the row count is not exactly one, so a user who has never
+          // saved a preference logged a failed request on every page load.
           const { data } = await supabase
             .from('user_preferences')
             .select('theme')
             .eq('user_id', user.id)
-            .single();
+            .maybeSingle();
 
           if (data?.theme) {
             setTheme(data.theme as Theme);
