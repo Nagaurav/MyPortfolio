@@ -8,19 +8,17 @@ import {
   ExternalLink,
   Globe,
   Smartphone,
-  Image as ImageIcon,
-  Layers,
   Maximize2,
   Sparkles,
   X,
   UserRound,
-  Check,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
+import { SectionHeader } from '../../components/ui/section-header';
 import { cn } from '../../lib/utils';
-import { linkHost, normalizeList, splitLines } from '../../lib/text';
+import { normalizeList, splitLines } from '../../lib/text';
 import type { Database } from '../../types/database.types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -200,10 +198,10 @@ export function ProjectDetailPage() {
 
   return (
     <div className="pb-24">
-      {/* HERO -- copy left, the active image right. The copy measure ran out
-          around 60% of the width, so the image fills the band that was empty
-          and the reader sees the product next to the sentence describing it. */}
-      <section className="relative overflow-hidden pt-10 pb-10 sm:pt-14">
+      {/* HERO -- copy left, device right, the way the reference case studies
+          open. The badge states category and status in one line so the headline
+          does not have to carry it. */}
+      <section className="relative overflow-hidden pt-8 pb-12 sm:pt-10">
         <div
           aria-hidden
           className="pointer-events-none absolute inset-0 -z-10 bg-aurora-light dark:bg-aurora"
@@ -214,43 +212,63 @@ export function ProjectDetailPage() {
         />
 
         <div className="container-page relative">
-          <Link
-            to="/projects"
-            className="group inline-flex items-center gap-1.5 text-sm font-medium text-secondary-600 dark:text-secondary-400 hover:text-brand-600 dark:hover:text-brand-300 transition-colors"
-          >
-            <ArrowLeft size={15} className="transition-transform group-hover:-translate-x-0.5" />
-            All projects
-          </Link>
+          {/* Breadcrumb rather than a lone back link: it says where this page
+              sits, not just where the last one was. */}
+          <nav aria-label="Breadcrumb" className="text-sm text-secondary-500 dark:text-secondary-400">
+            <ol className="flex flex-wrap items-center gap-1.5">
+              <li>
+                <Link to="/" className="hover:text-brand-600 dark:hover:text-brand-300 transition-colors">
+                  Home
+                </Link>
+              </li>
+              <li aria-hidden className="text-secondary-400 dark:text-secondary-600">/</li>
+              <li>
+                <Link to="/projects" className="hover:text-brand-600 dark:hover:text-brand-300 transition-colors">
+                  Projects
+                </Link>
+              </li>
+              <li aria-hidden className="text-secondary-400 dark:text-secondary-600">/</li>
+              <li className="font-medium text-secondary-700 dark:text-secondary-200">
+                {project.title}
+              </li>
+            </ol>
+          </nav>
 
           <motion.div
             initial={{ opacity: 0, y: 12 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5, ease: 'easeOut' }}
-            className="mt-6 grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12"
+            className="mt-8 grid gap-10 lg:grid-cols-12 lg:items-start lg:gap-12"
           >
             <div className="lg:col-span-7">
-              <div className="flex flex-wrap items-center gap-2">
-                {project.category && (
-                  <span className="eyebrow">
-                    <span className="eyebrow-dot" />
-                    {project.category}
-                  </span>
-                )}
-                {project.featured && <span className="chip-accent">Featured</span>}
-              </div>
+              <span className="eyebrow">
+                <span className="eyebrow-dot" />
+                {[project.category, liveLink?.isStore ? 'Live on Google Play' : liveLink && 'Live']
+                  .filter(Boolean)
+                  .join(' · ')}
+              </span>
 
-              <h1 className="mt-4 text-2xl sm:text-3xl lg:text-4xl font-black tracking-tight text-balance text-secondary-900 dark:text-white">
+              <h1 className="mt-5 text-3xl sm:text-4xl lg:text-5xl font-black tracking-tight text-balance text-secondary-900 dark:text-white">
                 {project.title}
               </h1>
 
               {project.short_description && (
-                <p className="mt-4 text-base leading-relaxed text-secondary-600 dark:text-secondary-300 text-pretty">
+                <p className="mt-5 text-base sm:text-lg leading-relaxed text-secondary-600 dark:text-secondary-300 text-pretty">
                   {project.short_description}
                 </p>
               )}
 
+              {project.outcome && (
+                <div className="mt-6 rounded-r-lg border-l-2 border-brand-500 bg-brand-500/5 px-4 py-3">
+                  <span className="text-sm font-bold text-brand-600 dark:text-brand-400">Result: </span>
+                  <span className="text-sm leading-relaxed text-secondary-700 dark:text-secondary-300">
+                    {project.outcome}
+                  </span>
+                </div>
+              )}
+
               {(project.live_url || project.github_url) && (
-                <div className="mt-6 flex flex-wrap gap-3">
+                <div className="mt-7 flex flex-wrap gap-3">
                   {project.live_url && (
                     <Button
                       as="a"
@@ -277,12 +295,39 @@ export function ProjectDetailPage() {
                   )}
                 </div>
               )}
+
+              {/* Fact pills instead of the old sidebar panel: three short facts
+                  read faster inline than as a table competing with the copy. */}
+              <div className="mt-7 flex flex-wrap gap-2">
+                {project.role && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary-200 dark:border-secondary-700 px-3 py-1.5 text-xs font-medium text-secondary-600 dark:text-secondary-300">
+                    <UserRound size={12} />
+                    {project.role}
+                  </span>
+                )}
+                {tech.length > 0 && (
+                  <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary-200 dark:border-secondary-700 px-3 py-1.5 text-xs font-medium text-secondary-600 dark:text-secondary-300">
+                    <Sparkles size={12} />
+                    {tech.length} technologies
+                  </span>
+                )}
+                {liveLink && (
+                  <a
+                    href={project.live_url!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex max-w-[60%] items-center gap-1.5 rounded-full border border-secondary-200 dark:border-secondary-700 px-3 py-1.5 font-mono text-xs text-brand-600 dark:text-brand-300 transition-colors hover:border-brand-500/50"
+                  >
+                    {liveLink.isStore ? <Smartphone size={12} /> : <Globe size={12} />}
+                    <span className="truncate">{liveLink.display}</span>
+                  </a>
+                )}
+              </div>
             </div>
 
-            {/* The frame follows the image's own orientation, measured on load.
-                A phone screenshot in a 16:9 box was a narrow strip of content
-                surrounded by blurred filler; portrait sources get a phone-shaped
-                frame instead, capped so a tall image cannot run off the screen. */}
+            {/* The frame follows the image's own orientation, measured on load:
+                a phone capture in a 16:9 box was a narrow strip of content
+                surrounded by blurred filler. */}
             {gallery.length > 0 && (
               <div className="lg:col-span-5">
                 <div
@@ -343,19 +388,76 @@ export function ProjectDetailPage() {
         </div>
       </section>
 
-      <div className="container-page">
-        {/* EVERY IMAGE -- a grid rather than a single strip, so a five-screen
-            app shows all five at a readable size. Clicking one swaps the hero
-            image above, which is why this sits directly under it. */}
-        {gallery.length > 1 && (
-          <section className="mb-14">
-            <h2 className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-              <ImageIcon size={13} className="text-brand-500" />
-              Screens
-              <span className="text-secondary-400 dark:text-secondary-600">({gallery.length})</span>
-            </h2>
+      {/* THE PROJECT -- centred section header then prose, the rhythm the
+          reference case studies repeat down the page. */}
+      {project.description && (
+        <section className="border-t border-secondary-200/70 dark:border-secondary-800/70 py-16 sm:py-20">
+          <div className="container-page">
+            <SectionHeader
+              eyebrow="The project"
+              title="What it"
+              highlight="is"
+              centered
+              variant="tech"
+            />
+            <p className="mx-auto max-w-3xl whitespace-pre-line text-center leading-relaxed text-secondary-700 dark:text-secondary-300">
+              {project.description}
+            </p>
+          </div>
+        </section>
+      )}
 
-            <ul className="mt-4 flex flex-wrap gap-3">
+      {/* THE WORK -- contributions as a card grid rather than a list. Each one
+          is a discrete piece of work, so each gets its own card. */}
+      {contributions.length > 0 && (
+        <section className="border-t border-secondary-200/70 dark:border-secondary-800/70 py-16 sm:py-20">
+          <div className="container-page">
+            <SectionHeader
+              eyebrow="The work"
+              title="What I"
+              highlight="built"
+              subtitle={`${contributions.length} pieces of this are mine, end to end.`}
+              centered
+              variant="tech"
+            />
+
+            <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+              {contributions.map((item, index) => (
+                <motion.div
+                  key={item}
+                  initial={{ opacity: 0, y: 16 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true, margin: '-40px' }}
+                  transition={{ duration: 0.4, delay: Math.min(index * 0.06, 0.3) }}
+                  className="surface p-6"
+                >
+                  <div className="grid h-10 w-10 place-items-center rounded-xl bg-brand-500/10 text-sm font-bold text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20">
+                    {String(index + 1).padStart(2, '0')}
+                  </div>
+                  <p className="mt-4 text-sm leading-relaxed text-secondary-700 dark:text-secondary-300">
+                    {item}
+                  </p>
+                </motion.div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* SCREENS */}
+      {gallery.length > 1 && (
+        <section className="border-t border-secondary-200/70 dark:border-secondary-800/70 py-16 sm:py-20">
+          <div className="container-page">
+            <SectionHeader
+              eyebrow="Screens"
+              title="What it looks"
+              highlight="like"
+              subtitle="Tap any screen to open it full size."
+              centered
+              variant="tech"
+            />
+
+            <ul className="flex flex-wrap justify-center gap-4">
               {gallery.map((url, index) => (
                 <li key={url}>
                   <button
@@ -367,10 +469,10 @@ export function ProjectDetailPage() {
                     aria-label={`View image ${index + 1} of ${gallery.length} larger`}
                     aria-current={index === activeImage}
                     className={cn(
-                      'block cursor-zoom-in overflow-hidden rounded-xl border-2 transition-all',
+                      'block cursor-zoom-in overflow-hidden rounded-xl border-2 transition-all hover:-translate-y-0.5',
                       index === activeImage
                         ? 'border-brand-500 ring-2 ring-brand-500/20'
-                        : 'border-secondary-200/70 dark:border-secondary-800/70 opacity-70 hover:opacity-100 hover:border-secondary-300 dark:hover:border-secondary-600'
+                        : 'border-secondary-200/70 dark:border-secondary-800/70 hover:border-secondary-300 dark:hover:border-secondary-600'
                     )}
                   >
                     <img
@@ -379,156 +481,42 @@ export function ProjectDetailPage() {
                       loading="lazy"
                       className={cn(
                         'object-contain bg-secondary-100 dark:bg-secondary-900',
-                        portrait ? 'h-44 w-[99px]' : 'h-28 w-44'
+                        portrait ? 'h-64 w-36' : 'h-40 w-64'
                       )}
                     />
                   </button>
                 </li>
               ))}
             </ul>
-          </section>
-        )}
-
-        {/* BODY -- prose left, spec sheet right. The four equal-weight cards
-            this replaces gave a one-line role as much of the page as the whole
-            overview. */}
-        <div className="grid gap-10 lg:grid-cols-12 lg:gap-12">
-          <div className="lg:col-span-7 space-y-10">
-            {project.description && (
-              <section>
-                <h2 className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-                  <Layers size={13} className="text-brand-500" />
-                  Overview
-                </h2>
-                <p className="mt-3 whitespace-pre-line leading-relaxed text-secondary-700 dark:text-secondary-300">
-                  {project.description}
-                </p>
-              </section>
-            )}
-
-            {contributions.length > 0 && (
-              <section>
-                <h2 className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-                  <Check size={13} className="text-brand-500" />
-                  What I built
-                </h2>
-                {/* Numbered rather than bulleted: these are the specific pieces
-                    of work, and the count is itself informative. */}
-                <ol className="mt-4 space-y-3">
-                  {contributions.map((item, index) => (
-                    <li key={item} className="flex gap-3">
-                      <span className="mt-0.5 grid h-6 w-6 shrink-0 place-items-center rounded-md bg-brand-500/10 text-2xs font-bold text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20">
-                        {index + 1}
-                      </span>
-                      <span className="text-sm leading-relaxed text-secondary-700 dark:text-secondary-300">
-                        {item}
-                      </span>
-                    </li>
-                  ))}
-                </ol>
-              </section>
-            )}
           </div>
+        </section>
+      )}
 
-          {/* Sticky on desktop so role and stack stay in view while the overview
-              scrolls. Rows only render when the field is set, so a sparse
-              project shows a short card rather than a tall empty one. */}
-          <aside className="lg:col-span-5">
-            <div className="surface-strong p-5 sm:p-6 lg:sticky lg:top-24">
-              <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-                At a glance
-              </div>
-
-              <dl className="mt-3 divide-y divide-secondary-200/70 dark:divide-secondary-800/70">
-                {project.role && (
-                  <div className="flex items-start justify-between gap-4 py-2.5 first:pt-0">
-                    <dt className="flex items-center gap-1.5 text-sm text-secondary-500 dark:text-secondary-400">
-                      <UserRound size={13} />
-                      My role
-                    </dt>
-                    <dd className="text-right text-sm font-semibold text-secondary-900 dark:text-white">
-                      {project.role}
-                    </dd>
-                  </div>
-                )}
-
-                {project.category && (
-                  <div className="flex items-start justify-between gap-4 py-2.5 first:pt-0">
-                    <dt className="text-sm text-secondary-500 dark:text-secondary-400">Category</dt>
-                    <dd className="text-right text-sm font-semibold text-secondary-900 dark:text-white">
-                      {project.category}
-                    </dd>
-                  </div>
-                )}
-
-                {/* The address as text, not another button: a real URL is
-                    evidence the thing actually ships. */}
-                {liveLink && (
-                  <div className="flex items-start justify-between gap-4 py-2.5 first:pt-0">
-                    <dt className="flex items-center gap-1.5 text-sm text-secondary-500 dark:text-secondary-400">
-                      {liveLink.isStore ? <Smartphone size={13} /> : <Globe size={13} />}
-                      {liveLink.isStore ? 'Store' : 'Live at'}
-                    </dt>
-                    <dd className="min-w-0 text-right">
-                      <a
-                        href={project.live_url!}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group inline-flex max-w-full items-center gap-1 font-mono text-xs text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-200"
-                      >
-                        <span className="truncate underline decoration-brand-500/30 underline-offset-4 group-hover:decoration-brand-500">
-                          {liveLink.display}
-                        </span>
-                        <ArrowUpRight size={12} className="shrink-0" />
-                      </a>
-                    </dd>
-                  </div>
-                )}
-
-                {project.github_url && (
-                  <div className="flex items-start justify-between gap-4 py-2.5 first:pt-0">
-                    <dt className="flex items-center gap-1.5 text-sm text-secondary-500 dark:text-secondary-400">
-                      <Github size={13} />
-                      Source
-                    </dt>
-                    <dd className="min-w-0 text-right">
-                      <a
-                        href={project.github_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="group inline-flex max-w-full items-center gap-1 font-mono text-xs text-brand-600 dark:text-brand-300 hover:text-brand-700 dark:hover:text-brand-200"
-                      >
-                        <span className="truncate underline decoration-brand-500/30 underline-offset-4 group-hover:decoration-brand-500">
-                          {linkHost(project.github_url)}
-                        </span>
-                        <ArrowUpRight size={12} className="shrink-0" />
-                      </a>
-                    </dd>
-                  </div>
-                )}
-              </dl>
-
-              {tech.length > 0 && (
-                <div className="mt-4 border-t border-secondary-200/70 dark:border-secondary-800/70 pt-4">
-                  <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-                    <Sparkles size={13} className="text-brand-500" />
-                    Tech stack
-                  </div>
-                  <div className="mt-3 flex flex-wrap gap-1.5">
-                    {tech.map(t => (
-                      <span key={t} className="chip">
-                        {t}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
+      {/* BUILT WITH */}
+      {tech.length > 0 && (
+        <section className="border-t border-secondary-200/70 dark:border-secondary-800/70 py-16 sm:py-20">
+          <div className="container-page">
+            <SectionHeader
+              eyebrow="Stack"
+              title="Built"
+              highlight="with"
+              centered
+              variant="tech"
+            />
+            <div className="mx-auto flex max-w-3xl flex-wrap justify-center gap-2">
+              {tech.map(t => (
+                <span key={t} className="chip-brand">
+                  {t}
+                </span>
+              ))}
             </div>
-          </aside>
-        </div>
+          </div>
+        </section>
+      )}
 
-        {/* Closing CTA -- the reader needs a way onward once the overview ends. */}
-        <div className="mt-16 flex flex-wrap items-center justify-between gap-4 border-t border-secondary-200/70 dark:border-secondary-800/70 pt-8">
+      {/* Closing CTA */}
+      <div className="container-page">
+        <div className="mt-8 flex flex-wrap items-center justify-between gap-4 border-t border-secondary-200/70 dark:border-secondary-800/70 pt-8">
           <p className="text-sm text-secondary-600 dark:text-secondary-400">
             Want to know more about how this was built?
           </p>
@@ -542,6 +530,7 @@ export function ProjectDetailPage() {
           </div>
         </div>
       </div>
+
       {/* LIGHTBOX -- tapping any image opens it at full size. The detail in a
           screenshot (a bill layout, a settings screen) is unreadable at phone-
           frame or thumbnail size, so the images have to be openable. */}

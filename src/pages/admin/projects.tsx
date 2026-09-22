@@ -19,6 +19,7 @@ interface ProjectFormData {
   role: string;
   /** One contribution per line; stored as a text[]. */
   contributions: string;
+  outcome: string;
   category: string;
   tech_stack: string;
   github_url: string;
@@ -55,6 +56,7 @@ export function AdminProjectsPage() {
       setValue('description', editingProject.description || '');
       setValue('short_description', editingProject.short_description || '');
       setValue('role', editingProject.role || '');
+      setValue('outcome', editingProject.outcome || '');
       setValue('contributions', (editingProject.contributions || []).join('\n'));
       setValue('category', editingProject.category || '');
       setValue('tech_stack', editingProject.tech_stack?.join(', ') || '');
@@ -287,6 +289,22 @@ Wired image uploads through Supabase Storage`}
             />
             <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
               Each line becomes a bullet on the project page. Say what you personally did, not what the project is.
+            </p>
+          </div>
+
+          <div>
+            <label htmlFor="outcome" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              Result
+            </label>
+            <textarea
+              id="outcome"
+              rows={2}
+              className="mt-1 input resize-y"
+              placeholder="e.g. Live on Google Play — replaces the paper register for chakki owners across India"
+              {...register('outcome')}
+            />
+            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+              Optional: one line on what it achieved. Shown as a highlighted callout on the project card.
             </p>
           </div>
 

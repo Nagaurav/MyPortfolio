@@ -21,8 +21,9 @@ const NAV_GROUPS = [
   {
     title: 'About',
     items: [
-      { to: '/certificates', label: 'Certificates' },
-      { to: '/resume', label: 'Resume' },
+      // Hidden for now -- uncomment to put these pages back in the footer.
+      // { to: '/certificates', label: 'Certificates' },
+      // { to: '/resume', label: 'Resume' },
       { to: '/contact', label: 'Contact' },
     ],
   },

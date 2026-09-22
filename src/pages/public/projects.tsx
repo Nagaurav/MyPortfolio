@@ -1,12 +1,13 @@
 import { useState, useEffect, useMemo } from 'react';
 import { Link } from 'react-router-dom';
-import { Github, ExternalLink, Search, ArrowUpRight, Sparkles, X, SlidersHorizontal } from 'lucide-react';
+import { Github, ExternalLink, ArrowUpRight, Sparkles, X, SlidersHorizontal } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { PageHero } from '../../components/ui/page-hero';
 import { Button } from '../../components/ui/button';
 import { cn } from '../../lib/utils';
-import { normalizeList } from '../../lib/text';
+import { linkHost, normalizeList } from '../../lib/text';
+import { projectBanner } from '../../lib/project-banner';
 import type { Database } from '../../types/database.types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -19,7 +20,6 @@ export function ProjectsPage() {
   const [selectedTech, setSelectedTech] = useState<string[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('date');
-  const [query, setQuery] = useState('');
   const [showFilters, setShowFilters] = useState(false);
 
   useEffect(() => {
@@ -61,23 +61,15 @@ export function ProjectsPage() {
       const techOk =
         selectedTech.length === 0 || selectedTech.every((t) => normalizeList(p.tech_stack).includes(t));
       const catOk = !selectedCategory || p.category === selectedCategory;
-      const ql = query.toLowerCase().trim();
-      const qOk =
-        !ql ||
-        p.title?.toLowerCase().includes(ql) ||
-        p.description?.toLowerCase().includes(ql) ||
-        p.short_description?.toLowerCase().includes(ql) ||
-        normalizeList(p.tech_stack).some((t) => t.toLowerCase().includes(ql));
-      return techOk && catOk && qOk;
+      return techOk && catOk;
     });
-  }, [projects, selectedTech, selectedCategory, query]);
+  }, [projects, selectedTech, selectedCategory]);
 
-  const activeFilters = selectedTech.length + (selectedCategory ? 1 : 0) + (query ? 1 : 0);
+  const activeFilters = selectedTech.length + (selectedCategory ? 1 : 0);
 
   const clearAll = () => {
     setSelectedTech([]);
     setSelectedCategory(null);
-    setQuery('');
   };
 
   return (
@@ -91,19 +83,8 @@ export function ProjectsPage() {
       />
 
       <div className="container-page pb-24">
-        {/* Search + sort bar */}
+        {/* Filter + sort bar */}
         <div className="surface p-3 sm:p-4 mb-6 flex flex-wrap items-center gap-2">
-          <div className="relative flex-1 min-w-[200px]">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-secondary-400" size={16} />
-            <input
-              type="text"
-              placeholder="Search projects, tech, descriptions…"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              className="input pl-9"
-            />
-          </div>
-
           <button
             type="button"
             onClick={() => setShowFilters((v) => !v)}
@@ -281,26 +262,40 @@ function FilterChip({
 }
 
 function ProjectCard({ project }: { project: Project }) {
+  const cover = projectBanner(project.id, project.image_url);
   const tech: string[] = normalizeList(project.tech_stack);
   return (
-    <div className="group relative surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
-      <div className="relative m-3 aspect-[16/10] overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-900">
-        {project.image_url ? (
-          <>
-            {/* Blurred copy fills the frame so tall UI screenshots letterbox into
-                a matching backdrop instead of being hard-cropped by object-cover. */}
-            <div
-              aria-hidden
-              className="absolute inset-0 scale-110 bg-cover bg-center blur-xl opacity-40 dark:opacity-25"
-              style={{ backgroundImage: `url(${project.image_url})` }}
-            />
+    <div className="group relative flex h-full flex-col surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+      <div className={cn(
+        'relative m-3 overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-900',
+        cover.designed ? 'aspect-[1200/630]' : 'aspect-[16/10]'
+      )}>
+        {cover.src ? (
+          cover.designed ? (
+            // Composed to fill this exact ratio, so it crops rather than floats.
             <img
-              src={project.image_url}
+              src={cover.src}
               alt={project.title}
               loading="lazy"
-              className="absolute inset-0 h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             />
-          </>
+          ) : (
+            <>
+              {/* Blurred backdrop so a raw screenshot letterboxes rather than
+                  being hard-cropped by object-cover. */}
+              <div
+                aria-hidden
+                className="absolute inset-0 scale-110 bg-cover bg-center blur-xl opacity-40 dark:opacity-25"
+                style={{ backgroundImage: `url(${cover.src})` }}
+              />
+              <img
+                src={cover.src}
+                alt={project.title}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+              />
+            </>
+          )
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-brand-500/10 to-accent-500/10">
             <Sparkles className="h-10 w-10 text-brand-500/70" />
@@ -345,41 +340,70 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
       </div>
 
-      <div className="p-5 flex flex-col gap-3">
-        <div>
-          <div className="flex items-center gap-2 text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-1.5">
-            {project.category && <span>{project.category}</span>}
+      <div className="flex flex-1 flex-col p-5">
+        {/* Category as a coloured overline rather than a grey chip: it labels
+            the project before the title is read. */}
+        {project.category && (
+          <div className="text-2xs font-mono font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
+            {project.category}
           </div>
-          <h3 className="text-lg font-semibold text-secondary-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors">
-            {project.title}
-          </h3>
-          <p className="mt-1.5 text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
-            {project.short_description || project.description}
-          </p>
-        </div>
+        )}
 
+        <h3 className="mt-1.5 text-lg font-bold tracking-tight text-secondary-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors">
+          {project.title}
+        </h3>
+
+        <p className="mt-2 text-sm leading-relaxed text-secondary-600 dark:text-secondary-400 line-clamp-4">
+          {project.short_description || project.description}
+        </p>
+
+        {/* Every technology, not the first four: the stack is what a reader
+            scans for, and "+3" hides exactly the one they were looking for. */}
         {tech.length > 0 && (
-          <div className="flex flex-wrap gap-1.5">
-            {tech.slice(0, 4).map((t) => (
+          <div className="mt-3.5 flex flex-wrap gap-1.5">
+            {tech.slice(0, 8).map((t) => (
               <span key={t} className="chip-brand">
                 {t}
               </span>
             ))}
-            {tech.length > 4 && <span className="chip">+{tech.length - 4}</span>}
+            {tech.length > 8 && <span className="chip">+{tech.length - 8}</span>}
           </div>
         )}
 
-        <div className="mt-1 pt-3 border-t border-secondary-200/70 dark:border-secondary-800/70 flex items-center justify-between">
-          <div className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300">
-            View details
-            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+        {/* The result gets its own block. Buried in the description it reads as
+            more detail; set apart, it reads as evidence. */}
+        {project.outcome && (
+          <div className="mt-4 rounded-r-lg border-l-2 border-brand-500 bg-brand-500/5 px-3 py-2.5">
+            <span className="text-xs font-bold text-brand-600 dark:text-brand-400">Result: </span>
+            <span className="text-xs leading-relaxed text-secondary-700 dark:text-secondary-300">
+              {project.outcome}
+            </span>
           </div>
-          <div className="flex items-center gap-3 text-secondary-500 dark:text-secondary-400">
-            {project.github_url && <Github size={15} />}
-            {project.live_url && <ExternalLink size={15} />}
-          </div>
+        )}
+
+        {/* mt-auto pins the action row to the bottom so cards in a row line up
+            however much description each one carries. */}
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20 transition-colors group-hover:bg-brand-500/20">
+            View case study
+            <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
+          </span>
+
+          {project.live_url && (
+            <a
+              href={project.live_url}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={(e) => e.stopPropagation()}
+              className="relative z-20 inline-flex max-w-[60%] items-center gap-1.5 rounded-full border border-secondary-200 dark:border-secondary-700 px-3 py-1.5 text-xs font-medium text-secondary-600 dark:text-secondary-300 transition-colors hover:border-brand-500/50 hover:text-brand-600 dark:hover:text-brand-300"
+            >
+              <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
+              <span className="truncate">{linkHost(project.live_url)}</span>
+            </a>
+          )}
         </div>
       </div>
+
 
       {/* Stretched link rather than an <a> wrapping the whole card: the GitHub
           and live-app links inside are real anchors, and nesting them in an

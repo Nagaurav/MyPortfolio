@@ -11,8 +11,9 @@ const NAV = [
   { to: '/projects', label: 'Projects' },
   { to: '/skills', label: 'Skills' },
   { to: '/experience', label: 'Experience' },
-  { to: '/certificates', label: 'Certificates' },
-  { to: '/resume', label: 'Resume' },
+  // Hidden for now -- uncomment to put these pages back in the nav.
+  // { to: '/certificates', label: 'Certificates' },
+  // { to: '/resume', label: 'Resume' },
   { to: '/contact', label: 'Contact' },
 ];
 

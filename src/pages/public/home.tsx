@@ -9,7 +9,7 @@ import {
   Sparkles,
   MapPin,
   Briefcase,
-  Award,
+  // Award, -- only used by the hidden Certifications stat
   Code2,
   Wrench,
   Layout,
@@ -22,8 +22,9 @@ import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { cn } from '../../lib/utils';
-import { leadSentences, linkHost, normalizeList, splitLines, stripSelfIntro } from '../../lib/text';
+import { leadSentences, linkHost, normalizeList, stripSelfIntro } from '../../lib/text';
 import { categoryMeta, isTechCategory, sortCategories } from '../../lib/skill-categories';
+import { projectBanner } from '../../lib/project-banner';
 import type { Database } from '../../types/database.types';
 
 type Profile = Database['public']['Tables']['profiles']['Row'];
@@ -50,24 +51,28 @@ const SERVICES = [
     title: 'Web Application Development',
     description:
       'Responsive, accessible interfaces in React and TypeScript, built component-first so they stay maintainable as the product grows.',
+    covers: ['React', 'TypeScript', 'Tailwind', 'Responsive', 'Accessibility'],
   },
   {
     icon: Server,
     title: 'Full-stack & APIs',
     description:
       'Postgres schema design, authentication, row-level security, and the API layer that connects a front end to real data.',
+    covers: ['Postgres', 'Auth', 'RLS', 'REST', 'Supabase'],
   },
   {
     icon: Bot,
     title: 'AI Integration',
     description:
       'Adding LLM-backed features such as chat, summarisation and semantic search to existing products without rebuilding them.',
+    covers: ['LLM APIs', 'Chat', 'Summarisation', 'Vector search'],
   },
   {
     icon: Gauge,
     title: 'Performance & Polish',
     description:
       'Bundle and Lighthouse audits, lazy-loaded routes, dark mode, and the accessibility pass most projects skip.',
+    covers: ['Lighthouse', 'Code splitting', 'Dark mode', 'A11y'],
   },
 ] as const;
 
@@ -374,7 +379,7 @@ export function HomePage() {
       {/* STATS */}
       <section className="relative py-8 sm:py-10">
         <div className="container-page">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
             {[
               { label: 'Projects', value: stats.projectCount, suffix: '+', icon: Code2 },
               {
@@ -384,7 +389,9 @@ export function HomePage() {
                 icon: Briefcase,
               },
               { label: 'Skills', value: stats.skillCount, suffix: '', icon: Wrench },
-              { label: 'Certifications', value: stats.certificateCount, suffix: '', icon: Award },
+              // Certificates are hidden site-wide for now; uncomment to bring
+              // the fourth stat back (the grid is sm:grid-cols-4 below).
+              // { label: 'Certifications', value: stats.certificateCount, suffix: '', icon: Award },
             ].map((s, i) => (
               <motion.div
                 key={s.label}
@@ -494,7 +501,7 @@ export function HomePage() {
             <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
               {skillCategories.map((category, i) => {
                 const meta = categoryMeta(category);
-                const items = stats.skillsByCategory[category] ?? [];
+                const items = normalizeList(stats.skillsByCategory[category]);
                 const Icon = meta.icon;
                 return (
                   <motion.div
@@ -505,32 +512,32 @@ export function HomePage() {
                     transition={{ duration: 0.4, delay: Math.min(i * 0.06, 0.3) }}
                     className="surface p-6"
                   >
-                    <div className="flex items-center gap-3">
+                    <div className="flex items-start gap-3">
                       <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20">
                         <Icon size={20} />
                       </div>
-                      {/* The category as typed, not the shortened label: these
-                          headings read as written ("Frontend Development"). */}
-                      <h3 className="min-w-0 font-bold tracking-tight text-secondary-900 dark:text-white">
-                        {category}
-                      </h3>
+                      <div className="min-w-0">
+                        <div className="text-2xs font-mono font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
+                          {items.length} {items.length === 1 ? 'tool' : 'tools'}
+                        </div>
+                        {/* The category as typed, not the shortened label: these
+                            headings read as written ("Frontend Development"). */}
+                        <h3 className="mt-1 min-w-0 font-bold tracking-tight text-secondary-900 dark:text-white">
+                          {category}
+                        </h3>
+                      </div>
                     </div>
 
-                    {/* One flowing line rather than chips. Separators are their
-                        own spans so they can be dimmed, and so a wrap never
-                        leaves a dot stranded at the start of a line. */}
-                    <p className="mt-4 text-sm leading-relaxed text-secondary-700 dark:text-secondary-300">
-                      {items.map((name, index) => (
-                        <span key={name}>
-                          {index > 0 && (
-                            <span className="mx-1.5 text-brand-500/70 dark:text-brand-400/70">
-                              ·
-                            </span>
-                          )}
+                    {/* Chips, matching the project cards: a reader scanning for
+                        "Flutter" finds it as an object rather than as a word
+                        inside a sentence. */}
+                    <div className="mt-4 flex flex-wrap gap-1.5">
+                      {items.map((name) => (
+                        <span key={name} className="chip-brand">
                           {name}
                         </span>
                       ))}
-                    </p>
+                    </div>
                   </motion.div>
                 );
               })}
@@ -572,17 +579,33 @@ export function HomePage() {
                   whileInView={{ opacity: 1, y: 0 }}
                   viewport={{ once: true, margin: '-40px' }}
                   transition={{ duration: 0.4, delay: Math.min(i * 0.06, 0.3) }}
-                  className="surface p-6"
+                  className="surface flex h-full flex-col p-6"
                 >
-                  <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20">
-                    <Icon size={20} />
+                  <div className="flex items-center justify-between">
+                    <div className="grid h-11 w-11 shrink-0 place-items-center rounded-xl bg-brand-500/10 text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20">
+                      <Icon size={20} />
+                    </div>
+                    {/* The number is the overline the project cards carry as a
+                        category: these have no category, but they are a set. */}
+                    <span className="font-mono text-2xs font-semibold tracking-widest text-secondary-400 dark:text-secondary-600">
+                      {String(i + 1).padStart(2, '0')}
+                    </span>
                   </div>
+
                   <h3 className="mt-4 font-bold tracking-tight text-secondary-900 dark:text-white">
                     {service.title}
                   </h3>
                   <p className="mt-2 text-sm leading-relaxed text-secondary-600 dark:text-secondary-300">
                     {service.description}
                   </p>
+
+                  <div className="mt-auto flex flex-wrap gap-1.5 pt-4">
+                    {service.covers.map((item) => (
+                      <span key={item} className="chip">
+                        {item}
+                      </span>
+                    ))}
+                  </div>
                 </motion.div>
               );
             })}
@@ -719,9 +742,11 @@ export function HomePage() {
                 <Button variant="gradient" size="lg" leftIcon={<Mail size={16} />} onClick={() => navigate('/contact')}>
                   Contact me
                 </Button>
+                {/* Hidden while the resume page is off the nav.
                 <Button variant="outline" size="lg" rightIcon={<ArrowRight size={16} />} onClick={() => navigate('/resume')}>
                   View resume
                 </Button>
+                */}
               </div>
             </div>
           </div>
@@ -732,26 +757,40 @@ export function HomePage() {
 }
 
 function ProjectCard({ project }: { project: Project }) {
+  const cover = projectBanner(project.id, project.image_url);
   const tech = normalizeList(project.tech_stack);
-  const contributions = (project.contributions ?? []).flatMap(splitLines);
   return (
-    <div className="group relative surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
-      <div className="relative m-3 aspect-[16/10] overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-900">
-        {project.image_url ? (
-          <>
-            {/* Blurred backdrop so screenshots letterbox rather than hard-crop. */}
-            <div
-              aria-hidden
-              className="absolute inset-0 scale-110 bg-cover bg-center blur-xl opacity-40 dark:opacity-25"
-              style={{ backgroundImage: `url(${project.image_url})` }}
-            />
+    <div className="group relative flex h-full flex-col surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
+      <div className={cn(
+        'relative m-3 overflow-hidden rounded-xl bg-secondary-100 dark:bg-secondary-900',
+        cover.designed ? 'aspect-[1200/630]' : 'aspect-[16/10]'
+      )}>
+        {cover.src ? (
+          cover.designed ? (
+            // Composed to fill this exact ratio, so it crops rather than floats.
             <img
-              src={project.image_url}
+              src={cover.src}
               alt={project.title}
-              className="absolute inset-0 h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
               loading="lazy"
+              className="absolute inset-0 h-full w-full object-cover transition-transform duration-500 group-hover:scale-[1.04]"
             />
-          </>
+          ) : (
+            <>
+              {/* Blurred backdrop so a raw screenshot letterboxes rather than
+                  being hard-cropped by object-cover. */}
+              <div
+                aria-hidden
+                className="absolute inset-0 scale-110 bg-cover bg-center blur-xl opacity-40 dark:opacity-25"
+                style={{ backgroundImage: `url(${cover.src})` }}
+              />
+              <img
+                src={cover.src}
+                alt={project.title}
+                loading="lazy"
+                className="absolute inset-0 h-full w-full object-contain transition-transform duration-500 group-hover:scale-[1.04]"
+              />
+            </>
+          )
         ) : (
           <div className="absolute inset-0 grid place-items-center bg-gradient-to-br from-brand-500/10 to-accent-500/10">
             <Sparkles className="h-10 w-10 text-brand-500/70" />
@@ -797,77 +836,70 @@ function ProjectCard({ project }: { project: Project }) {
         </div>
       </div>
 
-      <div className="p-5">
-        <h3 className="text-lg font-semibold text-secondary-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors">
-          {project.title}
-        </h3>
-        <p className="mt-1.5 text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">
-          {project.short_description || project.description}
-        </p>
-        {(project.role || contributions.length > 0) && (
-          <div className="mt-3 rounded-lg border border-secondary-200/70 dark:border-secondary-800/70 bg-secondary-50/60 dark:bg-secondary-900/30 px-3 py-2.5">
-            <div className="text-2xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
-              What I did
-            </div>
-            {project.role && (
-              <div className="mt-1 truncate text-sm font-semibold text-secondary-900 dark:text-white">
-                {project.role}
-              </div>
-            )}
-            {contributions.length > 0 && (
-              <ul className="mt-1.5 space-y-1">
-                {/* Two lines only: the card has to stay the same height as its
-                    neighbours in the grid. The rest are on the detail page. */}
-                {contributions.slice(0, 2).map(item => (
-                  <li key={item} className="flex gap-1.5 text-xs text-secondary-600 dark:text-secondary-400">
-                    <span className="mt-1.5 h-1 w-1 shrink-0 rounded-full bg-brand-500/70" />
-                    <span className="line-clamp-1">{item}</span>
-                  </li>
-                ))}
-                {contributions.length > 2 && (
-                  <li className="pl-3 text-xs text-secondary-500">
-                    +{contributions.length - 2} more
-                  </li>
-                )}
-              </ul>
-            )}
+      <div className="flex flex-1 flex-col p-5">
+        {/* Category as a coloured overline rather than a grey chip: it labels
+            the project before the title is read. */}
+        {project.category && (
+          <div className="text-2xs font-mono font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
+            {project.category}
           </div>
         )}
 
+        <h3 className="mt-1.5 text-lg font-bold tracking-tight text-secondary-900 dark:text-white group-hover:text-brand-600 dark:group-hover:text-brand-300 transition-colors">
+          {project.title}
+        </h3>
+
+        <p className="mt-2 text-sm leading-relaxed text-secondary-600 dark:text-secondary-400 line-clamp-4">
+          {project.short_description || project.description}
+        </p>
+
+        {/* Every technology, not the first four: the stack is what a reader
+            scans for, and "+3" hides exactly the one they were looking for. */}
         {tech.length > 0 && (
-          <div className="mt-3 flex flex-wrap gap-1.5">
-            {tech.slice(0, 4).map((t) => (
+          <div className="mt-3.5 flex flex-wrap gap-1.5">
+            {tech.slice(0, 8).map((t) => (
               <span key={t} className="chip-brand">
                 {t}
               </span>
             ))}
-            {tech.length > 4 && <span className="chip">+{tech.length - 4}</span>}
+            {tech.length > 8 && <span className="chip">+{tech.length - 8}</span>}
           </div>
         )}
 
-        <div className="mt-4 flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-1 text-sm font-semibold text-brand-600 dark:text-brand-300">
-            View details
-            <ArrowUpRight size={14} className="group-hover:translate-x-0.5 group-hover:-translate-y-0.5 transition-transform" />
+        {/* The result gets its own block. Buried in the description it reads as
+            more detail; set apart, it reads as evidence. */}
+        {project.outcome && (
+          <div className="mt-4 rounded-r-lg border-l-2 border-brand-500 bg-brand-500/5 px-3 py-2.5">
+            <span className="text-xs font-bold text-brand-600 dark:text-brand-400">Result: </span>
+            <span className="text-xs leading-relaxed text-secondary-700 dark:text-secondary-300">
+              {project.outcome}
+            </span>
+          </div>
+        )}
+
+        {/* mt-auto pins the action row to the bottom so cards in a row line up
+            however much description each one carries. */}
+        <div className="mt-auto flex flex-wrap items-center gap-2 pt-5">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-brand-500/10 px-3 py-1.5 text-xs font-semibold text-brand-600 dark:text-brand-300 ring-1 ring-inset ring-brand-500/20 transition-colors group-hover:bg-brand-500/20">
+            View case study
+            <ArrowUpRight size={13} className="transition-transform group-hover:translate-x-0.5 group-hover:-translate-y-0.5" />
           </span>
 
-          {/* A live app is the strongest thing a card can offer, so it gets a
-              standing link here rather than only the hover icon over the image. */}
           {project.live_url && (
             <a
               href={project.live_url}
               target="_blank"
               rel="noopener noreferrer"
               onClick={(e) => e.stopPropagation()}
-              className="relative z-20 inline-flex max-w-[55%] items-center gap-1.5 rounded-full border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-xs font-medium text-emerald-700 dark:text-emerald-300 hover:bg-emerald-500/20 transition-colors"
+              className="relative z-20 inline-flex max-w-[60%] items-center gap-1.5 rounded-full border border-secondary-200 dark:border-secondary-700 px-3 py-1.5 text-xs font-medium text-secondary-600 dark:text-secondary-300 transition-colors hover:border-brand-500/50 hover:text-brand-600 dark:hover:text-brand-300"
             >
               <span className="h-1.5 w-1.5 shrink-0 rounded-full bg-emerald-500" />
               <span className="truncate">{linkHost(project.live_url)}</span>
-              <ExternalLink size={11} className="shrink-0" />
             </a>
           )}
         </div>
       </div>
+
 
       {/* Stretched link rather than an <a> wrapping the whole card: the GitHub
           and live-app links inside are real anchors, and nesting them in an
@@ -883,6 +915,7 @@ function ProjectCard({ project }: { project: Project }) {
 }
 
 function ExperienceRow({ exp }: { exp: Experience }) {
+  const tech = normalizeList(exp.technologies);
   const start = new Date(exp.start_date).toLocaleDateString('en-US', { month: 'short', year: 'numeric' });
   const end = exp.current
     ? 'Present'
@@ -896,25 +929,35 @@ function ExperienceRow({ exp }: { exp: Experience }) {
           {(exp.company || '?').charAt(0)}
         </div>
         <div className="flex-1 min-w-0">
+          {/* Company as the accent overline and the role as the heading, the
+              same order the project cards use for category and title. */}
           <div className="flex flex-wrap items-baseline justify-between gap-2">
-            <h3 className="text-base sm:text-lg font-semibold text-secondary-900 dark:text-white">
-              {exp.position || exp.title}{' '}
-              <span className="text-brand-600 dark:text-brand-300 font-semibold">@ {exp.company}</span>
-            </h3>
-            <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400">
+            <div className="text-2xs font-mono font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
+              {exp.company}
+            </div>
+            <div className="text-2xs font-mono uppercase tracking-widest text-secondary-500 dark:text-secondary-400">
               {start} — {end}
             </div>
           </div>
+
+          <h3 className="mt-1.5 text-base sm:text-lg font-bold tracking-tight text-secondary-900 dark:text-white">
+            {exp.position || exp.title}
+          </h3>
+
           {exp.description && (
-            <p className="mt-2 text-sm text-secondary-600 dark:text-secondary-400 line-clamp-2">{exp.description}</p>
+            <p className="mt-2 text-sm leading-relaxed text-secondary-600 dark:text-secondary-400 line-clamp-3">
+              {exp.description}
+            </p>
           )}
-          {(exp.technologies?.length ?? 0) > 0 && (
-            <div className="mt-3 flex flex-wrap gap-1.5">
-              {(exp.technologies ?? []).slice(0, 5).map((t) => (
-                <span key={t} className="chip">
+
+          {tech.length > 0 && (
+            <div className="mt-3.5 flex flex-wrap gap-1.5">
+              {tech.slice(0, 8).map((t) => (
+                <span key={t} className="chip-brand">
                   {t}
                 </span>
               ))}
+              {tech.length > 8 && <span className="chip">+{tech.length - 8}</span>}
             </div>
           )}
         </div>

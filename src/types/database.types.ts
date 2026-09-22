@@ -249,6 +249,7 @@ export type Database = {
           image_url: string | null
           image_urls: string[]
           live_url: string | null
+          outcome: string | null
           role: string | null
           short_description: string | null
           tech_stack: string[] | null
@@ -267,6 +268,7 @@ export type Database = {
           image_url?: string | null
           image_urls?: string[]
           live_url?: string | null
+          outcome?: string | null
           role?: string | null
           short_description?: string | null
           tech_stack?: string[] | null
@@ -285,6 +287,7 @@ export type Database = {
           image_url?: string | null
           image_urls?: string[]
           live_url?: string | null
+          outcome?: string | null
           role?: string | null
           short_description?: string | null
           tech_stack?: string[] | null

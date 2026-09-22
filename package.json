@@ -10,6 +10,7 @@
     "typecheck": "tsc -b",
     "preview": "vite preview",
     "og": "node scripts/generate-og-image.mjs",
+    "banners": "node scripts/generate-project-banners.mjs",
     "test": "vitest",
     "test:ui": "vitest --ui",
     "test:coverage": "vitest run --coverage",
