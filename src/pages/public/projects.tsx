@@ -6,7 +6,13 @@ import { supabase } from '../../lib/supabase';
 import { PageHero } from '../../components/ui/page-hero';
 import { Button } from '../../components/ui/button';
 import { cn } from '../../lib/utils';
-import { linkHost, normalizeList } from '../../lib/text';
+import { leadSentences, linkHost, normalizeList } from '../../lib/text';
+import {
+  SHIPPING_META,
+  SHIPPING_STATUSES,
+  toShippingStatus,
+  type ShippingStatus,
+} from '../../lib/shipping-status';
 import { projectBanner } from '../../lib/project-banner';
 import type { Database } from '../../types/database.types';
 
@@ -18,7 +24,7 @@ export function ProjectsPage() {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedTech, setSelectedTech] = useState<string[]>([]);
-  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [selectedStatus, setSelectedStatus] = useState<ShippingStatus | null>(null);
   const [sortBy, setSortBy] = useState<SortOption>('date');
   const [showFilters, setShowFilters] = useState(false);
 
@@ -50,26 +56,27 @@ export function ProjectsPage() {
     return Array.from(set).sort();
   }, [projects]);
 
-  const allCategories = useMemo(() => {
-    const set = new Set<string>();
-    projects.forEach((p) => p.category && set.add(p.category));
-    return Array.from(set).sort();
+  // Only statuses some project actually has -- offering all three would show
+  // a filter that matches nothing. Ordered shipped -> local, not alphabetically.
+  const allStatuses = useMemo(() => {
+    const present = new Set(projects.map((p) => toShippingStatus(p.shipping_status)));
+    return SHIPPING_STATUSES.filter((status) => present.has(status));
   }, [projects]);
 
   const filtered = useMemo(() => {
     return projects.filter((p) => {
       const techOk =
         selectedTech.length === 0 || selectedTech.every((t) => normalizeList(p.tech_stack).includes(t));
-      const catOk = !selectedCategory || p.category === selectedCategory;
-      return techOk && catOk;
+      const statusOk = !selectedStatus || toShippingStatus(p.shipping_status) === selectedStatus;
+      return techOk && statusOk;
     });
-  }, [projects, selectedTech, selectedCategory]);
+  }, [projects, selectedTech, selectedStatus]);
 
-  const activeFilters = selectedTech.length + (selectedCategory ? 1 : 0);
+  const activeFilters = selectedTech.length + (selectedStatus ? 1 : 0);
 
   const clearAll = () => {
     setSelectedTech([]);
-    setSelectedCategory(null);
+    setSelectedStatus(null);
   };
 
   return (
@@ -123,19 +130,19 @@ export function ProjectsPage() {
             exit={{ opacity: 0, height: 0 }}
             className="surface p-4 sm:p-5 mb-6 space-y-4"
           >
-            {allCategories.length > 0 && (
+            {allStatuses.length > 0 && (
               <div>
                 <div className="text-xs font-mono uppercase tracking-wider text-secondary-500 dark:text-secondary-400 mb-2">
-                  Category
+                  Status
                 </div>
                 <div className="flex flex-wrap gap-1.5">
-                  {allCategories.map((c) => (
+                  {allStatuses.map((status) => (
                     <FilterChip
-                      key={c}
-                      active={selectedCategory === c}
-                      onClick={() => setSelectedCategory((cur) => (cur === c ? null : c))}
+                      key={status}
+                      active={selectedStatus === status}
+                      onClick={() => setSelectedStatus((cur) => (cur === status ? null : status))}
                     >
-                      {c}
+                      {SHIPPING_META[status].label}
                     </FilterChip>
                   ))}
                 </div>
@@ -264,6 +271,7 @@ function FilterChip({
 function ProjectCard({ project }: { project: Project }) {
   const cover = projectBanner(project.id, project.image_url);
   const tech: string[] = normalizeList(project.tech_stack);
+  const cardStatus = toShippingStatus(project.shipping_status);
   return (
     <div className="group relative flex h-full flex-col surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
       <div className={cn(
@@ -341,11 +349,11 @@ function ProjectCard({ project }: { project: Project }) {
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        {/* Category as a coloured overline rather than a grey chip: it labels
-            the project before the title is read. */}
-        {project.category && (
+        {/* Status as a coloured overline rather than a grey chip: it answers
+            "is this real?" before the title is read. */}
+        {cardStatus && (
           <div className="text-2xs font-mono font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
-            {project.category}
+            {SHIPPING_META[cardStatus].label}
           </div>
         )}
 
@@ -354,7 +362,7 @@ function ProjectCard({ project }: { project: Project }) {
         </h3>
 
         <p className="mt-2 text-sm leading-relaxed text-secondary-600 dark:text-secondary-400 line-clamp-4">
-          {project.short_description || project.description}
+          {project.description && leadSentences(project.description, 2)}
         </p>
 
         {/* Every technology, not the first four: the stack is what a reader
@@ -370,13 +378,12 @@ function ProjectCard({ project }: { project: Project }) {
           </div>
         )}
 
-        {/* The result gets its own block. Buried in the description it reads as
-            more detail; set apart, it reads as evidence. */}
-        {project.outcome && (
+        {/* What's shipped gets its own block. Buried in the description it
+            reads as more detail; set apart, it reads as evidence. */}
+        {project.shipping_note && (
           <div className="mt-4 rounded-r-lg border-l-2 border-brand-500 bg-brand-500/5 px-3 py-2.5">
-            <span className="text-xs font-bold text-brand-600 dark:text-brand-400">Result: </span>
             <span className="text-xs leading-relaxed text-secondary-700 dark:text-secondary-300">
-              {project.outcome}
+              {project.shipping_note}
             </span>
           </div>
         )}

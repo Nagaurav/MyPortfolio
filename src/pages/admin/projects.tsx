@@ -3,7 +3,13 @@ import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
 import { Plus, Pencil, Trash2, ExternalLink } from 'lucide-react';
 import { supabase } from '../../lib/supabase';
-import { splitList, splitLines } from '../../lib/text';
+import { leadSentences, splitList, splitLines } from '../../lib/text';
+import {
+  SHIPPING_META,
+  SHIPPING_STATUSES,
+  toShippingStatus,
+  type ShippingStatus,
+} from '../../lib/shipping-status';
 import { Button } from '../../components/ui/button';
 import { MultiImageUpload } from '../../components/ui/multi-image-upload';
 import { SectionHeader } from '../../components/ui/section-header';
@@ -12,16 +18,28 @@ import type { Database } from '../../types/database.types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
 
+/**
+ * The form follows a fixed template -- the six questions a reader actually has
+ * about a project -- rather than one field per idea.
+ *
+ * `short_description`, `role`, `outcome` and `category` still exist on the table
+ * and still hold content on older rows; they are simply no longer edited here.
+ */
 interface ProjectFormData {
   title: string;
+  /** What it does. */
   description: string;
-  short_description: string;
-  role: string;
-  /** One contribution per line; stored as a text[]. */
-  contributions: string;
-  outcome: string;
-  category: string;
+  /** Who uses it. */
+  audience: string;
+  /** Stack -- comma-separated; stored as a text[]. */
   tech_stack: string;
+  /** What I personally built -- one per line; stored as a text[]. */
+  contributions: string;
+  /** The hardest technical problem and how I solved it. */
+  hardest_problem: string;
+  /** What's shipped vs still local: the badge value, then the detail. */
+  shipping_status: ShippingStatus | '';
+  shipping_note: string;
   github_url: string;
   live_url: string;
   featured: boolean;
@@ -41,6 +59,7 @@ export function AdminProjectsPage() {
     handleSubmit,
     reset,
     setValue,
+    watch,
     formState: { errors, isSubmitting },
   } = useForm<ProjectFormData>();
 
@@ -54,12 +73,14 @@ export function AdminProjectsPage() {
     if (editingProject) {
       setValue('title', editingProject.title);
       setValue('description', editingProject.description || '');
-      setValue('short_description', editingProject.short_description || '');
-      setValue('role', editingProject.role || '');
-      setValue('outcome', editingProject.outcome || '');
-      setValue('contributions', (editingProject.contributions || []).join('\n'));
-      setValue('category', editingProject.category || '');
+      setValue('audience', editingProject.audience || '');
       setValue('tech_stack', editingProject.tech_stack?.join(', ') || '');
+      setValue('contributions', (editingProject.contributions || []).join('\n'));
+      setValue('hardest_problem', editingProject.hardest_problem || '');
+      // An unrecognised stored value (hand-edited row) falls back to unanswered
+      // rather than selecting an option the badge cannot render.
+      setValue('shipping_status', toShippingStatus(editingProject.shipping_status) ?? '');
+      setValue('shipping_note', editingProject.shipping_note || '');
 
       setValue('github_url', editingProject.github_url || '');
       setValue('live_url', editingProject.live_url || '');
@@ -108,6 +129,9 @@ export function AdminProjectsPage() {
         ...data,
         tech_stack: splitList(data.tech_stack),
         contributions: splitLines(data.contributions),
+        // The column is nullable under a check constraint that does not allow
+        // '', so "not stated" has to go in as null.
+        shipping_status: data.shipping_status || null,
         image_urls: imageUrls,
         // Cover image: keeps the project cards (which read image_url) in sync
         // with whichever image the gallery has first.
@@ -199,6 +223,10 @@ export function AdminProjectsPage() {
 
 
   
+  // Drives the hint under the select, so each option explains itself at the
+  // moment it is chosen instead of in a paragraph listing all three.
+  const shippingStatus = toShippingStatus(watch('shipping_status'));
+
   return (
     <div>
       <SectionHeader
@@ -225,58 +253,58 @@ export function AdminProjectsPage() {
           
           <div>
             <label htmlFor="description" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
-              Description
+              What it does
             </label>
             <textarea
               id="description"
-              rows={8}
+              rows={6}
               className="mt-1 input resize-y"
-              placeholder="Write a detailed description of your project, including technologies used, challenges faced, and key features implemented..."
-              {...register('description', { required: 'Description is required' })}
+              placeholder="What problem does it solve, and what does someone actually do with it?"
+              {...register('description', { required: 'Say what the project does' })}
             />
             {errors.description && (
               <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.description.message}</p>
             )}
             <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-              Provide a comprehensive description that showcases your project's technical details and achievements.
+              Plain sentences. The first two also stand in as the card summary.
             </p>
           </div>
-          
+
           <div>
-            <label htmlFor="short_description" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
-              Short Description
+            <label htmlFor="audience" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              Who uses it
             </label>
             <textarea
-              id="short_description"
-              rows={3}
+              id="audience"
+              rows={2}
               className="mt-1 input resize-y"
-              placeholder="A brief summary of your project (2-3 sentences) that will appear in project cards and previews..."
-              {...register('short_description')}
+              placeholder="e.g. Chakki owners across Maharashtra — about 40 shops as of last month"
+              {...register('audience')}
             />
             <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-              Keep this concise but informative for project previews and summaries.
+              Real users, a client, your team, or just you so far. Rough numbers if you have them; leave blank rather than guessing.
             </p>
           </div>
-          
+
           <div>
-            <label htmlFor="role" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
-              My Role
+            <label htmlFor="tech_stack" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              Stack (comma-separated)
             </label>
             <input
               type="text"
-              id="role"
+              id="tech_stack"
               className="mt-1 input"
-              placeholder="e.g. Solo developer, Frontend lead, Backend developer"
-              {...register('role')}
+              placeholder="React, TypeScript, Tailwind CSS, Supabase"
+              {...register('tech_stack')}
             />
             <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-              Optional: your part in the project. Worth filling in for team, client or freelance work.
+              Languages, frameworks, database, hosting. Each becomes a chip.
             </p>
           </div>
 
           <div>
             <label htmlFor="contributions" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
-              What I Built (one per line)
+              What I personally built (one per line)
             </label>
             <textarea
               id="contributions"
@@ -288,58 +316,69 @@ Wired image uploads through Supabase Storage`}
               {...register('contributions')}
             />
             <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-              Each line becomes a bullet on the project page. Say what you personally did, not what the project is.
+              Each line becomes a bullet. Say what you did, not what the project is — this is the field that matters most on team or client work.
             </p>
           </div>
 
           <div>
-            <label htmlFor="outcome" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
-              Result
+            <label htmlFor="hardest_problem" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+              The hardest technical problem, and how I solved it
             </label>
             <textarea
-              id="outcome"
-              rows={2}
+              id="hardest_problem"
+              rows={6}
               className="mt-1 input resize-y"
-              placeholder="e.g. Live on Google Play — replaces the paper register for chakki owners across India"
-              {...register('outcome')}
+              placeholder="What broke, wouldn't scale, or had no obvious answer — then what you actually did about it."
+              {...register('hardest_problem')}
             />
             <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-              Optional: one line on what it achieved. Shown as a highlighted callout on the project card.
+              The specific version. "Optimised performance" says nothing; "N+1 query on the dashboard, folded into one aggregate" does.
             </p>
           </div>
 
-          <div>
-            <label htmlFor="category" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
-              Category
-            </label>
-            <input
-              type="text"
-              id="category"
-              className="mt-1 input"
-              placeholder="e.g. Web App, Mobile, AI/ML"
-              {...register('category')}
-            />
-            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-              Optional: groups projects under a heading on the public projects page.
-            </p>
+          {/* Shipped vs local: a fixed status drives the badge, the note carries
+              the nuance that never fits three options. */}
+          <div className="grid gap-4 sm:grid-cols-[minmax(0,15rem)_1fr]">
+            <div>
+              <label htmlFor="shipping_status" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                Shipped or still local
+              </label>
+              <select
+                id="shipping_status"
+                className="mt-1 input"
+                {...register('shipping_status')}
+              >
+                <option value="">Not stated</option>
+                {SHIPPING_STATUSES.map((status) => (
+                  <option key={status} value={status}>
+                    {SHIPPING_META[status].label}
+                  </option>
+                ))}
+              </select>
+              <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                {shippingStatus
+                  ? SHIPPING_META[shippingStatus].hint
+                  : 'No badge is shown until you pick one.'}
+              </p>
+            </div>
+
+            <div>
+              <label htmlFor="shipping_note" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
+                What's shipped, what isn't
+              </label>
+              <textarea
+                id="shipping_note"
+                rows={3}
+                className="mt-1 input resize-y"
+                placeholder="e.g. Web app and admin are live; the WhatsApp notification worker still runs locally."
+                {...register('shipping_note')}
+              />
+              <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
+                Optional detail under the badge. Honest beats impressive.
+              </p>
+            </div>
           </div>
 
-          <div>
-            <label htmlFor="tech_stack" className="block text-sm font-medium text-secondary-700 dark:text-secondary-200">
-              Tech Stack (comma-separated)
-            </label>
-            <input
-              type="text"
-              id="tech_stack"
-              className="mt-1 input"
-              placeholder="React, TypeScript, Tailwind CSS, Supabase"
-              {...register('tech_stack')}
-            />
-            <p className="mt-1 text-xs text-secondary-500 dark:text-secondary-400">
-              Separate multiple technologies with commas. Tech stack helps showcase the technologies used in your project.
-            </p>
-          </div>
-          
           {/* Project images -- ordered gallery, first entry is the cover */}
           <div>
             <MultiImageUpload
@@ -442,13 +481,13 @@ Wired image uploads through Supabase Storage`}
                           </span>
                         )}
                       </h4>
-                      {project.category && (
+                      {toShippingStatus(project.shipping_status) && (
                         <p className="mt-1 text-xs font-mono uppercase tracking-wider text-secondary-500">
-                          {project.category}
+                          {SHIPPING_META[toShippingStatus(project.shipping_status)!].label}
                         </p>
                       )}
                       <p className="mt-1 text-sm text-secondary-500">
-                        {project.short_description}
+                        {project.description && leadSentences(project.description, 1)}
                       </p>
                       <div className="mt-2 flex flex-wrap gap-2">
                         {project.tech_stack?.map((tech) => (

@@ -11,14 +11,15 @@ import {
   Maximize2,
   Sparkles,
   X,
-  UserRound,
+  Users,
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { supabase } from '../../lib/supabase';
 import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { cn } from '../../lib/utils';
-import { normalizeList, splitLines } from '../../lib/text';
+import { leadSentences, normalizeList, splitLines } from '../../lib/text';
+import { SHIPPING_META, toShippingStatus } from '../../lib/shipping-status';
 import type { Database } from '../../types/database.types';
 
 type Project = Database['public']['Tables']['projects']['Row'];
@@ -73,6 +74,8 @@ export function ProjectDetailPage() {
   // Older rows may hold one joined blob per entry, so re-split on newlines.
   const contributions = (project?.contributions ?? []).flatMap(splitLines);
   const liveLink = project?.live_url ? describeLiveUrl(project.live_url) : null;
+  const shipping = toShippingStatus(project?.shipping_status);
+  const ShippingIcon = shipping ? SHIPPING_META[shipping].icon : null;
 
   const step = useCallback(
     (delta: number) => {
@@ -243,7 +246,10 @@ export function ProjectDetailPage() {
             <div className="lg:col-span-7">
               <span className="eyebrow">
                 <span className="eyebrow-dot" />
-                {[project.category, liveLink?.isStore ? 'Live on Google Play' : liveLink && 'Live']
+                {[
+                  shipping && SHIPPING_META[shipping].label,
+                  liveLink?.isStore ? 'Live on Google Play' : liveLink && 'Live',
+                ]
                   .filter(Boolean)
                   .join(' · ')}
               </span>
@@ -252,18 +258,34 @@ export function ProjectDetailPage() {
                 {project.title}
               </h1>
 
-              {project.short_description && (
+              {/* The template has one "what it does" field, so the standfirst is
+                  its opening sentences rather than a second copy to keep in sync. */}
+              {project.description && (
                 <p className="mt-5 text-base sm:text-lg leading-relaxed text-secondary-600 dark:text-secondary-300 text-pretty">
-                  {project.short_description}
+                  {leadSentences(project.description, 2)}
                 </p>
               )}
 
-              {project.outcome && (
+              {/* How far it actually got -- the first thing a reader wants to
+                  know about anything that sounds impressive. */}
+              {(shipping || project.shipping_note) && (
                 <div className="mt-6 rounded-r-lg border-l-2 border-brand-500 bg-brand-500/5 px-4 py-3">
-                  <span className="text-sm font-bold text-brand-600 dark:text-brand-400">Result: </span>
-                  <span className="text-sm leading-relaxed text-secondary-700 dark:text-secondary-300">
-                    {project.outcome}
-                  </span>
+                  {shipping && ShippingIcon && (
+                    <span
+                      className={cn(
+                        'mr-2 inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-bold align-middle',
+                        SHIPPING_META[shipping].badgeClass
+                      )}
+                    >
+                      <ShippingIcon size={12} />
+                      {SHIPPING_META[shipping].label}
+                    </span>
+                  )}
+                  {project.shipping_note && (
+                    <span className="text-sm leading-relaxed text-secondary-700 dark:text-secondary-300">
+                      {project.shipping_note}
+                    </span>
+                  )}
                 </div>
               )}
 
@@ -299,10 +321,10 @@ export function ProjectDetailPage() {
               {/* Fact pills instead of the old sidebar panel: three short facts
                   read faster inline than as a table competing with the copy. */}
               <div className="mt-7 flex flex-wrap gap-2">
-                {project.role && (
-                  <span className="inline-flex items-center gap-1.5 rounded-full border border-secondary-200 dark:border-secondary-700 px-3 py-1.5 text-xs font-medium text-secondary-600 dark:text-secondary-300">
-                    <UserRound size={12} />
-                    {project.role}
+                {project.audience && (
+                  <span className="inline-flex max-w-full items-center gap-1.5 rounded-full border border-secondary-200 dark:border-secondary-700 px-3 py-1.5 text-xs font-medium text-secondary-600 dark:text-secondary-300">
+                    <Users size={12} className="shrink-0" />
+                    <span className="truncate">{project.audience}</span>
                   </span>
                 )}
                 {tech.length > 0 && (
@@ -440,6 +462,32 @@ export function ProjectDetailPage() {
                 </motion.div>
               ))}
             </div>
+          </div>
+        </section>
+      )}
+
+      {/* THE PROBLEM -- one long-form answer, so it reads as a single column of
+          prose rather than being chopped into cards like the contributions. */}
+      {project.hardest_problem && (
+        <section className="border-t border-secondary-200/70 dark:border-secondary-800/70 py-16 sm:py-20">
+          <div className="container-page">
+            <SectionHeader
+              eyebrow="The problem"
+              title="The hardest"
+              highlight="part"
+              subtitle="What broke, and what I did about it."
+              centered
+              variant="tech"
+            />
+            <motion.p
+              initial={{ opacity: 0, y: 16 }}
+              whileInView={{ opacity: 1, y: 0 }}
+              viewport={{ once: true, margin: '-40px' }}
+              transition={{ duration: 0.4 }}
+              className="mx-auto max-w-3xl whitespace-pre-line leading-relaxed text-secondary-700 dark:text-secondary-300"
+            >
+              {project.hardest_problem}
+            </motion.p>
           </div>
         </section>
       )}

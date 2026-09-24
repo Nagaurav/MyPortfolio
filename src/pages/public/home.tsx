@@ -23,6 +23,7 @@ import { Button } from '../../components/ui/button';
 import { SectionHeader } from '../../components/ui/section-header';
 import { cn } from '../../lib/utils';
 import { leadSentences, linkHost, normalizeList, stripSelfIntro } from '../../lib/text';
+import { SHIPPING_META, toShippingStatus } from '../../lib/shipping-status';
 import { categoryMeta, isTechCategory, sortCategories } from '../../lib/skill-categories';
 import { projectBanner } from '../../lib/project-banner';
 import type { Database } from '../../types/database.types';
@@ -759,6 +760,7 @@ export function HomePage() {
 function ProjectCard({ project }: { project: Project }) {
   const cover = projectBanner(project.id, project.image_url);
   const tech = normalizeList(project.tech_stack);
+  const cardStatus = toShippingStatus(project.shipping_status);
   return (
     <div className="group relative flex h-full flex-col surface overflow-hidden p-0 hover:shadow-lg transition-all duration-300 hover:-translate-y-0.5">
       <div className={cn(
@@ -837,11 +839,11 @@ function ProjectCard({ project }: { project: Project }) {
       </div>
 
       <div className="flex flex-1 flex-col p-5">
-        {/* Category as a coloured overline rather than a grey chip: it labels
-            the project before the title is read. */}
-        {project.category && (
+        {/* Status as a coloured overline rather than a grey chip: it answers
+            "is this real?" before the title is read. */}
+        {cardStatus && (
           <div className="text-2xs font-mono font-semibold uppercase tracking-widest text-brand-600 dark:text-brand-400">
-            {project.category}
+            {SHIPPING_META[cardStatus].label}
           </div>
         )}
 
@@ -850,7 +852,7 @@ function ProjectCard({ project }: { project: Project }) {
         </h3>
 
         <p className="mt-2 text-sm leading-relaxed text-secondary-600 dark:text-secondary-400 line-clamp-4">
-          {project.short_description || project.description}
+          {project.description && leadSentences(project.description, 2)}
         </p>
 
         {/* Every technology, not the first four: the stack is what a reader
@@ -866,13 +868,12 @@ function ProjectCard({ project }: { project: Project }) {
           </div>
         )}
 
-        {/* The result gets its own block. Buried in the description it reads as
-            more detail; set apart, it reads as evidence. */}
-        {project.outcome && (
+        {/* What's shipped gets its own block. Buried in the description it
+            reads as more detail; set apart, it reads as evidence. */}
+        {project.shipping_note && (
           <div className="mt-4 rounded-r-lg border-l-2 border-brand-500 bg-brand-500/5 px-3 py-2.5">
-            <span className="text-xs font-bold text-brand-600 dark:text-brand-400">Result: </span>
             <span className="text-xs leading-relaxed text-secondary-700 dark:text-secondary-300">
-              {project.outcome}
+              {project.shipping_note}
             </span>
           </div>
         )}

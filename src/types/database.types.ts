@@ -239,18 +239,22 @@ export type Database = {
       }
       projects: {
         Row: {
+          audience: string | null
           category: string | null
           contributions: string[]
           created_at: string | null
           description: string | null
           featured: boolean | null
           github_url: string | null
+          hardest_problem: string | null
           id: string
           image_url: string | null
           image_urls: string[]
           live_url: string | null
           outcome: string | null
           role: string | null
+          shipping_note: string | null
+          shipping_status: string | null
           short_description: string | null
           tech_stack: string[] | null
           title: string
@@ -258,18 +262,22 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          audience?: string | null
           category?: string | null
           contributions?: string[]
           created_at?: string | null
           description?: string | null
           featured?: boolean | null
           github_url?: string | null
+          hardest_problem?: string | null
           id?: string
           image_url?: string | null
           image_urls?: string[]
           live_url?: string | null
           outcome?: string | null
           role?: string | null
+          shipping_note?: string | null
+          shipping_status?: string | null
           short_description?: string | null
           tech_stack?: string[] | null
           title: string
@@ -277,18 +285,22 @@ export type Database = {
           user_id: string
         }
         Update: {
+          audience?: string | null
           category?: string | null
           contributions?: string[]
           created_at?: string | null
           description?: string | null
           featured?: boolean | null
           github_url?: string | null
+          hardest_problem?: string | null
           id?: string
           image_url?: string | null
           image_urls?: string[]
           live_url?: string | null
           outcome?: string | null
           role?: string | null
+          shipping_note?: string | null
+          shipping_status?: string | null
           short_description?: string | null
           tech_stack?: string[] | null
           title?: string
